@@ -10,7 +10,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <!-- WDWQuest homepage refresh build: 2026-10-01 -->
-<title>WDWQuest v0.8.2</title>
+<title>WDWQuest v0.8.3</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--panel3:#0c1729;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--accent2:#c4b5fd;--good:#86efac;--bad:#fca5a5;--gold:#fde68a;--shadow:0 18px 50px rgba(0,0,0,.23)}
 *{box-sizing:border-box}html{color-scheme:dark}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 10% -10%,rgba(125,211,252,.13),transparent 30%),radial-gradient(circle at 90% 0%,rgba(196,181,253,.12),transparent 27%),var(--bg);color:var(--text);min-height:100vh}
@@ -212,7 +212,7 @@ h1,h2,h3,.question,.lead,.row,.badge,.photo-credit{overflow-wrap:anywhere}
 </head>
 <body>
 <header class="site-header">
-<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.8.2</small></button>
+<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.8.3</small></button>
 <nav>
 <button data-nav="home">Home</button>
 <button data-nav="trivia">Trivia</button>
@@ -316,7 +316,7 @@ function teamSetup(gameKey){
     activeGameTeam=0;
     if(gameKey==='pin-drop'){
       const encoded=encodeURIComponent(JSON.stringify(gameTeams.map(t=>t.name)));
-      window.location.href='pin-drop.html?teams='+encoded+'&v=082';
+      window.location.href='pin-drop.html?teams='+encoded+'&v=083';
       return;
     }
     launchGame(gameKey);
@@ -364,8 +364,13 @@ function addGameTeamPoints(points){
   renderGameTeamScores();
 }
 
+function advanceGamePlayer(){
+  if(gameTeams.length>1)activeGameTeam=(activeGameTeam+1)%gameTeams.length;
+  renderGameTeamScores();
+}
+
 function home(){
-return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.8.2 repairs the player scoreboards while keeping solo through 4-player support across every game.</p></section>
+return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.8.3 automatically passes the turn to the next player after each completed question or round.</p></section>
 <section class="arcade-grid">
 <article class="game-card"><div class="icon">📸</div><h3>Where Am I? Photo</h3><p>Start extremely zoomed in. Every reveal zooms out. Guess early for maximum points.</p><button class="primary" data-nav="photo">Play Photo Mode</button></article>
 <article class="game-card"><div class="icon">🎯</div><h3>WDW Trivia</h3><p>Traditional questions across parks, resorts, attractions, food and transportation.</p><button class="primary" data-nav="trivia">Play Trivia</button></article>
@@ -382,7 +387,7 @@ ${teamScoreMarkup()}
 <section class="panel"><div class="badge" id="tm"></div><div class="question" id="tq"></div><div class="answers" id="ta"></div><div class="feedback" id="tf"></div><div class="actions"><button id="tn" class="primary">Next Question</button></div></section>`;
 renderGameTeamScores();
 let current=null,answered=false;
-function next(){const d=document.getElementById('td').value,p=document.getElementById('tp').value;const pool=DATA.trivia.filter(x=>(d==='All'||x.diff===d)&&(p==='All'||x.park===p));if(!pool.length)return;current=pool[Math.floor(Math.random()*pool.length)];answered=false;tm.textContent=`${current.park} • ${current.cat} • ${current.diff}`;tq.textContent=current.q;tf.textContent='';ta.innerHTML='';shuffle(current.choices).forEach(c=>{const b=document.createElement('button');b.className='answer-btn';b.textContent=c;b.addEventListener('click',()=>{if(answered)return;answered=true;const ok=c===current.a;record(current.park,ok,ok?100:0);if(ok)addGameTeamPoints(100);document.querySelectorAll('#ta button').forEach(x=>{x.disabled=true;if(x.textContent===current.a)x.classList.add('correct')});if(!ok)b.classList.add('wrong');tf.innerHTML=ok?'<span class="good">Correct! +100</span>':`<span class="bad">Not quite.</span> Answer: ${esc(current.a)}`;});ta.appendChild(b);})}
+function next(){const d=document.getElementById('td').value,p=document.getElementById('tp').value;const pool=DATA.trivia.filter(x=>(d==='All'||x.diff===d)&&(p==='All'||x.park===p));if(!pool.length)return;current=pool[Math.floor(Math.random()*pool.length)];answered=false;tm.textContent=`${current.park} • ${current.cat} • ${current.diff}`;tq.textContent=current.q;tf.textContent='';ta.innerHTML='';shuffle(current.choices).forEach(c=>{const b=document.createElement('button');b.className='answer-btn';b.textContent=c;b.addEventListener('click',()=>{if(answered)return;answered=true;const ok=c===current.a;record(current.park,ok,ok?100:0);if(ok)addGameTeamPoints(100);document.querySelectorAll('#ta button').forEach(x=>{x.disabled=true;if(x.textContent===current.a)x.classList.add('correct')});if(!ok)b.classList.add('wrong');tf.innerHTML=ok?'<span class="good">Correct! +100</span>':`<span class="bad">Not quite.</span> Answer: ${esc(current.a)}`;advanceGamePlayer();});ta.appendChild(b);})}
 tn.addEventListener('click',next);td.addEventListener('change',next);tp.addEventListener('change',next);bumpGame('trivia');next();
 }
 
@@ -423,7 +428,7 @@ ps.textContent='Reveal 1 of 4';pfeed.textContent='';preveal.disabled=false;
 pcredit.innerHTML=`Photo: <a href="${current.source}" target="_blank" rel="noopener">${esc(current.credit)}</a> • <a href="${current.licenseUrl}" target="_blank" rel="noopener">${esc(current.license)}</a>`;
 renderChoices();
 }
-function renderChoices(){const unique=[];for(const x of shuffle(DATA.photos)){if(x.answer!==current.answer&&!unique.includes(x.answer))unique.push(x.answer);if(unique.length===3)break;}const opts=shuffle([current.answer,...unique]);pa.innerHTML='';opts.forEach(c=>{const b=document.createElement('button');b.className='answer-btn';b.textContent=c;b.addEventListener('click',()=>{if(answered)return;if(c===current.answer){answered=true;const pts=[100,75,50,25][stage];record(current.park,true,pts);addGameTeamPoints(pts);document.querySelectorAll('#pa button').forEach(x=>{x.disabled=true;if(x.textContent===current.answer)x.classList.add('correct')});pf.dataset.stage='3';ps.textContent='Full image';pfeed.innerHTML=`<span class="good">Correct! +${pts}</span> • ${esc(current.area)}<br><span class="muted">${esc(current.note)}</span>`;preveal.disabled=true;}else{wrong++;record(current.park,false,0);b.classList.add('wrong');b.disabled=true;pfeed.innerHTML='<span class="bad">Not quite.</span> You can guess again or reveal more.';}});pa.appendChild(b);});}
+function renderChoices(){const unique=[];for(const x of shuffle(DATA.photos)){if(x.answer!==current.answer&&!unique.includes(x.answer))unique.push(x.answer);if(unique.length===3)break;}const opts=shuffle([current.answer,...unique]);pa.innerHTML='';opts.forEach(c=>{const b=document.createElement('button');b.className='answer-btn';b.textContent=c;b.addEventListener('click',()=>{if(answered)return;if(c===current.answer){answered=true;const pts=[100,75,50,25][stage];record(current.park,true,pts);addGameTeamPoints(pts);document.querySelectorAll('#pa button').forEach(x=>{x.disabled=true;if(x.textContent===current.answer)x.classList.add('correct')});pf.dataset.stage='3';ps.textContent='Full image';pfeed.innerHTML=`<span class="good">Correct! +${pts}</span> • ${esc(current.area)}<br><span class="muted">${esc(current.note)}</span>`;preveal.disabled=true;advanceGamePlayer();}else{wrong++;record(current.park,false,0);b.classList.add('wrong');b.disabled=true;pfeed.innerHTML='<span class="bad">Not quite.</span> You can guess again or reveal more.';}});pa.appendChild(b);});}
 preveal.addEventListener('click',()=>{if(answered)return;if(stage<3){stage++;pf.dataset.stage=String(stage);ps.textContent=`Reveal ${stage+1} of 4`;if(stage===3)preveal.disabled=true;}});
 pnext.addEventListener('click',next);pp.addEventListener('change',()=>{deck=[];next();});bumpGame('photo');next();
 }
@@ -437,7 +442,7 @@ renderGameTeamScores();
 let current=null,idx=0,answered=false;
 function next(){const park=cp.value,pool=DATA.whereClues.filter(x=>park==='All'||x.park===park);current=pool[Math.floor(Math.random()*pool.length)];idx=0;answered=false;cm.textContent=`${current.park} • ${current.diff}`;cf.textContent='';renderClue();renderChoices();}
 function renderClue(){cclue.textContent=current.clues[idx];cprog.style.width=`${(idx+1)*33.33}%`;cmore.disabled=idx>=2||answered;}
-function renderChoices(){let pool=shuffle(DATA.whereClues.filter(x=>x.a!==current.a));let opts=shuffle([current.a,...pool.slice(0,3).map(x=>x.a)]);ca.innerHTML='';opts.forEach(c=>{const b=document.createElement('button');b.className='answer-btn';b.textContent=c;b.addEventListener('click',()=>{if(answered)return;answered=true;const ok=c===current.a,pts=ok?[100,70,40][idx]:0;record(current.park,ok,pts);if(ok)addGameTeamPoints(pts);document.querySelectorAll('#ca button').forEach(x=>{x.disabled=true;if(x.textContent===current.a)x.classList.add('correct')});if(!ok)b.classList.add('wrong');cf.innerHTML=ok?`<span class="good">Correct! +${pts}</span> • ${esc(current.area)}`:`<span class="bad">Not quite.</span> ${esc(current.a)}`;cmore.disabled=true;});ca.appendChild(b);});}
+function renderChoices(){let pool=shuffle(DATA.whereClues.filter(x=>x.a!==current.a));let opts=shuffle([current.a,...pool.slice(0,3).map(x=>x.a)]);ca.innerHTML='';opts.forEach(c=>{const b=document.createElement('button');b.className='answer-btn';b.textContent=c;b.addEventListener('click',()=>{if(answered)return;answered=true;const ok=c===current.a,pts=ok?[100,70,40][idx]:0;record(current.park,ok,pts);if(ok)addGameTeamPoints(pts);document.querySelectorAll('#ca button').forEach(x=>{x.disabled=true;if(x.textContent===current.a)x.classList.add('correct')});if(!ok)b.classList.add('wrong');cf.innerHTML=ok?`<span class="good">Correct! +${pts}</span> • ${esc(current.area)}`:`<span class="bad">Not quite.</span> ${esc(current.a)}`;cmore.disabled=true;advanceGamePlayer();});ca.appendChild(b);});}
 cmore.addEventListener('click',()=>{if(!answered&&idx<2){idx++;renderClue()}});cnext.addEventListener('click',next);cp.addEventListener('change',next);bumpGame('clues');next();
 }
 
@@ -447,7 +452,7 @@ ${teamScoreMarkup()}
 <section class="panel"><div class="badge" id="hm"></div><div class="question">Before <span id="hcurrent" class="gold"></span>, what was here?</div><div class="answers" id="ha"></div><div class="feedback" id="hf"></div><div class="actions"><button id="hn" class="primary">Next</button></div></section>`;
 renderGameTeamScores();
 let current=null,answered=false;
-function next(){current=DATA.history[Math.floor(Math.random()*DATA.history.length)];answered=false;hm.textContent=current.park;hcurrent.textContent=current.current;hf.textContent='';let pool=shuffle(DATA.history.filter(x=>x.former!==current.former));let opts=shuffle([current.former,...pool.slice(0,3).map(x=>x.former)]);ha.innerHTML='';opts.forEach(c=>{const b=document.createElement('button');b.className='answer-btn';b.textContent=c;b.addEventListener('click',()=>{if(answered)return;answered=true;const ok=c===current.former;record(current.park,ok,ok?150:0);if(ok)addGameTeamPoints(150);document.querySelectorAll('#ha button').forEach(x=>{x.disabled=true;if(x.textContent===current.former)x.classList.add('correct')});if(!ok)b.classList.add('wrong');hf.innerHTML=ok?'<span class="good">Correct! +150</span>':`<span class="bad">Not quite.</span> Answer: ${esc(current.former)}`;});ha.appendChild(b);});}
+function next(){current=DATA.history[Math.floor(Math.random()*DATA.history.length)];answered=false;hm.textContent=current.park;hcurrent.textContent=current.current;hf.textContent='';let pool=shuffle(DATA.history.filter(x=>x.former!==current.former));let opts=shuffle([current.former,...pool.slice(0,3).map(x=>x.former)]);ha.innerHTML='';opts.forEach(c=>{const b=document.createElement('button');b.className='answer-btn';b.textContent=c;b.addEventListener('click',()=>{if(answered)return;answered=true;const ok=c===current.former;record(current.park,ok,ok?150:0);if(ok)addGameTeamPoints(150);document.querySelectorAll('#ha button').forEach(x=>{x.disabled=true;if(x.textContent===current.former)x.classList.add('correct')});if(!ok)b.classList.add('wrong');hf.innerHTML=ok?'<span class="good">Correct! +150</span>':`<span class="bad">Not quite.</span> Answer: ${esc(current.former)}`;advanceGamePlayer();});ha.appendChild(b);});}
 hn.addEventListener('click',next);bumpGame('history');next();
 }
 
@@ -650,6 +655,7 @@ function renderBoard(){
           teams[activeTeam].score-=item.v;
           record(c,false,0);
         }
+        if(teams.length>1)activeTeam=(activeTeam+1)%teams.length;
         renderTeamScores();
       }
 
@@ -714,7 +720,13 @@ reset.addEventListener('click',()=>{if(confirm('Reset all WDWQuest v0.2 stats st
 function changelog(){
 app.innerHTML=`<section class="hero"><div class="eyebrow">Project log</div><h2>WDWQuest Changelog</h2></section>
 <div class="card">
-<h3>v0.8.2</h3>
+<h3>v0.8.3</h3>
+<div class="list">
+<div class="row"><span>🔄 Automatically advances to the next player after each completed question or round</span><strong>NEW</strong></div>
+<div class="row"><span>🧍 Solo play stays on Player 1</span><strong>UPDATED</strong></div>
+<div class="row"><span>💰 Points are awarded before the turn changes</span><strong>FIXED</strong></div>
+</div>
+<h3 style="margin-top:24px">v0.8.2</h3>
 <div class="list">
 <div class="row"><span>🛠️ Repaired broken player-score JavaScript that could print code onto the page</span><strong>FIXED</strong></div>
 <div class="row"><span>✅ Restored Home, game scoring, and Jeopardy board rendering</span><strong>FIXED</strong></div>
