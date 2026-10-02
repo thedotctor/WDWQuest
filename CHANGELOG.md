@@ -1,5 +1,13 @@
 # WDWQuest Changelog
 
+## v0.11.0 - Attraction Purchase Flow
+- Unowned attractions now check affordability before starting trivia.
+- If the player can afford the attraction, the game asks whether they want to try to buy it.
+- Choosing yes starts the park-themed trivia question; a correct answer automatically purchases the attraction and deducts its price.
+- Choosing no ends the turn without starting trivia.
+- If the player cannot afford the attraction, the game shows the cost, current cash, and shortfall, then ends the turn.
+- Removed the old post-trivia Buy/Pass step to prevent ownership inconsistencies.
+
 ## v0.10.9 - 30-Photo Snack Break Deck
 - Expanded Snack Break from 8 illustrated cards to 30 real Disney food photos.
 - Snack Break now uses a shuffled deck so all 30 photo cards appear before any repeat.
