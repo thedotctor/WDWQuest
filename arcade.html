@@ -10,7 +10,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <!-- WDWQuest homepage refresh build: 2026-10-01 -->
-<title>WDWQuest v0.8.3</title>
+<title>WDWQuest v0.8.4</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--panel3:#0c1729;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--accent2:#c4b5fd;--good:#86efac;--bad:#fca5a5;--gold:#fde68a;--shadow:0 18px 50px rgba(0,0,0,.23)}
 *{box-sizing:border-box}html{color-scheme:dark}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 10% -10%,rgba(125,211,252,.13),transparent 30%),radial-gradient(circle at 90% 0%,rgba(196,181,253,.12),transparent 27%),var(--bg);color:var(--text);min-height:100vh}
@@ -40,6 +40,13 @@ nav{display:flex;gap:6px;flex-wrap:wrap}nav button{background:transparent;color:
 .j-suggestion:hover,.j-suggestion.active{background:#17243d}
 .j-no-results{padding:11px 12px;color:var(--muted);font-size:13px}
 
+
+.trivia-difficulty-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:760px}
+.difficulty-card{background:#14223a;color:var(--text);border:1px solid var(--border);border-radius:16px;padding:18px;text-align:left;min-height:110px}
+.difficulty-card strong{display:block;font-size:20px;margin-bottom:6px}
+.difficulty-card span{display:block;color:var(--muted);line-height:1.4}
+.difficulty-card:active{transform:translateY(1px)}
+@media(max-width:560px){.trivia-difficulty-grid{grid-template-columns:1fr}}
 
 .j-team-setup{display:grid;gap:12px;max-width:720px}
 .j-team-row{display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center}
@@ -212,7 +219,7 @@ h1,h2,h3,.question,.lead,.row,.badge,.photo-credit{overflow-wrap:anywhere}
 </head>
 <body>
 <header class="site-header">
-<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.8.3</small></button>
+<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.8.4</small></button>
 <nav>
 <button data-nav="home">Home</button>
 <button data-nav="trivia">Trivia</button>
@@ -249,6 +256,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-nav]');if(
 
 let gameTeams=[];
 let activeGameTeam=0;
+let triviaDifficulty='All';
 const GAME_TITLES={
   trivia:'WDW Trivia',
   photo:'Where Am I? Photo',
@@ -316,13 +324,41 @@ function teamSetup(gameKey){
     activeGameTeam=0;
     if(gameKey==='pin-drop'){
       const encoded=encodeURIComponent(JSON.stringify(gameTeams.map(t=>t.name)));
-      window.location.href='pin-drop.html?teams='+encoded+'&v=083';
+      window.location.href='pin-drop.html?teams='+encoded+'&v=084';
+      return;
+    }
+    if(gameKey==='trivia'){
+      triviaDifficultySetup();
       return;
     }
     launchGame(gameKey);
   });
 
   draw();
+}
+
+function triviaDifficultySetup(){
+  app.innerHTML=`<div class="scorebar"><div><div class="eyebrow">Trivia Setup</div><h2>Choose Difficulty</h2></div><span class="badge">${gameTeams.length} player${gameTeams.length===1?'':'s'}</span></div>
+  <section class="panel">
+    <div class="j-picker-head"><div><h3>How hard should the questions be?</h3><div class="muted">Choose one difficulty for this Trivia game.</div></div></div>
+    <div class="trivia-difficulty-grid" id="triviaDifficultyGrid">
+      <button type="button" class="difficulty-card" data-diff="Casual"><strong>Casual</strong><span>Easier Disney World questions</span></button>
+      <button type="button" class="difficulty-card" data-diff="Fan"><strong>Fan</strong><span>For regular park fans</span></button>
+      <button type="button" class="difficulty-card" data-diff="Expert"><strong>Expert</strong><span>Deep-cut Disney World knowledge</span></button>
+      <button type="button" class="difficulty-card" data-diff="All"><strong>Mixed</strong><span>A little of everything</span></button>
+    </div>
+    <div class="j-builder-actions">
+      <button id="triviaBackPlayers" class="secondary">Back to Players</button>
+    </div>
+  </section>`;
+
+  document.querySelectorAll('[data-diff]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      triviaDifficulty=btn.dataset.diff;
+      trivia();
+    });
+  });
+  triviaBackPlayers.addEventListener('click',()=>teamSetup('trivia'));
 }
 
 function launchGame(v){
@@ -370,7 +406,7 @@ function advanceGamePlayer(){
 }
 
 function home(){
-return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.8.3 automatically passes the turn to the next player after each completed question or round.</p></section>
+return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.8.4 moves Trivia difficulty selection into setup and removes the in-game park filter.</p></section>
 <section class="arcade-grid">
 <article class="game-card"><div class="icon">📸</div><h3>Where Am I? Photo</h3><p>Start extremely zoomed in. Every reveal zooms out. Guess early for maximum points.</p><button class="primary" data-nav="photo">Play Photo Mode</button></article>
 <article class="game-card"><div class="icon">🎯</div><h3>WDW Trivia</h3><p>Traditional questions across parks, resorts, attractions, food and transportation.</p><button class="primary" data-nav="trivia">Play Trivia</button></article>
@@ -381,14 +417,15 @@ return `<section class="hero"><div class="eyebrow">Free Disney World fan-game ar
 </section>`}
 
 function trivia(){
-app.innerHTML=`<div class="scorebar"><div><div class="eyebrow">Game</div><h2>WDW Trivia</h2></div><span class="badge">Team Play</span></div>
+const diffLabel=triviaDifficulty==='All'?'Mixed':triviaDifficulty;
+app.innerHTML=`<div class="scorebar"><div><div class="eyebrow">Game</div><h2>WDW Trivia</h2></div><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="badge">${esc(diffLabel)}</span><button id="changeTriviaDifficulty" class="secondary">Change Difficulty</button></div></div>
 ${teamScoreMarkup()}
-<div class="filters"><select id="td"><option>All</option><option>Casual</option><option>Fan</option><option>Expert</option></select><select id="tp"><option>All</option><option>Magic Kingdom</option><option>EPCOT</option><option>Hollywood Studios</option><option>Animal Kingdom</option><option>Resorts</option><option>Disney Springs</option></select></div>
 <section class="panel"><div class="badge" id="tm"></div><div class="question" id="tq"></div><div class="answers" id="ta"></div><div class="feedback" id="tf"></div><div class="actions"><button id="tn" class="primary">Next Question</button></div></section>`;
 renderGameTeamScores();
+changeTriviaDifficulty.addEventListener('click',triviaDifficultySetup);
 let current=null,answered=false;
-function next(){const d=document.getElementById('td').value,p=document.getElementById('tp').value;const pool=DATA.trivia.filter(x=>(d==='All'||x.diff===d)&&(p==='All'||x.park===p));if(!pool.length)return;current=pool[Math.floor(Math.random()*pool.length)];answered=false;tm.textContent=`${current.park} • ${current.cat} • ${current.diff}`;tq.textContent=current.q;tf.textContent='';ta.innerHTML='';shuffle(current.choices).forEach(c=>{const b=document.createElement('button');b.className='answer-btn';b.textContent=c;b.addEventListener('click',()=>{if(answered)return;answered=true;const ok=c===current.a;record(current.park,ok,ok?100:0);if(ok)addGameTeamPoints(100);document.querySelectorAll('#ta button').forEach(x=>{x.disabled=true;if(x.textContent===current.a)x.classList.add('correct')});if(!ok)b.classList.add('wrong');tf.innerHTML=ok?'<span class="good">Correct! +100</span>':`<span class="bad">Not quite.</span> Answer: ${esc(current.a)}`;advanceGamePlayer();});ta.appendChild(b);})}
-tn.addEventListener('click',next);td.addEventListener('change',next);tp.addEventListener('change',next);bumpGame('trivia');next();
+function next(){const pool=DATA.trivia.filter(x=>triviaDifficulty==='All'||x.diff===triviaDifficulty);if(!pool.length)return;current=pool[Math.floor(Math.random()*pool.length)];answered=false;tm.textContent=`${current.park} • ${current.cat} • ${current.diff}`;tq.textContent=current.q;tf.textContent='';ta.innerHTML='';shuffle(current.choices).forEach(c=>{const b=document.createElement('button');b.className='answer-btn';b.textContent=c;b.addEventListener('click',()=>{if(answered)return;answered=true;const ok=c===current.a;record(current.park,ok,ok?100:0);if(ok)addGameTeamPoints(100);document.querySelectorAll('#ta button').forEach(x=>{x.disabled=true;if(x.textContent===current.a)x.classList.add('correct')});if(!ok)b.classList.add('wrong');tf.innerHTML=ok?'<span class="good">Correct! +100</span>':`<span class="bad">Not quite.</span> Answer: ${esc(current.a)}`;advanceGamePlayer();});ta.appendChild(b);})}
+tn.addEventListener('click',next);bumpGame('trivia');next();
 }
 
 function photoGame(){
@@ -720,7 +757,13 @@ reset.addEventListener('click',()=>{if(confirm('Reset all WDWQuest v0.2 stats st
 function changelog(){
 app.innerHTML=`<section class="hero"><div class="eyebrow">Project log</div><h2>WDWQuest Changelog</h2></section>
 <div class="card">
-<h3>v0.8.3</h3>
+<h3>v0.8.4</h3>
+<div class="list">
+<div class="row"><span>🎯 Added a dedicated Trivia difficulty screen after Player Setup</span><strong>NEW</strong></div>
+<div class="row"><span>🏞️ Removed the Trivia park filter</span><strong>REMOVED</strong></div>
+<div class="row"><span>🧠 Added Casual, Fan, Expert, and Mixed difficulty choices before the game starts</span><strong>UPDATED</strong></div>
+</div>
+<h3 style="margin-top:24px">v0.8.3</h3>
 <div class="list">
 <div class="row"><span>🔄 Automatically advances to the next player after each completed question or round</span><strong>NEW</strong></div>
 <div class="row"><span>🧍 Solo play stays on Player 1</span><strong>UPDATED</strong></div>
