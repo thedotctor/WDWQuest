@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.10.6 - Slower Motion and Property Readability
+- Slowed the 3D dice travel slightly and increased the pause after the die lands.
+- Slowed player-piece movement from about 0.5 seconds per space to about 0.65 seconds per space.
+- Reduced the board-space title font size so long attraction names fit more cleanly.
+- Owned attractions now remove the purchase price, keep the rent visible, and show the owner's name separately.
+
 ## v0.10.5 - Dice Pause and Slower Pawn Movement
 - Added a one-second pause after the 3D die settles before the player piece begins moving.
 - Slowed piece movement from about 0.26 seconds per space to 0.5 seconds per space.
