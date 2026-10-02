@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.8.4 - Trivia Setup Flow
+- Added a Trivia difficulty screen after Player Setup and before gameplay.
+- Removed the Trivia park filter.
+- Removed the in-game difficulty dropdown.
+- Added Casual, Fan, Expert, and Mixed difficulty choices before the game starts.
+
 ## v0.8.3 - Automatic Turn Rotation
 - Automatically advances to the next player after each completed question or round.
 - Solo games remain on Player 1.
