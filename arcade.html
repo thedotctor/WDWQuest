@@ -8,7 +8,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <!-- WDWQuest homepage refresh build: 2026-10-01 -->
-<title>WDWQuest v0.5.0</title>
+<title>WDWQuest v0.5.1</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--panel3:#0c1729;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--accent2:#c4b5fd;--good:#86efac;--bad:#fca5a5;--gold:#fde68a;--shadow:0 18px 50px rgba(0,0,0,.23)}
 *{box-sizing:border-box}html{color-scheme:dark}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 10% -10%,rgba(125,211,252,.13),transparent 30%),radial-gradient(circle at 90% 0%,rgba(196,181,253,.12),transparent 27%),var(--bg);color:var(--text);min-height:100vh}
@@ -53,11 +53,59 @@ nav{display:flex;gap:6px;flex-wrap:wrap}nav button{background:transparent;color:
 
 @media(max-width:850px){.arcade-grid{grid-template-columns:1fr 1fr}.answers{grid-template-columns:1fr}.history-wrap{grid-template-columns:1fr}.site-header{align-items:flex-start;flex-direction:column}nav{width:100%;overflow:auto;flex-wrap:nowrap}}
 @media(max-width:560px){.photo-frame{max-width:none}.arcade-grid,.stats-row{grid-template-columns:1fr}.page-shell{padding-left:12px;padding-right:12px}}
-.photo-error{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:#0b1527;color:var(--bad);font-weight:800}.photo-error[hidden]{display:none}</style>
+.photo-error{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:#0b1527;color:var(--bad);font-weight:800}.photo-error[hidden]{display:none}
+/* v0.5.1 iPhone/mobile polish */
+html{-webkit-text-size-adjust:100%}
+button,input,select{touch-action:manipulation}
+input,select{font-size:16px}
+.site-header{padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right))}
+.page-shell{padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right))}
+.jwrap{-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.j-suggestion{min-height:46px}
+@media(max-width:700px){
+  .site-header{padding-top:max(10px,env(safe-area-inset-top));gap:8px}
+  .brand{font-size:18px}
+  nav{padding-bottom:2px}
+  nav button{min-height:44px;padding:9px 12px;white-space:nowrap}
+  .page-shell{padding-top:18px;padding-bottom:24px}
+  .panel,.card,.game-card,.history-card{border-radius:14px}
+  .j-picker-head h3{margin-bottom:6px}
+  .j-category-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .j-cat{min-height:58px;padding:11px;border-radius:12px}
+  .j-cat input{width:20px;height:20px}
+  .j-builder-actions{display:grid;grid-template-columns:1fr 1fr}
+  .j-builder-actions .primary{grid-column:1/-1}
+  .j-builder-actions button{min-height:48px}
+  .jboard{min-width:690px;gap:6px}
+  .jhead{min-height:62px;padding:10px 6px;border-radius:8px;font-size:13px;line-height:1.15}
+  .jcell{min-height:66px;font-size:20px;padding:8px 4px;border-radius:8px}
+  .j-answer-wrap{max-width:none}
+  .j-answer-wrap input{min-height:50px;font-size:16px;padding:12px}
+  .j-suggestions{max-height:220px}
+  .j-suggestion{padding:12px;font-size:16px}
+  .question{font-size:20px;line-height:1.35}
+  .actions button{min-height:48px}
+}
+@media(max-width:430px){
+  .site-header{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+  .page-shell{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right));padding-top:14px}
+  .j-category-grid{grid-template-columns:1fr}
+  .j-cat{min-height:54px}
+  .j-builder-actions{grid-template-columns:1fr}
+  .j-builder-actions .primary{grid-column:auto}
+  .jboard{min-width:640px}
+  .jhead{font-size:12px}
+  .jcell{min-height:62px;font-size:18px}
+  .scorebar{align-items:flex-start}
+  .scorebar>.stat{min-width:112px}
+  .row{align-items:flex-start;flex-direction:column;gap:4px}
+}
+
+</style>
 </head>
 <body>
 <header class="site-header">
-<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.5.0</small></button>
+<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.5.1</small></button>
 <nav>
 <button data-nav="home">Home</button>
 <button data-nav="trivia">Trivia</button>
@@ -93,7 +141,7 @@ function nav(v){history.replaceState(null,'','#'+v);render(v);window.scrollTo({t
 document.addEventListener('click',e=>{const b=e.target.closest('[data-nav]');if(b)nav(b.dataset.nav);});
 
 function home(){
-return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.5.0 expands WDW Jeopardy to 20 categories and 400 clues. Pick any 5 categories and the site randomly builds a fresh board.</p></section>
+return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.5.1 adds an iPhone-focused mobile layout while keeping the 20-category, 400-clue customizable Jeopardy game intact.</p></section>
 <section class="stats-row">
 <div class="stat"><div class="n">${stats.totalScore}</div><div class="label">Total score</div></div>
 <div class="stat"><div class="n">${pct()}%</div><div class="label">Accuracy</div></div>
@@ -265,7 +313,7 @@ function buildBoard(){
 function renderBoard(){
   const answerOptions=[...new Set(boardCats.flatMap(c=>boardData[c].map(x=>x.a)))].sort((a,b)=>a.localeCompare(b));
   app.innerHTML=`<div class="scorebar"><div><div class="eyebrow">Custom board</div><h2>WDW Jeopardy</h2></div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button id="jnew" class="secondary">Change Categories</button><div class="stat"><div class="n" id="js">$0</div><div class="label">Board score</div></div></div></div>
-  <section class="panel jwrap"><div class="jboard" id="jb"></div></section>
+  <section class="panel jwrap"><div class="muted" style="font-size:12px;margin-bottom:8px">On a phone, swipe the board left or right to see all 5 categories.</div><div class="jboard" id="jb"></div></section>
   <section class="card" id="jc" style="margin-top:16px"><span class="muted">Choose a dollar value to begin.</span></section>`;
 
   jnew.addEventListener('click',renderPicker);
@@ -407,7 +455,14 @@ reset.addEventListener('click',()=>{if(confirm('Reset all WDWQuest v0.2 stats st
 function changelog(){
 app.innerHTML=`<section class="hero"><div class="eyebrow">Project log</div><h2>WDWQuest Changelog</h2></section>
 <div class="card">
-<h3>v0.5.0</h3>
+<h3>v0.5.1</h3>
+<div class="list">
+<div class="row"><span>📱 Added iPhone-focused mobile polish across the arcade</span><strong>UPDATED</strong></div>
+<div class="row"><span>🎛️ Improved Jeopardy category selection and tap targets on narrow screens</span><strong>UPDATED</strong></div>
+<div class="row"><span>↔️ Tuned the Jeopardy board for smoother horizontal swiping</span><strong>UPDATED</strong></div>
+<div class="row"><span>⌨️ Set mobile answer inputs to iPhone-friendly sizing to avoid Safari zoom</span><strong>UPDATED</strong></div>
+</div>
+<h3 style="margin-top:24px">v0.5.0</h3>
 <div class="list">
 <div class="row"><span>🧠 Expanded Jeopardy to a 400-clue Jeopardy bank</span><strong>NEW</strong></div>
 <div class="row"><span>🧩 Increased category choices from 17 to 20</span><strong>NEW</strong></div>
