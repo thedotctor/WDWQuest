@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>WDWQuest Pin Drop v0.8.2</title>
+<title>WDWQuest Pin Drop v0.8.3</title>
 <meta name="theme-color" content="#07111f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -110,11 +110,11 @@ function newRound(){
 }
 document.getElementById('lock').addEventListener('click',()=>{
  if(!guess||locked)return;locked=true;document.getElementById('lock').disabled=true;
- const t=targetFor(current),actual={lat:t[0],lng:t[1]},d=meters(guess,actual),p=points(d);teams[activeTeam].score+=p;
+ const t=targetFor(current),actual={lat:t[0],lng:t[1]},d=meters(guess,actual),p=points(d),scoringPlayer=teams[activeTeam].name;teams[activeTeam].score+=p;if(teams.length>1)activeTeam=(activeTeam+1)%teams.length;
  targetMarker=L.circleMarker([actual.lat,actual.lng],{radius:9,weight:3,fillOpacity:.8}).addTo(map).bindPopup('Actual: '+current.answer).openPopup();
  line=L.polyline([[guess.lat,guess.lng],[actual.lat,actual.lng]],{weight:3,dashArray:'8 8'}).addTo(map);map.fitBounds(line.getBounds(),{padding:[40,40],maxZoom:17});
  renderTeams();
- document.getElementById('status').innerHTML='<span class="good">Locked!</span> '+escapeHtml(teams[activeTeam].name)+' earns '+p.toLocaleString()+' points';
+ document.getElementById('status').innerHTML='<span class="good">Locked!</span> '+escapeHtml(scoringPlayer)+' earns '+p.toLocaleString()+' points';
  document.getElementById('result').innerHTML='<p><b>'+current.answer+'</b> • '+current.area+' • '+fmt(d)+' away</p>';
  renderTeams();
  document.getElementById('credit').innerHTML='Photo: <a target="_blank" rel="noopener" href="'+current.source+'">'+current.credit+'</a> • '+current.license;
