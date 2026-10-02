@@ -1,5 +1,9 @@
 # WDWQuest Changelog
 
+## v0.6.2 - Jeopardy Suggestion Timing
+- Jeopardy answer suggestions now stay hidden until the player starts typing.
+- The Answers picker still opens the full answer list on demand.
+
 ## v0.6.1 - Jeopardy Answer Picker
 - Added a visible Answers picker to every Jeopardy clue.
 - Tapping the Jeopardy answer field now opens the full current-board answer list.
