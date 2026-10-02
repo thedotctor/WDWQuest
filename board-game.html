@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111f">
+<title>WDWQuest Board Game v0.1</title>
+<style>
+:root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
+button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width:1180px;margin:auto;padding:14px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.top a{color:var(--accent);text-decoration:none}.badge{border:1px solid var(--border);border-radius:999px;padding:6px 10px;color:var(--muted);font-size:13px}.panel{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px}.muted{color:var(--muted)}.good{color:var(--good)}.bad{color:var(--bad)}.gold{color:var(--gold)}.primary,.secondary,.danger{border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-weight:850}.primary{background:var(--accent);color:#082137;border-color:transparent}.secondary{background:var(--panel2);color:var(--text)}.danger{background:#472331;color:#fff}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.setup-grid{display:grid;gap:10px;max-width:720px}.player-row{display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center}.player-row input{width:100%;background:#0b1527;color:var(--text);border:1px solid var(--border);border-radius:11px;padding:11px 12px;min-height:44px;font-size:16px}
+.game-layout{display:grid;gap:14px}.scoreboard{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.player-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:10px;min-width:0}.player-card.active{outline:2px solid var(--accent);background:#17304a}.player-card .name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.player-card .cash{font-size:20px;font-weight:900;margin:3px 0}.mini{font-size:12px;color:var(--muted);line-height:1.35}
+.board-wrap{overflow:auto;-webkit-overflow-scrolling:touch}.board{width:min(94vw,850px);aspect-ratio:1;margin:auto;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);gap:3px;background:#08111f;border:3px solid var(--border);border-radius:18px;padding:3px}.space{position:relative;background:#14223a;border:1px solid var(--border);border-radius:7px;padding:4px;overflow:hidden;min-width:0}.space.property{background:#17243d}.space.trivia{background:#18293b}.space.special{background:#24223d}.space.transport{background:#162b31}.space.final{background:#312a19}.space .icon{font-size:clamp(12px,2.2vw,22px);line-height:1}.space .sname{font-size:clamp(7px,1.25vw,12px);font-weight:850;line-height:1.05;margin-top:2px;overflow-wrap:anywhere}.space .price{font-size:clamp(7px,1.05vw,10px);color:var(--muted);margin-top:2px}.space .owner{font-size:clamp(7px,1.05vw,10px);color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tokens{position:absolute;left:3px;right:3px;bottom:3px;display:flex;gap:1px;flex-wrap:wrap}.token{width:16px;height:16px;border-radius:50%;background:#f7f8fc;color:#07111f;font-size:10px;font-weight:950;display:grid;place-items:center;border:1px solid #07111f}
+.center{grid-row:2/7;grid-column:2/7;background:radial-gradient(circle at 50% 30%,rgba(125,211,252,.11),transparent 45%),var(--panel);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px;min-width:0}.center h1{font-size:clamp(22px,4vw,44px);margin:0 0 4px}.dice{font-size:clamp(40px,8vw,78px);line-height:1;margin:8px}.turn{font-weight:900;margin-bottom:4px}.status{color:var(--muted);line-height:1.4;max-width:520px;min-height:42px}.legend{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}.legend span{font-size:11px;color:var(--muted)}
+.log{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:12px}.log h3{margin:0 0 8px}.log-list{display:grid;gap:6px;max-height:160px;overflow:auto}.log-item{font-size:13px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:5px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:16px;z-index:100}.modal{width:min(620px,96vw);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:18px}.modal h2{margin:0 0 8px}.question{font-size:clamp(20px,4vw,30px);line-height:1.25;margin:15px 0}.answers{display:grid;grid-template-columns:1fr 1fr;gap:9px}.answer{background:#14223a;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:left;font-weight:800}.answer.correct{outline:2px solid var(--good)}.answer.wrong{outline:2px solid var(--bad)}.result{font-weight:850;margin-top:12px;min-height:28px}.hidden{display:none!important}
+@media(max-width:760px){.scoreboard{grid-template-columns:1fr 1fr}.player-row{grid-template-columns:1fr}.player-row label{margin-bottom:-6px}.player-row .secondary{width:100%}.answers{grid-template-columns:1fr}.shell{padding:10px}.panel{padding:14px}.board{width:min(96vw,650px)}}
+@media(max-width:420px){.board{gap:2px;padding:2px;border-radius:12px}.space{padding:2px;border-radius:5px}.token{width:13px;height:13px;font-size:8px}.center{padding:7px}.center .actions{display:grid;width:100%;gap:7px}.center .actions button{width:100%}.scoreboard{gap:6px}.player-card{padding:8px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<div class="top">
+<a href="arcade.html">← Back to WDWQuest Arcade</a>
+<span class="badge">Board Game Prototype v0.1 • 1–8 players</span>
+</div>
+<div id="app"></div>
+</div>
+<div id="modalRoot"></div>
+<script>
+const QUESTION_BANK=[{"q":"Which Magic Kingdom attraction uses Doom Buggies?","a":"Haunted Mansion","choices":["Haunted Mansion","Peter Pan's Flight","Pirates of the Caribbean","Space Mountain"],"badge":"Magic Kingdom","diff":"Casual"},{"q":"Which EPCOT pavilion is home to Frozen Ever After?","a":"Norway","choices":["Norway","Germany","France","Canada"],"badge":"EPCOT","diff":"Casual"},{"q":"Which Hollywood Studios land is home to Slinky Dog Dash?","a":"Toy Story Land","choices":["Toy Story Land","Galaxy's Edge","Sunset Boulevard","Echo Lake"],"badge":"Hollywood Studios","diff":"Casual"},{"q":"Which Animal Kingdom attraction explores the Harambe Wildlife Reserve?","a":"Kilimanjaro Safaris","choices":["Kilimanjaro Safaris","Kali River Rapids","Na'vi River Journey","Expedition Everest"],"badge":"Animal Kingdom","diff":"Casual"},{"q":"Which resort has the monorail pass directly through its main building?","a":"Disney's Contemporary Resort","choices":["Disney's Contemporary Resort","Disney's Polynesian Village Resort","Disney's Grand Floridian Resort & Spa","Disney's Wilderness Lodge"],"badge":"Resorts & Dining","diff":"Casual"},{"q":"Which EPCOT attraction includes working greenhouses?","a":"Living with the Land","choices":["Living with the Land","Spaceship Earth","Mission: SPACE","Journey Into Imagination With Figment"],"badge":"EPCOT","diff":"Fan"},{"q":"Which Hollywood Studios restaurant seats many guests in classic convertible-style tables?","a":"Sci-Fi Dine-In Theater Restaurant","choices":["Sci-Fi Dine-In Theater Restaurant","50's Prime Time Café","Hollywood & Vine","The Hollywood Brown Derby"],"badge":"Hollywood Studios","diff":"Fan"},{"q":"Which Magic Kingdom land contains the Hall of Presidents?","a":"Liberty Square","choices":["Liberty Square","Frontierland","Main Street, U.S.A.","Adventureland"],"badge":"Magic Kingdom","diff":"Fan"},{"q":"What is the rooftop restaurant at Disney's Riviera Resort?","a":"Topolino's Terrace","choices":["Topolino's Terrace","California Grill","Toledo","Narcoossee's"],"badge":"Resorts & Dining","diff":"Fan"},{"q":"Which Disney Springs venue is themed to Jock Lindsey?","a":"Jock Lindsey's Hangar Bar","choices":["Jock Lindsey's Hangar Bar","The BOATHOUSE","Raglan Road","Wine Bar George"],"badge":"Resorts & Dining","diff":"Fan"},{"q":"Which Animal Kingdom walking trail is located in Asia?","a":"Maharajah Jungle Trek","choices":["Maharajah Jungle Trek","Gorilla Falls Exploration Trail","Discovery Island Trails","The Oasis Exhibits"],"badge":"Animal Kingdom","diff":"Expert"},{"q":"Which EPCOT restaurant sits inside the Mexico pavilion pyramid and overlooks a boat ride?","a":"San Angel Inn Restaurante","choices":["San Angel Inn Restaurante","La Hacienda de San Angel","Tutto Italia","Spice Road Table"],"badge":"EPCOT","diff":"Expert"},{"q":"Which resort is divided into villages named for Caribbean islands?","a":"Disney's Caribbean Beach Resort","choices":["Disney's Caribbean Beach Resort","Disney's Old Key West Resort","Disney's Port Orleans Resort - Riverside","Disney's Coronado Springs Resort"],"badge":"Resorts & Dining","diff":"Expert"},{"q":"What is the name of the large pool complex shared by Disney's Yacht Club and Beach Club Resorts?","a":"Stormalong Bay","choices":["Stormalong Bay","Lava Pool","Uzima Springs Pool","Big Blue Pool"],"badge":"Resorts & Dining","diff":"Expert"},{"q":"Which Magic Kingdom restaurant is divided into colonial-era rooms named for historical figures?","a":"Liberty Tree Tavern","choices":["Liberty Tree Tavern","The Crystal Palace","Columbia Harbour House","The Diamond Horseshoe"],"badge":"Magic Kingdom","diff":"Expert"},{"q":"Before Tiana's Bayou Adventure, what was here?","a":"Splash Mountain","choices":["Splash Mountain","The Living Seas","The Great Movie Ride","World of Motion"],"badge":"Disney History","diff":"Expert"},{"q":"Before Mickey & Minnie's Runaway Railway, what was here?","a":"The Great Movie Ride","choices":["The Great Movie Ride","The Living Seas","World of Motion","Maelstrom"],"badge":"Disney History","diff":"Expert"},{"q":"Before Frozen Ever After, what was here?","a":"Maelstrom","choices":["Maelstrom","The Great Movie Ride","Camp Minnie-Mickey","Splash Mountain"],"badge":"Disney History","diff":"Expert"},{"q":"Before Mission: SPACE, what was here?","a":"Horizons","choices":["Horizons","The Living Seas","World of Motion","The Great Movie Ride"],"badge":"Disney History","diff":"Expert"},{"q":"Before Test Track, what was here?","a":"World of Motion","choices":["World of Motion","Splash Mountain","The Living Seas","Horizons"],"badge":"Disney History","diff":"Expert"},{"q":"Before Pandora – The World of Avatar, what was here?","a":"Camp Minnie-Mickey","choices":["Camp Minnie-Mickey","The Great Movie Ride","Maelstrom","Mr. Toad's Wild Ride"],"badge":"Disney History","diff":"Expert"},{"q":"Before The Many Adventures of Winnie the Pooh, what was here?","a":"Mr. Toad's Wild Ride","choices":["Mr. Toad's Wild Ride","Horizons","Camp Minnie-Mickey","Splash Mountain"],"badge":"Disney History","diff":"Expert"},{"q":"Before The Seas with Nemo & Friends, what was here?","a":"The Living Seas","choices":["The Living Seas","Splash Mountain","Mr. Toad's Wild Ride","The Great Movie Ride"],"badge":"Disney History","diff":"Expert"}];
+const BADGES=['Magic Kingdom','EPCOT','Hollywood Studios','Animal Kingdom','Resorts & Dining','Disney History'];
+const TOKENS=['1','2','3','4','5','6','7','8'];
+const SPACES=[
+ {type:'start',name:'Park Entrance',icon:'🏰'},
+ {type:'property',name:'Haunted Mansion',icon:'👻',badge:'Magic Kingdom',cost:200,rent:55},
+ {type:'trivia',name:'Trivia Challenge',icon:'❓'},
+ {type:'property',name:'Spaceship Earth',icon:'🌐',badge:'EPCOT',cost:220,rent:60},
+ {type:'special',name:'Pixie Dust',icon:'✨',amount:100},
+ {type:'property',name:'Tower of Terror',icon:'🏨',badge:'Hollywood Studios',cost:240,rent:65},
+ {type:'transport',name:'Monorail',icon:'🚝',move:4},
+ {type:'property',name:'Kilimanjaro Safaris',icon:'🦒',badge:'Animal Kingdom',cost:220,rent:60},
+ {type:'trivia',name:'Trivia Challenge',icon:'❓'},
+ {type:'property',name:'Contemporary Resort',icon:'🏨',badge:'Resorts & Dining',cost:180,rent:45},
+ {type:'trivia',name:'Disney History',icon:'🕰️',badge:'Disney History'},
+ {type:'property',name:'Pirates of the Caribbean',icon:'🏴‍☠️',badge:'Magic Kingdom',cost:210,rent:55},
+ {type:'special',name:'Snack Break',icon:'🍿',amount:-50},
+ {type:'property',name:'Test Track',icon:'🏎️',badge:'EPCOT',cost:230,rent:60},
+ {type:'trivia',name:'Trivia Challenge',icon:'❓'},
+ {type:'property',name:'Rise of the Resistance',icon:'🚀',badge:'Hollywood Studios',cost:260,rent:70},
+ {type:'transport',name:'Disney Bus',icon:'🚌',move:3},
+ {type:'property',name:'Expedition Everest',icon:'🏔️',badge:'Animal Kingdom',cost:230,rent:60},
+ {type:'property',name:'BoardWalk Resort',icon:'🎡',badge:'Resorts & Dining',cost:190,rent:50},
+ {type:'trivia',name:'Trivia Challenge',icon:'❓'},
+ {type:'property',name:'Seven Dwarfs Mine Train',icon:'⛏️',badge:'Magic Kingdom',cost:250,rent:70},
+ {type:'transport',name:'Disney Skyliner',icon:'🚡',move:3},
+ {type:'property',name:'Guardians of the Galaxy',icon:'🎧',badge:'EPCOT',cost:260,rent:70},
+ {type:'final',name:'Castle Finale',icon:'🎆'}
+];
+let setupPlayers=[{name:''}];
+let players=[];
+let currentPlayer=0;
+let owners={};
+let gameOver=false;
+let turnLocked=false;
+let lastQuestion=-1;
+const app=document.getElementById('app');
+const modalRoot=document.getElementById('modalRoot');
+
+function esc(s){return String(s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
+function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=b[i];b[i]=b[j];b[j]=t}return b}
+function showSetup(){
+ app.innerHTML='<section class="panel"><div class="badge" id="countBadge">1 player</div><h1>🎲 WDWQuest Board Game</h1><p class="muted">A first playable mix of trivia, attraction ownership, rent, Disney Dollars, category badges, and a final castle challenge.</p><h3>Who is playing?</h3><p class="muted">Play solo or add up to 8 players. The other WDWQuest games stay at 1–4.</p><div class="setup-grid" id="setupGrid"></div><div class="actions"><button class="primary" id="startGame">Start Board Game</button><button class="secondary" id="addPlayer">Add Player</button></div><div class="muted" id="setupMsg" style="margin-top:10px">Each player starts with $1,500 Disney Dollars.</div></section>';
+ const grid=document.getElementById('setupGrid');
+ const add=document.getElementById('addPlayer');
+ const count=document.getElementById('countBadge');
+ function draw(){
+   grid.innerHTML=setupPlayers.map(function(p,i){return '<div class="player-row"><label>Player '+(i+1)+'</label><input data-p="'+i+'" '+(p.name?'value="'+esc(p.name)+'" ':'')+'placeholder="Player '+(i+1)+'" maxlength="24" autocomplete="new-password" autocapitalize="words">'+(setupPlayers.length>1?'<button class="secondary" type="button" data-remove="'+i+'">Remove</button>':'')+'</div>'}).join('');
+   count.textContent=setupPlayers.length+(setupPlayers.length===1?' player':' players');
+   add.disabled=setupPlayers.length>=8;
+   grid.querySelectorAll('[data-p]').forEach(function(input){
+     const i=Number(input.dataset.p),def='Player '+(i+1);
+     input.addEventListener('focus',function(){if(input.value.trim()===def)input.select()});
+     input.addEventListener('beforeinput',function(){if(input.value.trim()===def)input.value=''});
+     input.addEventListener('input',function(){setupPlayers[i].name=input.value.slice(0,24)});
+   });
+   grid.querySelectorAll('[data-remove]').forEach(function(btn){btn.addEventListener('click',function(){if(setupPlayers.length<=1)return;setupPlayers.splice(Number(btn.dataset.remove),1);draw()})});
+ }
+ add.addEventListener('click',function(){if(setupPlayers.length>=8)return;setupPlayers.push({name:''});draw()});
+ document.getElementById('startGame').addEventListener('click',function(){
+   const cleaned=setupPlayers.map(function(p,i){return (p.name||'').trim()||('Player '+(i+1))});
+   const keys=cleaned.map(function(x){return x.toLowerCase()});
+   if(new Set(keys).size!==keys.length){document.getElementById('setupMsg').textContent='Give each player a different name.';document.getElementById('setupMsg').className='bad';return}
+   players=cleaned.map(function(name,i){return {name:name,cash:1500,pos:0,badges:[],props:[],token:TOKENS[i]}});
+   currentPlayer=0;owners={};gameOver=false;turnLocked=false;renderGame();addLog('Game started with '+players.length+' player'+(players.length===1?'':'s')+'.');
+ });
+ draw();
+}
+function renderGame(){
+ app.innerHTML='<div class="game-layout"><section class="scoreboard" id="scoreboard"></section><div class="board-wrap"><div class="board" id="board"><div class="center"><h1>🏰 WDWQuest</h1><div class="turn" id="turnText"></div><div class="dice" id="dice">⚀</div><div class="status" id="status">Roll the dice to begin.</div><div class="actions"><button class="primary" id="rollBtn">Roll Dice</button><button class="secondary" id="rulesBtn">Quick Rules</button></div><div class="legend"><span>❓ trivia</span><span>🏠 own attractions</span><span>💵 pay rent</span><span>🎟️ collect 6 badges</span></div></div></div></div><section class="log"><h3>Game Log</h3><div class="log-list" id="logList"></div></section></div>';
+ buildBoard();
+ renderAll();
+ document.getElementById('rollBtn').addEventListener('click',rollDice);
+ document.getElementById('rulesBtn').addEventListener('click',showRules);
+}
+function perimeterPos(i){
+ if(i<=6)return {r:1,c:i+1};
+ if(i<=11)return {r:i-5,c:7};
+ if(i<=18)return {r:7,c:19-i};
+ return {r:25-i,c:1};
+}
+function buildBoard(){
+ const board=document.getElementById('board');
+ SPACES.forEach(function(s,i){
+   const p=perimeterPos(i);
+   const d=document.createElement('div');
+   d.className='space '+s.type;
+   d.id='space'+i;
+   d.style.gridRow=String(p.r);d.style.gridColumn=String(p.c);
+   const price=s.type==='property'?'<div class="price">$'+s.cost+' • rent $'+s.rent+'</div>':'';
+   d.innerHTML='<div class="icon">'+s.icon+'</div><div class="sname">'+esc(s.name)+'</div>'+price+'<div class="owner" id="owner'+i+'"></div><div class="tokens" id="tokens'+i+'"></div>';
+   board.appendChild(d);
+ });
+}
+function renderAll(){
+ renderScores();renderTokens();renderOwners();
+ const p=players[currentPlayer];
+ document.getElementById('turnText').textContent=p.name+"'s turn";
+ document.getElementById('rollBtn').disabled=turnLocked||gameOver;
+}
+function renderScores(){
+ const s=document.getElementById('scoreboard');if(!s)return;
+ s.innerHTML=players.map(function(p,i){return '<div class="player-card '+(i===currentPlayer&&!gameOver?'active':'')+'"><div class="name">'+esc(p.name)+'</div><div class="cash">$'+p.cash.toLocaleString()+'</div><div class="mini">Badges '+p.badges.length+'/6 • Attractions '+p.props.length+'</div><div class="mini">'+(p.badges.length?p.badges.map(shortBadge).join(' • '):'No badges yet')+'</div></div>'}).join('');
+}
+function shortBadge(b){return {'Magic Kingdom':'🏰','EPCOT':'🌐','Hollywood Studios':'🎬','Animal Kingdom':'🌳','Resorts & Dining':'🏨','Disney History':'🕰️'}[b]||'🎟️'}
+function renderTokens(){
+ SPACES.forEach(function(s,i){const el=document.getElementById('tokens'+i);if(el)el.innerHTML=''});
+ players.forEach(function(p,i){const el=document.getElementById('tokens'+p.pos);if(el)el.innerHTML+='<span class="token" title="'+esc(p.name)+'">'+(i+1)+'</span>'});
+}
+function renderOwners(){
+ SPACES.forEach(function(s,i){const el=document.getElementById('owner'+i);if(!el)return;el.textContent=owners[i]!==undefined?'Owned: '+players[owners[i]].name:''});
+}
+function addLog(msg){
+ const list=document.getElementById('logList');if(!list)return;
+ const d=document.createElement('div');d.className='log-item';d.textContent=msg;list.prepend(d);
+ while(list.children.length>12)list.removeChild(list.lastChild);
+}
+function setStatus(msg){const s=document.getElementById('status');if(s)s.innerHTML=msg}
+function rollDice(){
+ if(turnLocked||gameOver)return;
+ turnLocked=true;
+ const roll=1+Math.floor(Math.random()*6);
+ const faces=['⚀','⚁','⚂','⚃','⚄','⚅'];document.getElementById('dice').textContent=faces[roll-1];
+ const p=players[currentPlayer],old=p.pos,newPos=(old+roll)%SPACES.length;
+ if(old+roll>=SPACES.length){p.cash+=200;addLog(p.name+' passed Park Entrance and collected $200.')}
+ p.pos=newPos;renderTokens();renderScores();
+ setStatus(esc(p.name)+' rolled <strong>'+roll+'</strong> and landed on <strong>'+esc(SPACES[newPos].name)+'</strong>.');
+ resolveSpace(newPos,false);
+}
+function resolveSpace(idx,fromTransport){
+ const s=SPACES[idx],p=players[currentPlayer];
+ if(s.type==='start'){p.cash+=100;finishTurn(p.name+' gets a $100 welcome bonus.');return}
+ if(s.type==='property'){
+   if(owners[idx]===undefined){askQuestion(s.badge,{mode:'property',space:idx});return}
+   if(owners[idx]===currentPlayer){finishTurn(p.name+' already owns '+s.name+'.');return}
+   const owner=players[owners[idx]];p.cash-=s.rent;owner.cash+=s.rent;renderScores();finishTurn(p.name+' paid '+owner.name+' $'+s.rent+' rent at '+s.name+'.');return
+ }
+ if(s.type==='trivia'){askQuestion(s.badge||null,{mode:'badge'});return}
+ if(s.type==='special'){p.cash+=s.amount;renderScores();finishTurn(s.amount>0?p.name+' found Pixie Dust and gained $'+s.amount+'.':p.name+' bought snacks and spent $'+Math.abs(s.amount)+'.');return}
+ if(s.type==='transport'){
+   if(fromTransport){finishTurn(p.name+' arrived by Disney transportation.');return}
+   const old=p.pos;p.pos=(p.pos+s.move)%SPACES.length;if(old+s.move>=SPACES.length){p.cash+=200;addLog(p.name+' passed Park Entrance and collected $200.')}
+   renderTokens();renderScores();setStatus(esc(p.name)+' rides '+esc(s.name)+' ahead '+s.move+' spaces.');resolveSpace(p.pos,true);return
+ }
+ if(s.type==='final'){
+   if(p.badges.length===BADGES.length){askQuestion(null,{mode:'final'});return}
+   askQuestion('Disney History',{mode:'badge',finalGate:true});return
+ }
+ finishTurn('Turn complete.');
+}
+function pickQuestion(badge,finalMode){
+ let pool=QUESTION_BANK.filter(function(q){return !badge||q.badge===badge});
+ if(finalMode){const experts=pool.filter(function(q){return q.diff==='Expert'});if(experts.length)pool=experts}
+ if(!pool.length)pool=QUESTION_BANK.slice();
+ let idx=Math.floor(Math.random()*pool.length);
+ let q=pool[idx];
+ if(QUESTION_BANK.indexOf(q)===lastQuestion&&pool.length>1){q=pool[(idx+1)%pool.length]}
+ lastQuestion=QUESTION_BANK.indexOf(q);return q;
+}
+function askQuestion(badge,ctx){
+ const p=players[currentPlayer];
+ if(ctx.mode==='badge'&&!badge){
+   const missing=BADGES.filter(function(b){return p.badges.indexOf(b)<0});
+   if(missing.length)badge=missing[Math.floor(Math.random()*missing.length)];
+ }
+ const q=pickQuestion(badge,ctx.mode==='final');
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">'+esc(ctx.mode==='final'?'FINAL CHALLENGE':q.badge)+'</div><h2>'+(ctx.mode==='property'?'Answer to unlock the attraction':'Trivia Challenge')+'</h2><div class="question">'+esc(q.q)+'</div><div class="answers" id="qAnswers"></div><div class="result" id="qResult"></div><div class="actions" id="qActions"></div></div></div>';
+ const answers=document.getElementById('qAnswers');
+ shuffle(q.choices).forEach(function(choice){
+   const b=document.createElement('button');b.className='answer';b.textContent=choice;
+   b.addEventListener('click',function(){gradeQuestion(choice,q,ctx,b)});
+   answers.appendChild(b);
+ });
+}
+function gradeQuestion(choice,q,ctx,btn){
+ const buttons=Array.from(document.querySelectorAll('#qAnswers .answer'));buttons.forEach(function(b){b.disabled=true;if(b.textContent===q.a)b.classList.add('correct')});
+ const ok=choice===q.a;if(!ok)btn.classList.add('wrong');
+ const result=document.getElementById('qResult'),actions=document.getElementById('qActions');
+ const p=players[currentPlayer];
+ if(!ok){
+   result.innerHTML='<span class="bad">Not quite.</span> Answer: '+esc(q.a);
+   actions.innerHTML='<button class="primary" id="qContinue">Continue</button>';
+   document.getElementById('qContinue').addEventListener('click',function(){closeModal();finishTurn(p.name+' missed the '+q.badge+' question.')});
+   return;
+ }
+ if(ctx.mode==='final'){
+   result.innerHTML='<span class="good">Correct!</span> '+esc(p.name)+' wins WDWQuest!';
+   actions.innerHTML='<button class="primary" id="winClose">See Final Board</button>';
+   document.getElementById('winClose').addEventListener('click',function(){gameOver=true;closeModal();setStatus('<span class="gold">🏆 '+esc(p.name)+' wins WDWQuest!</span>');renderScores();document.getElementById('rollBtn').disabled=true;addLog(p.name+' won the game!')});
+   return;
+ }
+ let badgeMsg='';
+ if(p.badges.indexOf(q.badge)<0){p.badges.push(q.badge);badgeMsg=' You earned the '+q.badge+' badge!';}
+ else{p.cash+=100;badgeMsg=' You already had that badge, so you earned $100 instead.';}
+ renderScores();
+ if(ctx.mode==='property'){
+   const s=SPACES[ctx.space];
+   result.innerHTML='<span class="good">Correct!</span>'+esc(badgeMsg)+'<br>You may buy <strong>'+esc(s.name)+'</strong> for $'+s.cost+'.';
+   if(p.cash>=s.cost){
+     actions.innerHTML='<button class="primary" id="buyProp">Buy Attraction</button><button class="secondary" id="passProp">Pass</button>';
+     document.getElementById('buyProp').addEventListener('click',function(){p.cash-=s.cost;p.props.push(ctx.space);owners[ctx.space]=currentPlayer;renderAll();closeModal();finishTurn(p.name+' bought '+s.name+' for $'+s.cost+'.')});
+   }else{
+     actions.innerHTML='<button class="primary" id="passProp">Continue</button>';
+     result.innerHTML+='<br><span class="bad">You do not have enough Disney Dollars to buy it.</span>';
+   }
+   document.getElementById('passProp').addEventListener('click',function(){closeModal();finishTurn(p.name+' passed on '+s.name+'.')});
+   return;
+ }
+ result.innerHTML='<span class="good">Correct!</span>'+esc(badgeMsg);
+ actions.innerHTML='<button class="primary" id="qContinue">Continue</button>';
+ document.getElementById('qContinue').addEventListener('click',function(){closeModal();finishTurn(p.name+' answered correctly and now has '+p.badges.length+'/6 badges.')});
+}
+function closeModal(){modalRoot.innerHTML=''}
+function finishTurn(msg){
+ addLog(msg);renderAll();
+ if(gameOver)return;
+ const previous=players[currentPlayer].name;
+ currentPlayer=(currentPlayer+1)%players.length;
+ turnLocked=false;
+ renderAll();
+ setStatus(esc(msg)+'<br><strong>'+esc(players[currentPlayer].name)+"'s turn.</strong>");
+}
+function showRules(){
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><h2>Quick Rules</h2><p>Roll and move around Walt Disney World. Unowned attractions can only be bought after a correct trivia answer. Land on somebody else’s attraction and pay rent.</p><p>Correct trivia earns category badges. If you already own that badge, you get $100 instead. Collect all six badges, then land on <strong>Castle Finale</strong> and answer the final question correctly to win.</p><p>Passing Park Entrance pays $200. Disney transportation moves you ahead. Special spaces can add or remove Disney Dollars.</p><div class="actions"><button class="primary" id="closeRules">Got It</button></div></div></div>';
+ document.getElementById('closeRules').addEventListener('click',closeModal);
+}
+showSetup();
+</script>
+</body>
+</html>
