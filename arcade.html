@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08111f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <!-- WDWQuest homepage refresh build: 2026-10-01 -->
-<title>WDWQuest v0.5.1</title>
+<title>WDWQuest v0.6.0</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--panel3:#0c1729;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--accent2:#c4b5fd;--good:#86efac;--bad:#fca5a5;--gold:#fde68a;--shadow:0 18px 50px rgba(0,0,0,.23)}
 *{box-sizing:border-box}html{color-scheme:dark}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 10% -10%,rgba(125,211,252,.13),transparent 30%),radial-gradient(circle at 90% 0%,rgba(196,181,253,.12),transparent 27%),var(--bg);color:var(--text);min-height:100vh}
@@ -54,58 +56,150 @@ nav{display:flex;gap:6px;flex-wrap:wrap}nav button{background:transparent;color:
 @media(max-width:850px){.arcade-grid{grid-template-columns:1fr 1fr}.answers{grid-template-columns:1fr}.history-wrap{grid-template-columns:1fr}.site-header{align-items:flex-start;flex-direction:column}nav{width:100%;overflow:auto;flex-wrap:nowrap}}
 @media(max-width:560px){.photo-frame{max-width:none}.arcade-grid,.stats-row{grid-template-columns:1fr}.page-shell{padding-left:12px;padding-right:12px}}
 .photo-error{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:#0b1527;color:var(--bad);font-weight:800}.photo-error[hidden]{display:none}
-/* v0.5.1 iPhone/mobile polish */
-html{-webkit-text-size-adjust:100%}
+
+
+/* v0.6.0 full-site iPhone/mobile layout */
+html{-webkit-text-size-adjust:100%;overflow-x:hidden}
+body{overflow-x:hidden;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+img,svg,video,canvas{max-width:100%}
 button,input,select{touch-action:manipulation}
-input,select{font-size:16px}
-.site-header{padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right))}
-.page-shell{padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right))}
-.jwrap{-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+input,select{font-size:16px;max-width:100%}
+button{min-height:44px}
+.site-header{
+  padding-left:max(18px,env(safe-area-inset-left));
+  padding-right:max(18px,env(safe-area-inset-right))
+}
+.page-shell{
+  width:100%;
+  min-width:0;
+  padding-left:max(18px,env(safe-area-inset-left));
+  padding-right:max(18px,env(safe-area-inset-right))
+}
+.hero,.panel,.card,.game-card,.history-card,.stat,.notice{min-width:0}
+h1,h2,h3,.question,.lead,.row,.badge,.photo-credit{overflow-wrap:anywhere}
+.jwrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
 .j-suggestion{min-height:46px}
+
 @media(max-width:700px){
-  .site-header{padding-top:max(10px,env(safe-area-inset-top));gap:8px}
-  .brand{font-size:18px}
-  nav{padding-bottom:2px}
-  nav button{min-height:44px;padding:9px 12px;white-space:nowrap}
-  .page-shell{padding-top:18px;padding-bottom:24px}
-  .panel,.card,.game-card,.history-card{border-radius:14px}
-  .j-picker-head h3{margin-bottom:6px}
+  body{padding-bottom:env(safe-area-inset-bottom)}
+  .site-header{
+    position:sticky;
+    top:0;
+    gap:8px;
+    padding-top:max(10px,env(safe-area-inset-top));
+    padding-bottom:8px;
+    align-items:flex-start;
+    flex-direction:column
+  }
+  .brand{font-size:18px;min-height:40px;padding:4px 0}
+  nav{
+    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    flex-wrap:nowrap;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    padding-bottom:3px
+  }
+  nav::-webkit-scrollbar{display:none}
+  nav button{
+    flex:0 0 auto;
+    min-height:44px;
+    padding:9px 12px;
+    white-space:nowrap
+  }
+
+  .page-shell{padding-top:16px;padding-bottom:28px}
+  .hero{padding:20px 0 8px}
+  h1{font-size:clamp(38px,13vw,58px)}
+  h2{font-size:clamp(26px,8vw,36px)}
+  .lead{font-size:17px;line-height:1.48}
+
+  .arcade-grid{grid-template-columns:1fr;gap:12px;margin-top:18px}
+  .game-card{min-height:0;padding:17px;border-radius:16px}
+  .game-card .icon{font-size:30px;margin-bottom:10px}
+  .game-card p{margin-bottom:14px}
+
+  .stats-row{grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}
+  .stat{padding:13px;border-radius:13px}
+  .stat .n{font-size:24px}
+
+  .panel,.card,.history-card{padding:15px;border-radius:15px}
+  .notice{padding:12px;border-radius:12px}
+  .filters{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:14px}
+  .filters select,.filters input{width:100%;min-height:48px}
+  .question{font-size:23px;line-height:1.32;margin:15px 0}
+
+  .answers{grid-template-columns:1fr;gap:8px}
+  .answer-btn{min-height:52px;padding:12px 13px;font-size:16px}
+  .actions{display:grid;grid-template-columns:1fr;gap:8px}
+  .actions button{width:100%;min-height:50px;font-size:16px}
+  .feedback{line-height:1.4}
+
+  .photo-frame{width:100%;max-width:none;border-radius:14px}
+  .photo-cover-note{font-size:11px}
+  .photo-credit{font-size:11px;line-height:1.5}
+
+  .history-wrap{grid-template-columns:1fr;gap:10px}
+  .history-current{font-size:21px}
+  .row{align-items:flex-start;line-height:1.4}
+  footer{
+    padding-left:max(14px,env(safe-area-inset-left));
+    padding-right:max(14px,env(safe-area-inset-right));
+    padding-bottom:max(24px,env(safe-area-inset-bottom))
+  }
+
+  .j-picker-head{margin-bottom:12px}
+  .j-picker-head h3{margin-bottom:5px}
   .j-category-grid{grid-template-columns:1fr 1fr;gap:8px}
   .j-cat{min-height:58px;padding:11px;border-radius:12px}
   .j-cat input{width:20px;height:20px}
   .j-builder-actions{display:grid;grid-template-columns:1fr 1fr}
   .j-builder-actions .primary{grid-column:1/-1}
-  .j-builder-actions button{min-height:48px}
-  .jboard{min-width:690px;gap:6px}
-  .jhead{min-height:62px;padding:10px 6px;border-radius:8px;font-size:13px;line-height:1.15}
+  .j-builder-actions button{min-height:50px}
+  .jboard{min-width:680px;gap:6px}
+  .jhead{min-height:62px;padding:9px 5px;border-radius:8px;font-size:13px;line-height:1.15}
   .jcell{min-height:66px;font-size:20px;padding:8px 4px;border-radius:8px}
   .j-answer-wrap{max-width:none}
-  .j-answer-wrap input{min-height:50px;font-size:16px;padding:12px}
+  .j-answer-wrap input{width:100%;min-height:50px;font-size:16px;padding:12px}
   .j-suggestions{max-height:220px}
   .j-suggestion{padding:12px;font-size:16px}
-  .question{font-size:20px;line-height:1.35}
-  .actions button{min-height:48px}
 }
+
 @media(max-width:430px){
-  .site-header{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
-  .page-shell{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right));padding-top:14px}
+  .site-header{
+    padding-left:max(12px,env(safe-area-inset-left));
+    padding-right:max(12px,env(safe-area-inset-right))
+  }
+  .page-shell{
+    padding-left:max(10px,env(safe-area-inset-left));
+    padding-right:max(10px,env(safe-area-inset-right));
+    padding-top:13px
+  }
+  .stats-row{grid-template-columns:1fr 1fr}
+  .stat .n{font-size:22px}
   .j-category-grid{grid-template-columns:1fr}
   .j-cat{min-height:54px}
   .j-builder-actions{grid-template-columns:1fr}
   .j-builder-actions .primary{grid-column:auto}
-  .jboard{min-width:640px}
+  .jboard{min-width:625px}
   .jhead{font-size:12px}
-  .jcell{min-height:62px;font-size:18px}
+  .jcell{min-height:60px;font-size:18px}
   .scorebar{align-items:flex-start}
-  .scorebar>.stat{min-width:112px}
-  .row{align-items:flex-start;flex-direction:column;gap:4px}
+  .scorebar>.stat{min-width:108px}
+  .row{flex-direction:column;gap:4px}
+}
+
+@media(max-width:350px){
+  .stats-row{grid-template-columns:1fr}
+  .brand small{display:none}
 }
 
 </style>
 </head>
 <body>
 <header class="site-header">
-<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.5.1</small></button>
+<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.6.0</small></button>
 <nav>
 <button data-nav="home">Home</button>
 <button data-nav="trivia">Trivia</button>
@@ -141,7 +235,7 @@ function nav(v){history.replaceState(null,'','#'+v);render(v);window.scrollTo({t
 document.addEventListener('click',e=>{const b=e.target.closest('[data-nav]');if(b)nav(b.dataset.nav);});
 
 function home(){
-return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.5.1 adds an iPhone-focused mobile layout while keeping the 20-category, 400-clue customizable Jeopardy game intact.</p></section>
+return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.6.0 makes the full WDWQuest arcade iPhone-friendly across every game mode, with larger touch controls, safer spacing, and cleaner small-screen layouts.</p></section>
 <section class="stats-row">
 <div class="stat"><div class="n">${stats.totalScore}</div><div class="label">Total score</div></div>
 <div class="stat"><div class="n">${pct()}%</div><div class="label">Accuracy</div></div>
@@ -455,7 +549,16 @@ reset.addEventListener('click',()=>{if(confirm('Reset all WDWQuest v0.2 stats st
 function changelog(){
 app.innerHTML=`<section class="hero"><div class="eyebrow">Project log</div><h2>WDWQuest Changelog</h2></section>
 <div class="card">
-<h3>v0.5.1</h3>
+<h3>v0.6.0</h3>
+<div class="list">
+<div class="row"><span>📱 Full-site iPhone support across every WDWQuest game mode</span><strong>UPDATED</strong></div>
+<div class="row"><span>👆 Larger tap targets and full-width mobile controls</span><strong>UPDATED</strong></div>
+<div class="row"><span>🧭 Added safe-area spacing for modern iPhone screens</span><strong>UPDATED</strong></div>
+<div class="row"><span>⌨️ Prevented Safari input zoom with mobile-friendly form sizing</span><strong>UPDATED</strong></div>
+<div class="row"><span>↔️ Improved horizontal navigation and Jeopardy board swiping</span><strong>UPDATED</strong></div>
+<div class="row"><span>🖼️ Improved Photo, Trivia, History, Stats and Changelog layouts on narrow screens</span><strong>UPDATED</strong></div>
+</div>
+<h3 style="margin-top:24px">v0.5.1</h3>
 <div class="list">
 <div class="row"><span>📱 Added iPhone-focused mobile polish across the arcade</span><strong>UPDATED</strong></div>
 <div class="row"><span>🎛️ Improved Jeopardy category selection and tap targets on narrow screens</span><strong>UPDATED</strong></div>
