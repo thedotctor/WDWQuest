@@ -1,5 +1,13 @@
 # WDWQuest Changelog
 
+## v0.10.9 - 30-Photo Snack Break Deck
+- Expanded Snack Break from 8 illustrated cards to 30 real Disney food photos.
+- Snack Break now uses a shuffled deck so all 30 photo cards appear before any repeat.
+- Avoids immediately repeating the same food when possible.
+- Multiple-choice distractors are deduplicated.
+- Added photo credits and Creative Commons license links under each image.
+- Correct guesses still award $50.
+
 ## v0.10.8 - Pixie Dust Risk Reward
 - Pixie Dust now awards $100 only when its trivia question is answered correctly.
 - A wrong Pixie Dust answer now subtracts $100.
