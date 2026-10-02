@@ -1,5 +1,16 @@
 # WDWQuest Changelog
 
+## v0.9.0 - WDWQuest Board Game
+- Added the first playable WDWQuest Board Game as a separate game page.
+- Board Game supports 1 to 8 players; the other WDWQuest games remain 1 to 4 players.
+- Added a 24-space Walt Disney World board with attractions, trivia, transportation, special spaces, and a Castle Finale.
+- Players begin with $1,500 Disney Dollars.
+- Unowned attractions require a correct trivia answer before they can be purchased.
+- Landing on another player's attraction charges rent.
+- Correct trivia can earn six category badges: Magic Kingdom, EPCOT, Hollywood Studios, Animal Kingdom, Resorts & Dining, and Disney History.
+- Players with all six badges must reach the Castle Finale and answer the final question correctly to win.
+- Added automatic turn advancement, passing-Park-Entrance bonuses, transportation moves, and a game log.
+
 ## v0.8.6 - iPhone Player Name Fix
 - Improved Player Setup so Player 1 through Player 4 behave as true placeholder text.
 - Added a safeguard for iPhone/Safari restoring the default player name as a real input value.
