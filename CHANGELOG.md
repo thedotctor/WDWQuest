@@ -1,5 +1,10 @@
 # WDWQuest Changelog
 
+## v0.9.4 - Board Space Question Info
+- Board Game trivia popups now show the space the active player landed on.
+- Attraction spaces show the category, purchase price, rent, and current ownership while answering.
+- Trivia, History, and Castle Finale spaces identify the type of challenge that triggered the question.
+
 ## v0.9.2 - Board Game Token Selector
 - Added a token-selection step after Board Game player setup.
 - Added 12 Disney World-themed token choices for up to 8 players.
