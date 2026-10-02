@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.6.1 - Jeopardy Answer Picker
+- Added a visible Answers picker to every Jeopardy clue.
+- Tapping the Jeopardy answer field now opens the full current-board answer list.
+- Kept live type-to-search filtering.
+- Verified all 400 Jeopardy clues contain valid answer data.
+
 ## v0.6.0 - Full iPhone Support
 - Added iPhone-responsive styling across Home, Trivia, Photo, Clues, History, Jeopardy, Stats, and Changelog.
 - Added safe-area spacing for notched and Dynamic Island iPhones.
