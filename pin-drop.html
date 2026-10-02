@@ -1,8 +1,11 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>WDWQuest Pin Drop</title>
+<meta name="theme-color" content="#07111f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{--bg:#07111f;--panel:#111c31;--border:#2b3b5a;--text:#f7f8fc;--muted:#aeb9cf;--accent:#7dd3fc;--good:#86efac;--gold:#fde68a}
@@ -15,28 +18,34 @@ button{min-height:44px;border-radius:12px;border:1px solid var(--border);padding
 #status{margin-top:12px;font-weight:800}.good{color:var(--good)}a{color:var(--accent)}.credit{font-size:12px;color:var(--muted);margin-top:10px}
 @media(max-width:650px){#map{height:350px}}
 
-/* v0.5.1 iPhone/mobile polish */
-html{-webkit-text-size-adjust:100%}
-body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+
+
+/* v0.6.0 full iPhone support */
+html{-webkit-text-size-adjust:100%;overflow-x:hidden}
+body{overflow-x:hidden;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
+img{max-width:100%}
 button{touch-action:manipulation}
 @media(max-width:650px){
-  main{padding:12px}
-  .panel{padding:14px;border-radius:14px}
+  main{padding:10px}
+  main>p{margin-top:max(8px,env(safe-area-inset-top));margin-bottom:10px}
+  .panel{padding:13px;border-radius:14px}
   h1{font-size:27px;line-height:1.1}
-  .photo{margin:12px auto;border-radius:12px}
-  #map{height:320px;border-radius:12px;touch-action:pan-x pan-y}
+  .muted{line-height:1.45}
+  .score{gap:7px;margin:10px 0}
+  .pill{padding:7px 9px;font-size:14px}
+  .photo{width:100%;max-width:none;margin:12px auto;border-radius:12px}
+  #map{height:330px;border-radius:12px}
   .actions{display:grid;grid-template-columns:1fr;gap:8px}
   .actions button{width:100%;min-height:50px;font-size:16px}
-  .score{gap:7px}
-  .pill{padding:7px 9px;font-size:14px}
-  #status{line-height:1.35}
-  .credit{font-size:11px;line-height:1.45}
-  .leaflet-control-zoom a{width:38px!important;height:38px!important;line-height:38px!important;font-size:22px!important}
+  #status{line-height:1.4}
+  #result{line-height:1.45}
+  .credit{font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+  .leaflet-control-zoom a{width:40px!important;height:40px!important;line-height:40px!important;font-size:22px!important}
 }
 @media(max-width:390px){
-  main{padding:9px}
-  .panel{padding:12px}
-  #map{height:290px}
+  main{padding:8px}
+  .panel{padding:11px}
+  #map{height:300px}
 }
 
 </style>
