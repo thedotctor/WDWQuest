@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.10.5 - Dice Pause and Slower Pawn Movement
+- Added a one-second pause after the 3D die settles before the player piece begins moving.
+- Slowed piece movement from about 0.26 seconds per space to 0.5 seconds per space.
+- Lengthened the pawn hop animation so each step matches the slower travel speed.
+- Reduced-motion mode also pauses briefly on the rolled result before movement begins.
+
 ## v0.10.4 - 3D Rolling Dice
 - Replaced the flat Board Game die with a 3D cube.
 - Rolling now launches a larger 3D die across the screen with a tumbling animation.
