@@ -10,7 +10,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <!-- WDWQuest homepage refresh build: 2026-10-01 -->
-<title>WDWQuest v0.8.0</title>
+<title>WDWQuest v0.8.1</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--panel3:#0c1729;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--accent2:#c4b5fd;--good:#86efac;--bad:#fca5a5;--gold:#fde68a;--shadow:0 18px 50px rgba(0,0,0,.23)}
 *{box-sizing:border-box}html{color-scheme:dark}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 10% -10%,rgba(125,211,252,.13),transparent 30%),radial-gradient(circle at 90% 0%,rgba(196,181,253,.12),transparent 27%),var(--bg);color:var(--text);min-height:100vh}
@@ -212,7 +212,7 @@ h1,h2,h3,.question,.lead,.row,.badge,.photo-credit{overflow-wrap:anywhere}
 </head>
 <body>
 <header class="site-header">
-<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.8.0</small></button>
+<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.8.1</small></button>
 <nav>
 <button data-nav="home">Home</button>
 <button data-nav="trivia">Trivia</button>
@@ -260,27 +260,27 @@ const GAME_TITLES={
 
 function teamSetup(gameKey){
   const title=GAME_TITLES[gameKey]||'WDWQuest';
-  gameTeams=[{name:'Team 1',score:0},{name:'Team 2',score:0}];
+  gameTeams=[{name:'Player 1',score:0}];
   activeGameTeam=0;
-  app.innerHTML=`<div class="scorebar"><div><div class="eyebrow">Team Setup</div><h2>${esc(title)}</h2></div><span class="badge" id="teamcount">2 teams</span></div>
+  app.innerHTML=`<div class="scorebar"><div><div class="eyebrow">Player Setup</div><h2>${esc(title)}</h2></div><span class="badge" id="teamcount">1 player</span></div>
   <section class="panel">
-    <div class="j-picker-head"><div><h3>Who is playing?</h3><div class="muted">Name 2 teams, or add up to 4 total.</div></div></div>
+    <div class="j-picker-head"><div><h3>Who is playing?</h3><div class="muted">Play solo, or add up to 4 players total.</div></div></div>
     <div class="j-team-setup" id="gamesetupteams"></div>
     <div class="j-builder-actions">
       <button id="gamestart" class="primary">Start Game</button>
-      <button id="gameaddteam" class="secondary">Add Team</button>
+      <button id="gameaddteam" class="secondary">Add Player</button>
       <button id="gamecancel" class="secondary">Back to Arcade</button>
     </div>
-    <div id="gameteammsg" class="j-builder-note">Each team will have its own score during this game.</div>
+    <div id="gameteammsg" class="j-builder-note">Each player will have their own score during this game.</div>
   </section>`;
 
   function draw(){
     gamesetupteams.innerHTML=gameTeams.map((t,i)=>`<div class="j-team-row">
-      <label for="gteam${i}">Team ${i+1}</label>
+      <label for="gteam${i}">Player ${i+1}</label>
       <input id="gteam${i}" data-gteam="${i}" value="${esc(t.name)}" maxlength="24" autocomplete="off">
-      ${gameTeams.length>2?'<button type="button" class="secondary j-team-remove" data-gremove="'+i+'">Remove</button>':''}
+      ${gameTeams.length>1?'<button type="button" class="secondary j-team-remove" data-gremove="'+i+'">Remove</button>':''}
     </div>`).join('');
-    teamcount.textContent=gameTeams.length+' teams';
+    teamcount.textContent=gameTeams.length+(gameTeams.length===1?' player':' players');
     gameaddteam.disabled=gameTeams.length>=4;
 
     gamesetupteams.querySelectorAll('[data-gteam]').forEach(input=>{
@@ -290,7 +290,7 @@ function teamSetup(gameKey){
     });
     gamesetupteams.querySelectorAll('[data-gremove]').forEach(btn=>{
       btn.addEventListener('click',()=>{
-        if(gameTeams.length<=2)return;
+        if(gameTeams.length<=1)return;
         gameTeams.splice(Number(btn.dataset.gremove),1);
         draw();
       });
@@ -299,17 +299,17 @@ function teamSetup(gameKey){
 
   gameaddteam.addEventListener('click',()=>{
     if(gameTeams.length>=4)return;
-    gameTeams.push({name:'Team '+(gameTeams.length+1),score:0});
+    gameTeams.push({name:'Player '+(gameTeams.length+1),score:0});
     draw();
   });
 
   gamecancel.addEventListener('click',()=>nav('home'));
 
   gamestart.addEventListener('click',()=>{
-    gameTeams=gameTeams.map((t,i)=>({name:(t.name||'').trim()||('Team '+(i+1)),score:0}));
+    gameTeams=gameTeams.map((t,i)=>({name:(t.name||'').trim()||('Player '+(i+1)),score:0}));
     const names=gameTeams.map(t=>t.name.toLowerCase());
     if(new Set(names).size!==names.length){
-      gameteammsg.textContent='Give each team a different name.';
+      gameteammsg.textContent='Give each player a different name.';
       gameteammsg.classList.add('bad');
       return;
     }
@@ -334,7 +334,7 @@ function launchGame(v){
 }
 
 function teamScoreMarkup(){
-  return `<section class="j-team-scores game-team-scores" id="gameTeamScores" aria-label="Team scores"></section>
+  return `<section class="j-team-scores game-team-scores" id="gameTeamScores" aria-label="Player scores"></section>
   <div class="j-active-note" id="gameActiveTeam"></div>`;
 }
 
@@ -345,7 +345,7 @@ function renderGameTeamScores(){
   wrap.innerHTML=gameTeams.map((t,i)=>`<button type="button" class="j-team-score ${i===activeGameTeam?'active':''}" data-game-team="${i}">
     <span class="j-team-name">${esc(t.name)}</span>
     <strong>${t.score<0?'-
-return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.8.0 brings Team Play to every WDWQuest game. Pick your teams before you play, then compete with separate live scores.</p></section>
+return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.8.1 lets every WDWQuest game run solo or with up to 4 players, each with a separate live score.</p></section>
 <section class="arcade-grid">
 <article class="game-card"><div class="icon">📸</div><h3>Where Am I? Photo</h3><p>Start extremely zoomed in. Every reveal zooms out. Guess early for maximum points.</p><button class="primary" data-nav="photo">Play Photo Mode</button></article>
 <article class="game-card"><div class="icon">🎯</div><h3>WDW Trivia</h3><p>Traditional questions across parks, resorts, attractions, food and transportation.</p><button class="primary" data-nav="trivia">Play Trivia</button></article>
@@ -592,10 +592,10 @@ function buildBoard(){
 
 function renderBoard(){
   const answerOptions=[...new Set(boardCats.flatMap(c=>boardData[c].map(x=>x.a)))].sort((a,b)=>a.localeCompare(b));
-  app.innerHTML=`<div class="scorebar"><div><div class="eyebrow">Team Play</div><h2>WDW Jeopardy</h2></div><div class="j-board-actions"><button id="jnew" class="secondary">Change Categories</button><button id="jchangeteams" class="secondary">Change Teams</button></div></div>
-  <section class="j-team-scores" id="jteamscores" aria-label="Team scores"></section>
+  app.innerHTML=`<div class="scorebar"><div><div class="eyebrow">Player Mode</div><h2>WDW Jeopardy</h2></div><div class="j-board-actions"><button id="jnew" class="secondary">Change Categories</button><button id="jchangeteams" class="secondary">Change Teams</button></div></div>
+  <section class="j-team-scores" id="jteamscores" aria-label="Player scores"></section>
   <div class="j-active-note" id="jactivenote"></div>
-  <section class="panel jwrap"><div class="muted" style="font-size:12px;margin-bottom:8px">Tap the team that is answering, then choose a clue. On a phone, swipe the board left or right to see all 5 categories.</div><div class="jboard" id="jb"></div></section>
+  <section class="panel jwrap"><div class="muted" style="font-size:12px;margin-bottom:8px">Tap the player that is answering, then choose a clue. On a phone, swipe the board left or right to see all 5 categories.</div><div class="jboard" id="jb"></div></section>
   <section class="card" id="jc" style="margin-top:16px"><span class="muted">Choose a dollar value to begin.</span></section>`;
 
   jnew.addEventListener('click',renderPicker);
@@ -748,7 +748,13 @@ reset.addEventListener('click',()=>{if(confirm('Reset all WDWQuest v0.2 stats st
 function changelog(){
 app.innerHTML=`<section class="hero"><div class="eyebrow">Project log</div><h2>WDWQuest Changelog</h2></section>
 <div class="card">
-<h3>v0.8.0</h3>
+<h3>v0.8.1</h3>
+<div class="list">
+<div class="row"><span>🧍 Added solo play to every game</span><strong>NEW</strong></div>
+<div class="row"><span>👥 Player setup now supports 1 to 4 players</span><strong>UPDATED</strong></div>
+<div class="row"><span>✏️ Reworded Team Setup as Player Setup across the arcade</span><strong>UPDATED</strong></div>
+</div>
+<h3 style="margin-top:24px">v0.8.0</h3>
 <div class="list">
 <div class="row"><span>👥 Added Team Setup before every WDWQuest game</span><strong>NEW</strong></div>
 <div class="row"><span>💰 Added separate live team scores to Trivia, Photo, Clues, History, Jeopardy and Pin Drop</span><strong>NEW</strong></div>
@@ -1096,7 +1102,7 @@ render((location.hash||'#home').slice(1));
 </html>
 +t.score}</strong>
     </button>`).join('');
-    jactivenote.innerHTML=`Answering: <strong>${esc(teams[activeTeam].name)}</strong> <span class="muted">• tap another team to switch</span>`;
+    jactivenote.innerHTML=`Answering: <strong>${esc(teams[activeTeam].name)}</strong> <span class="muted">• tap another player to switch</span>`;
     jteamscores.querySelectorAll('[data-team-score]').forEach(btn=>{
       btn.addEventListener('click',()=>{
         activeTeam=Number(btn.dataset.teamScore);
@@ -2314,7 +2320,7 @@ render((location.hash||'#home').slice(1));
 </html>
 +t.score}</strong>
   </button>`).join('');
-  note.innerHTML=`Playing: <strong>${esc(gameTeams[activeGameTeam].name)}</strong> <span class="muted">• tap another team to switch</span>`;
+  note.innerHTML=`Playing: <strong>${esc(gameTeams[activeGameTeam].name)}</strong> <span class="muted">• tap another player to switch</span>`;
   wrap.querySelectorAll('[data-game-team]').forEach(btn=>{
     btn.addEventListener('click',()=>{
       activeGameTeam=Number(btn.dataset.gameTeam);
