@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.10.1 - Larger Board Spaces
+- Kept the 62-space Board Game at the same 1020px overall board width.
+- Reworked the route into an 11-by-11 two-space-deep track so individual spaces are substantially larger.
+- Increased attraction names, icons, prices, and ownership text for easier reading.
+- Preserved all four park sections, transportation corners, token movement, and gameplay rules.
+
 ## v0.10.0 - 62-Space Four-Park Board
 - Rebuilt the Board Game from 24 spaces to 62 spaces.
 - The top side is themed to Magic Kingdom, the right side to EPCOT, the bottom side to Hollywood Studios, and the left side to Animal Kingdom.
