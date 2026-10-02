@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.10.8 - Pixie Dust Risk Reward
+- Pixie Dust now awards $100 only when its trivia question is answered correctly.
+- A wrong Pixie Dust answer now subtracts $100.
+- Updated the landed-space info, Board Key, and Quick Rules to show both outcomes.
+- Snack Break remains its separate picture-guessing mini-game.
+
 ## v0.10.7 - Snack Break Mini-Game
 - Replaced Snack Break's $50 penalty with a four-choice picture guessing mini-game.
 - Added 8 built-in illustrated Disney World snacks: Dole Whip, Mickey Pretzel, Mickey Premium Ice Cream Bar, Turkey Leg, Churro, Cheeseburger Spring Rolls, School Bread, and Mickey Waffle.
