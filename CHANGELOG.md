@@ -1,5 +1,12 @@
 # WDWQuest Changelog
 
+## v0.10.2 - Consecutive Large-Space Board
+- Kept the Board Game at the same 1020px overall size.
+- Replaced the snaking two-deep track with one clean clockwise 62-space loop.
+- Kept the larger-space feel by using a thicker perimeter track and a smaller center.
+- Removed the four park-title boxes from the center of the board.
+- Park sides are still identified by their space colors and the Board Key.
+
 ## v0.10.1 - Larger Board Spaces
 - Kept the 62-space Board Game at the same 1020px overall board width.
 - Reworked the route into an 11-by-11 two-space-deep track so individual spaces are substantially larger.
