@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.9.2 - Board Game Token Selector
+- Added a token-selection step after Board Game player setup.
+- Added 12 Disney World-themed token choices for up to 8 players.
+- Each token can only be selected by one player per game.
+- A player's chosen token appears on their score card and is the actual piece that animates around the board.
+
 ## v0.9.1 - Animated Board Movement
 - Added an animated, tappable six-sided die to the Board Game.
 - Player pawns now move one board space at a time after a roll.
