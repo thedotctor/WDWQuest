@@ -10,7 +10,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <!-- WDWQuest homepage refresh build: 2026-10-01 -->
-<title>WDWQuest v0.8.5</title>
+<title>WDWQuest v0.8.6</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--panel3:#0c1729;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--accent2:#c4b5fd;--good:#86efac;--bad:#fca5a5;--gold:#fde68a;--shadow:0 18px 50px rgba(0,0,0,.23)}
 *{box-sizing:border-box}html{color-scheme:dark}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 10% -10%,rgba(125,211,252,.13),transparent 30%),radial-gradient(circle at 90% 0%,rgba(196,181,253,.12),transparent 27%),var(--bg);color:var(--text);min-height:100vh}
@@ -219,7 +219,7 @@ h1,h2,h3,.question,.lead,.row,.badge,.photo-credit{overflow-wrap:anywhere}
 </head>
 <body>
 <header class="site-header">
-<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.8.5</small></button>
+<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.8.6</small></button>
 <nav>
 <button data-nav="home">Home</button>
 <button data-nav="trivia">Trivia</button>
@@ -285,15 +285,26 @@ function teamSetup(gameKey){
   function draw(){
     gamesetupteams.innerHTML=gameTeams.map((t,i)=>`<div class="j-team-row">
       <label for="gteam${i}">Player ${i+1}</label>
-      <input id="gteam${i}" data-gteam="${i}" value="${esc(t.name)}" placeholder="Player ${i+1}" maxlength="24" autocomplete="off">
+      <input id="gteam${i}" data-gteam="${i}" ${t.name?'value="'+esc(t.name)+'"':''} placeholder="Player ${i+1}" maxlength="24" autocomplete="new-password" autocapitalize="words">
       ${gameTeams.length>1?'<button type="button" class="secondary j-team-remove" data-gremove="'+i+'">Remove</button>':''}
     </div>`).join('');
     teamcount.textContent=gameTeams.length+(gameTeams.length===1?' player':' players');
     gameaddteam.disabled=gameTeams.length>=4;
 
     gamesetupteams.querySelectorAll('[data-gteam]').forEach(input=>{
+      const i=Number(input.dataset.gteam);
+      const defaultName='Player '+(i+1);
+
+      input.addEventListener('focus',()=>{
+        if(input.value.trim()===defaultName)input.select();
+      });
+
+      input.addEventListener('beforeinput',()=>{
+        if(input.value.trim()===defaultName)input.value='';
+      });
+
       input.addEventListener('input',()=>{
-        gameTeams[Number(input.dataset.gteam)].name=input.value.slice(0,24);
+        gameTeams[i].name=input.value.slice(0,24);
       });
     });
     gamesetupteams.querySelectorAll('[data-gremove]').forEach(btn=>{
@@ -324,7 +335,7 @@ function teamSetup(gameKey){
     activeGameTeam=0;
     if(gameKey==='pin-drop'){
       const encoded=encodeURIComponent(JSON.stringify(gameTeams.map(t=>t.name)));
-      window.location.href='pin-drop.html?teams='+encoded+'&v=085';
+      window.location.href='pin-drop.html?teams='+encoded+'&v=086';
       return;
     }
     if(gameKey==='trivia'){
@@ -406,7 +417,7 @@ function advanceGamePlayer(){
 }
 
 function home(){
-return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.8.5 makes default player names behave like placeholders, so they disappear as soon as you type.</p></section>
+return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.8.6 makes default player names reliably disappear on iPhone when you begin typing.</p></section>
 <section class="arcade-grid">
 <article class="game-card"><div class="icon">📸</div><h3>Where Am I? Photo</h3><p>Start extremely zoomed in. Every reveal zooms out. Guess early for maximum points.</p><button class="primary" data-nav="photo">Play Photo Mode</button></article>
 <article class="game-card"><div class="icon">🎯</div><h3>WDW Trivia</h3><p>Traditional questions across parks, resorts, attractions, food and transportation.</p><button class="primary" data-nav="trivia">Play Trivia</button></article>
@@ -757,7 +768,12 @@ reset.addEventListener('click',()=>{if(confirm('Reset all WDWQuest v0.2 stats st
 function changelog(){
 app.innerHTML=`<section class="hero"><div class="eyebrow">Project log</div><h2>WDWQuest Changelog</h2></section>
 <div class="card">
-<h3>v0.8.5</h3>
+<h3>v0.8.6</h3>
+<div class="list">
+<div class="row"><span>📱 Fixed iPhone restoring Player 1–4 as real input text</span><strong>FIXED</strong></div>
+<div class="row"><span>⌨️ Default player text now clears automatically on the first typed character</span><strong>FIXED</strong></div>
+</div>
+<h3 style="margin-top:24px">v0.8.5</h3>
 <div class="list">
 <div class="row"><span>✏️ Player 1–4 now appear as placeholder text in Player Setup</span><strong>UPDATED</strong></div>
 <div class="row"><span>⌨️ Placeholder names disappear automatically as soon as you type</span><strong>UPDATED</strong></div>
