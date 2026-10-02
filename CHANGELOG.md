@@ -1,5 +1,14 @@
 # WDWQuest Changelog
 
+## v0.10.0 - 62-Space Four-Park Board
+- Rebuilt the Board Game from 24 spaces to 62 spaces.
+- The top side is themed to Magic Kingdom, the right side to EPCOT, the bottom side to Hollywood Studios, and the left side to Animal Kingdom.
+- All four corner spaces are transportation hubs: Monorail, Disney Bus, Disney Skyliner, and Friendship Boat.
+- Landing exactly on a transportation corner now offers an optional bonus die roll instead of automatically moving a fixed number of spaces.
+- Completing a full lap still awards $200.
+- Moved the roll controls outside the large board so the 62-space layout stays usable on smaller screens.
+- Updated the Board Key and Quick Rules for the new layout.
+
 ## v0.9.9 - Collapsed Board Key
 - Board Game key is now collapsed by default.
 - Tap the Board Key header to expand or collapse the space explanations.
