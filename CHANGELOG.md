@@ -1,5 +1,10 @@
 # WDWQuest Changelog
 
+## v0.9.6 - Board Game Landing Pause
+- Added a 1.2-second pause after landing on a space that will trigger a question.
+- The landing message remains visible briefly before the question popup opens.
+- The same pause applies when Disney transportation delivers a player to a question space.
+
 ## v0.9.5 - Collapsible Board Game Log
 - Board Game log is now collapsed by default.
 - Tap the Game Log header to expand or collapse the turn history.
