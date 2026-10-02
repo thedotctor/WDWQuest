@@ -1,5 +1,10 @@
 # WDWQuest Changelog
 
+## v0.9.7 - Special Space Trivia
+- Pixie Dust and Snack Break spaces now trigger a trivia question after the landing pause.
+- Correct answers can still earn the question's category badge.
+- The special-space Disney Dollar effect happens after the question whether the answer is correct or incorrect.
+
 ## v0.9.6 - Board Game Landing Pause
 - Added a 1.2-second pause after landing on a space that will trigger a question.
 - The landing message remains visible briefly before the question popup opens.
