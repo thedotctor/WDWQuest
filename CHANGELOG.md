@@ -1,5 +1,10 @@
 # WDWQuest Changelog
 
+## v0.6.3 - Jeopardy Typing-Only Suggestions
+- Removed the manual Answers picker from Jeopardy.
+- Answer suggestions now stay completely hidden until the player types.
+- This prevents the full answer list from opening immediately when a clue is selected on iPhone.
+
 ## v0.6.2 - Jeopardy Suggestion Timing
 - Jeopardy answer suggestions now stay hidden until the player starts typing.
 - The Answers picker still opens the full answer list on demand.
