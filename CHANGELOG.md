@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.9.8 - Board Game Space Key
+- Added an open-by-default Board Key directly on the Board Game page.
+- The key explains Park Entrance, Attractions, Trivia Challenge, Pixie Dust, Snack Break, Monorail, Disney Bus, Disney Skyliner, and Castle Finale.
+- Transportation entries show their exact extra movement.
+- The key can be collapsed when players no longer need it.
+
 ## v0.9.7 - Special Space Trivia
 - Pixie Dust and Snack Break spaces now trigger a trivia question after the landing pause.
 - Correct answers can still earn the question's category badge.
