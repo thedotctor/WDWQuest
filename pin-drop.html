@@ -14,6 +14,31 @@ h1{margin:0 0 6px}.muted{color:var(--muted)}.score{display:flex;gap:10px;flex-wr
 button{min-height:44px;border-radius:12px;border:1px solid var(--border);padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:var(--accent);color:#082137}.secondary{background:#17243d;color:var(--text)}
 #status{margin-top:12px;font-weight:800}.good{color:var(--good)}a{color:var(--accent)}.credit{font-size:12px;color:var(--muted);margin-top:10px}
 @media(max-width:650px){#map{height:350px}}
+
+/* v0.5.1 iPhone/mobile polish */
+html{-webkit-text-size-adjust:100%}
+body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+button{touch-action:manipulation}
+@media(max-width:650px){
+  main{padding:12px}
+  .panel{padding:14px;border-radius:14px}
+  h1{font-size:27px;line-height:1.1}
+  .photo{margin:12px auto;border-radius:12px}
+  #map{height:320px;border-radius:12px;touch-action:pan-x pan-y}
+  .actions{display:grid;grid-template-columns:1fr;gap:8px}
+  .actions button{width:100%;min-height:50px;font-size:16px}
+  .score{gap:7px}
+  .pill{padding:7px 9px;font-size:14px}
+  #status{line-height:1.35}
+  .credit{font-size:11px;line-height:1.45}
+  .leaflet-control-zoom a{width:38px!important;height:38px!important;line-height:38px!important;font-size:22px!important}
+}
+@media(max-width:390px){
+  main{padding:9px}
+  .panel{padding:12px}
+  #map{height:290px}
+}
+
 </style>
 </head>
 <body>
