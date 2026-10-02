@@ -1,5 +1,10 @@
 # WDWQuest Changelog
 
+## v0.8.6 - iPhone Player Name Fix
+- Improved Player Setup so Player 1 through Player 4 behave as true placeholder text.
+- Added a safeguard for iPhone/Safari restoring the default player name as a real input value.
+- If a default Player N value is present, typing the first character clears it automatically.
+
 ## v0.8.5 - Player Name Placeholders
 - Player 1 through Player 4 now appear as placeholder text in Player Setup.
 - The placeholder disappears automatically as soon as a player types a custom name.
