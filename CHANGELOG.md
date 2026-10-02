@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.10.3 - Near-Square Board Spaces
+- Kept the 62-space consecutive loop and the same 1020px overall board size.
+- Reshaped top and bottom spaces to be much less tall and skinny.
+- Reshaped left and right spaces to be much less wide and flat.
+- Expanded the center area into the freed space while keeping the park-side colors and transportation corners.
+
 ## v0.10.2 - Consecutive Large-Space Board
 - Kept the Board Game at the same 1020px overall size.
 - Replaced the snaking two-deep track with one clean clockwise 62-space loop.
