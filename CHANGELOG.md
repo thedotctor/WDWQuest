@@ -1,5 +1,10 @@
 # WDWQuest Changelog
 
+## v0.9.5 - Collapsible Board Game Log
+- Board Game log is now collapsed by default.
+- Tap the Game Log header to expand or collapse the turn history.
+- Logging continues normally while the panel is closed.
+
 ## v0.9.4 - Board Space Question Info
 - Board Game trivia popups now show the space the active player landed on.
 - Attraction spaces show the category, purchase price, rent, and current ownership while answering.
