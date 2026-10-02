@@ -8,7 +8,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <!-- WDWQuest homepage refresh build: 2026-10-01 -->
-<title>WDWQuest v0.2.5</title>
+<title>WDWQuest v0.3.0</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--panel3:#0c1729;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--accent2:#c4b5fd;--good:#86efac;--bad:#fca5a5;--gold:#fde68a;--shadow:0 18px 50px rgba(0,0,0,.23)}
 *{box-sizing:border-box}html{color-scheme:dark}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 10% -10%,rgba(125,211,252,.13),transparent 30%),radial-gradient(circle at 90% 0%,rgba(196,181,253,.12),transparent 27%),var(--bg);color:var(--text);min-height:100vh}
@@ -34,11 +34,12 @@ nav{display:flex;gap:6px;flex-wrap:wrap}nav button{background:transparent;color:
 </head>
 <body>
 <header class="site-header">
-<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.2.5</small></button>
+<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.3.0</small></button>
 <nav>
 <button data-nav="home">Home</button>
 <button data-nav="trivia">Trivia</button>
 <button data-nav="photo">Photo</button>
+<button onclick="window.location.href='pin-drop.html'">Pin Drop</button>
 <button data-nav="clues">Clues</button>
 <button data-nav="history">History</button>
 <button data-nav="jeopardy">Jeopardy</button>
@@ -69,7 +70,7 @@ function nav(v){history.replaceState(null,'','#'+v);render(v);window.scrollTo({t
 document.addEventListener('click',e=>{const b=e.target.closest('[data-nav]');if(b)nav(b.dataset.nav);});
 
 function home(){
-return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.2 Photo Pack 1 adds 100 real Walt Disney World photos to the crop-and-reveal game, with source and license credits built in.</p></section>
+return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.3.0 adds WDW Pin Drop, an endless map challenge built from the 100-photo WDW library. The rest of the arcade stays on the stable v0.2.5 game engine.</p></section>
 <section class="stats-row">
 <div class="stat"><div class="n">${stats.totalScore}</div><div class="label">Total score</div></div>
 <div class="stat"><div class="n">${pct()}%</div><div class="label">Accuracy</div></div>
@@ -82,7 +83,7 @@ return `<section class="hero"><div class="eyebrow">Free Disney World fan-game ar
 <article class="game-card"><div class="icon">🔎</div><h3>Where Am I? Clues</h3><p>The original text-clue mode is still here as a separate game.</p><button class="primary" data-nav="clues">Play Clue Mode</button></article>
 <article class="game-card"><div class="icon">🕰️</div><h3>What Was Here Before?</h3><p>Disney World history. Match today's attraction or land with what occupied the space before it.</p><button class="primary" data-nav="history">Play History</button></article>
 <article class="game-card"><div class="icon">💰</div><h3>WDW Jeopardy</h3><p>Five categories, five dollar values, typed answers and a running board score.</p><button class="primary" data-nav="jeopardy">Play Jeopardy</button></article>
-<article class="game-card"><div class="icon">🗺️</div><h3>GeoGuessr-style Mode</h3><p>Coming later. We’ll build this after the photo library is strong enough to support it.</p><button class="secondary" disabled>Coming Soon</button></article>
+<article class="game-card"><div class="icon">📍</div><h3>WDW Pin Drop</h3><p>Study a WDW photo, drop a pin on the map, and keep building your score endlessly.</p><button class="primary" onclick="window.location.href='pin-drop.html'">Play Pin Drop</button></article>
 </section>`}
 
 function trivia(){
@@ -169,7 +170,14 @@ reset.addEventListener('click',()=>{if(confirm('Reset all WDWQuest v0.2 stats st
 function changelog(){
 app.innerHTML=`<section class="hero"><div class="eyebrow">Project log</div><h2>WDWQuest Changelog</h2></section>
 <div class="card">
-<h3>v0.2.5</h3>
+<h3>v0.3.0</h3>
+<div class="list">
+<div class="row"><span>📍 Published WDW Pin Drop as an endless map game</span><strong>NEW</strong></div>
+<div class="row"><span>🗺️ Added interactive map guessing and distance scoring</span><strong>NEW</strong></div>
+<div class="row"><span>♾️ Pin Drop continues indefinitely instead of ending after five rounds</span><strong>NEW</strong></div>
+<div class="row"><span>🧱 Pin Drop runs on its own game page so it cannot break the main arcade</span><strong>TECH</strong></div>
+</div>
+<h3 style="margin-top:24px">v0.2.5</h3>
 <div class="list">
 <div class="row"><span>📸 Reduced Photo Mode image window to 600 × 400 px max on desktop</span><strong>UPDATED</strong></div>
 <div class="row"><span>📱 Kept Photo Mode responsive on smaller screens</span><strong>UPDATED</strong></div>
