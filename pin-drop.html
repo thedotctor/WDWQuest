@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>WDWQuest Pin Drop v0.8.0</title>
+<title>WDWQuest Pin Drop v0.8.1</title>
 <meta name="theme-color" content="#07111f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -57,7 +57,7 @@ button{touch-action:manipulation}
 <div class="panel">
 <h1>📍 WDW Pin Drop</h1>
 <p class="muted">Endless WDW location challenge. Study the photo, drop your pin, lock the guess, and keep going for as long as you want.</p>
-<div class="score"><span class="pill" id="round">Location 1</span><span class="pill">Team Play</span></div>
+<div class="score"><span class="pill" id="round">Location 1</span><span class="pill">1–4 Players</span></div>
 <div class="team-scores" id="teamScores"></div>
 <div id="activeTeam"></div>
 <div class="photo"><img id="photo" alt="WDW location challenge"></div>
@@ -74,8 +74,8 @@ const GEO={"targets":{"Cinderella Castle":[28.41942,-81.58119],"The Crystal Pala
 const teamParam=new URLSearchParams(location.search).get('teams');
 let teamNames;
 try{teamNames=JSON.parse(teamParam||'[]')}catch(e){teamNames=[]}
-if(!Array.isArray(teamNames)||teamNames.length<2)teamNames=['Team 1','Team 2'];
-teamNames=teamNames.slice(0,4).map((x,i)=>String(x||('Team '+(i+1))).slice(0,24));
+if(!Array.isArray(teamNames)||teamNames.length<1)teamNames=['Player 1'];
+teamNames=teamNames.slice(0,4).map((x,i)=>String(x||('Player '+(i+1))).slice(0,24));
 let teams=teamNames.map(name=>({name,score:0}));
 let activeTeam=0;
 let deck=[],current=null,round=1,map,guessMarker,targetMarker,line,guess=null,locked=false;
@@ -83,7 +83,7 @@ let deck=[],current=null,round=1,map,guessMarker,targetMarker,line,guess=null,lo
 function renderTeams(){
  const wrap=document.getElementById('teamScores');
  wrap.innerHTML=teams.map((t,i)=>'<button type="button" class="team-score '+(i===activeTeam?'active':'')+'" data-team="'+i+'"><span>'+escapeHtml(t.name)+'</span><strong>'+t.score.toLocaleString()+'</strong></button>').join('');
- document.getElementById('activeTeam').innerHTML='Playing: <strong>'+escapeHtml(teams[activeTeam].name)+'</strong> <span class="muted">• tap another team to switch</span>';
+ document.getElementById('activeTeam').innerHTML='Playing: <strong>'+escapeHtml(teams[activeTeam].name)+'</strong> <span class="muted">• tap another player to switch</span>';
  wrap.querySelectorAll('[data-team]').forEach(btn=>btn.addEventListener('click',()=>{activeTeam=Number(btn.dataset.team);renderTeams()}));
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
