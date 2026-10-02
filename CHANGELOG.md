@@ -1,5 +1,10 @@
 # WDWQuest Changelog
 
+## v0.8.5 - Player Name Placeholders
+- Player 1 through Player 4 now appear as placeholder text in Player Setup.
+- The placeholder disappears automatically as soon as a player types a custom name.
+- Leaving a name blank still falls back to Player 1, Player 2, and so on when the game starts.
+
 ## v0.8.4 - Trivia Setup Flow
 - Added a Trivia difficulty screen after Player Setup and before gameplay.
 - Removed the Trivia park filter.
