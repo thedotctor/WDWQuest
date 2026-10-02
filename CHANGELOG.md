@@ -1,5 +1,12 @@
 # WDWQuest Changelog
 
+## v0.3.2 - Custom Jeopardy Autocomplete
+- Replaced the browser datalist with a custom live-search dropdown.
+- Matching Jeopardy answers appear visibly as the user types.
+- Suggestions can be clicked to fill the answer.
+- Arrow Up/Down navigate suggestions.
+- Enter selects an active suggestion or submits the typed answer.
+
 ## v0.3.1 - Searchable Jeopardy Answers
 - Added a searchable answer dropdown to WDW Jeopardy.
 - Typing in the answer box filters all Jeopardy answers.
