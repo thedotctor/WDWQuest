@@ -1,5 +1,9 @@
 # WDWQuest Changelog
 
+## v0.9.9 - Collapsed Board Key
+- Board Game key is now collapsed by default.
+- Tap the Board Key header to expand or collapse the space explanations.
+
 ## v0.9.8 - Board Game Space Key
 - Added an open-by-default Board Key directly on the Board Game page.
 - The key explains Park Entrance, Attractions, Trivia Challenge, Pixie Dust, Snack Break, Monorail, Disney Bus, Disney Skyliner, and Castle Finale.
