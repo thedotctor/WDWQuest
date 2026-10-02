@@ -1,5 +1,13 @@
 # WDWQuest Changelog
 
+## v0.7.0 - Jeopardy Team Play
+- Added a team setup screen before Jeopardy category selection.
+- Start with 2 teams and add up to 4 total.
+- Teams can be given custom names.
+- Each team has its own live score on the Jeopardy board.
+- Tap a team to make it the active answering team.
+- Correct answers add the clue value; incorrect answers subtract it.
+
 ## v0.6.3 - Jeopardy Typing-Only Suggestions
 - Removed the manual Answers picker from Jeopardy.
 - Answer suggestions now stay completely hidden until the player types.
