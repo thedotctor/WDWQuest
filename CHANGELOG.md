@@ -1,5 +1,14 @@
 # WDWQuest Changelog
 
+## v0.5.0 - 400-Clue Jeopardy Bank
+- Expanded WDW Jeopardy to 20 selectable categories.
+- Every category now contains 20 clues.
+- Each category has 4 different clues for each value: $100, $200, $300, $400, and $500.
+- Total Jeopardy bank: 400 clues.
+- Building a board randomly selects one clue at each value from each selected category.
+- Rebuilding a category during the same Jeopardy session avoids immediately repeating the same clue/value combination.
+- Added Queues & Details, Opening Years & Milestones, and Animals & Nature.
+
 ## v0.4.0 - Custom Jeopardy Builder
 - WDW Jeopardy now starts with a category-selection screen.
 - Players choose exactly 5 categories to build their own board.
