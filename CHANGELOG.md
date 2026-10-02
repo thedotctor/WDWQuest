@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.10.7 - Snack Break Mini-Game
+- Replaced Snack Break's $50 penalty with a four-choice picture guessing mini-game.
+- Added 8 built-in illustrated Disney World snacks: Dole Whip, Mickey Pretzel, Mickey Premium Ice Cream Bar, Turkey Leg, Churro, Cheeseburger Spring Rolls, School Bread, and Mickey Waffle.
+- Correct answers award $50 Disney Dollars; wrong answers reveal the snack and award nothing.
+- Updated the Board Key and Quick Rules for the new Snack Break behavior.
+
 ## v0.10.6 - Slower Motion and Property Readability
 - Slowed the 3D dice travel slightly and increased the pause after the die lands.
 - Slowed player-piece movement from about 0.5 seconds per space to about 0.65 seconds per space.
