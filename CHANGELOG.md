@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.3.1 - Searchable Jeopardy Answers
+- Added a searchable answer dropdown to WDW Jeopardy.
+- Typing in the answer box filters all Jeopardy answers.
+- Players can select an answer from the browser suggestion list.
+- Pressing Enter now submits the current answer.
+
 ## v0.3.0 - WDW Pin Drop
 - Published WDW Pin Drop as an endless map game.
 - Uses the 100-photo WDW photo library.
