@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.8.2 - Arcade Repair
+- Repaired broken player-score JavaScript that could print source code onto the page.
+- Restored the Home screen, shared player scoreboards, and Jeopardy board rendering.
+- Kept solo through 4-player support across every game.
+- Verified the main arcade JavaScript parses successfully before publishing.
+
 ## v0.8.1 - Solo to Four Players
 - Every WDWQuest game can now be played solo or with up to 4 players.
 - Player Setup now begins with Player 1 instead of forcing two teams.
