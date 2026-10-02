@@ -8,7 +8,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <!-- WDWQuest homepage refresh build: 2026-10-01 -->
-<title>WDWQuest v0.3.0</title>
+<title>WDWQuest v0.3.1</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--panel3:#0c1729;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--accent2:#c4b5fd;--good:#86efac;--bad:#fca5a5;--gold:#fde68a;--shadow:0 18px 50px rgba(0,0,0,.23)}
 *{box-sizing:border-box}html{color-scheme:dark}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 10% -10%,rgba(125,211,252,.13),transparent 30%),radial-gradient(circle at 90% 0%,rgba(196,181,253,.12),transparent 27%),var(--bg);color:var(--text);min-height:100vh}
@@ -34,7 +34,7 @@ nav{display:flex;gap:6px;flex-wrap:wrap}nav button{background:transparent;color:
 </head>
 <body>
 <header class="site-header">
-<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.3.0</small></button>
+<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.3.1</small></button>
 <nav>
 <button data-nav="home">Home</button>
 <button data-nav="trivia">Trivia</button>
@@ -70,7 +70,7 @@ function nav(v){history.replaceState(null,'','#'+v);render(v);window.scrollTo({t
 document.addEventListener('click',e=>{const b=e.target.closest('[data-nav]');if(b)nav(b.dataset.nav);});
 
 function home(){
-return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.3.0 adds WDW Pin Drop, an endless map challenge built from the 100-photo WDW library. The rest of the arcade stays on the stable v0.2.5 game engine.</p></section>
+return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.3.1 adds searchable answer suggestions to WDW Jeopardy while keeping WDW Pin Drop and the rest of the arcade intact.</p></section>
 <section class="stats-row">
 <div class="stat"><div class="n">${stats.totalScore}</div><div class="label">Total score</div></div>
 <div class="stat"><div class="n">${pct()}%</div><div class="label">Accuracy</div></div>
@@ -156,8 +156,51 @@ hn.addEventListener('click',next);bumpGame('history');next();
 
 function jeopardy(){
 const cats=Object.keys(DATA.jeopardy);
+const answerOptions=[...new Set(cats.flatMap(c=>DATA.jeopardy[c].map(x=>x.a)))].sort((a,b)=>a.localeCompare(b));
+const dataListHTML=answerOptions.map(a=>`<option value="${esc(a)}"></option>`).join('');
 app.innerHTML=`<div class="scorebar"><div><div class="eyebrow">Game</div><h2>WDW Jeopardy</h2></div><div class="stat"><div class="n" id="js">$0</div><div class="label">Board score</div></div></div><section class="panel jwrap"><div class="jboard" id="jb"></div></section><section class="card" id="jc" style="margin-top:16px"><span class="muted">Choose a dollar value to begin.</span></section>`;
-let score=0,used=new Set;cats.forEach(c=>{const h=document.createElement('div');h.className='jhead';h.textContent=c;jb.appendChild(h)});for(let row=0;row<5;row++)cats.forEach(c=>{const item=DATA.jeopardy[c][row],key=c+row,b=document.createElement('button');b.className='jcell';b.textContent='$'+item.v;b.addEventListener('click',()=>{if(used.has(key))return;jc.innerHTML=`<div class="badge">${esc(c)} • $${item.v}</div><div class="question">${esc(item.clue)}</div><input id="ji" placeholder="Type your answer"><div class="actions"><button id="jsub" class="primary">Submit</button><button id="jrev" class="secondary">Reveal</button></div><div id="jf" class="feedback"></div>`;function finish(ok){used.add(key);b.classList.add('used');b.disabled=true;if(ok){score+=item.v;record(c,true,item.v)}else{score=Math.max(0,score-item.v);record(c,false,0)}js.textContent='$'+score;}jsub.addEventListener('click',()=>{if(used.has(key))return;const g=ji.value.trim().toLowerCase(),a=item.a.toLowerCase(),ok=g.length>2&&(a.includes(g)||g.includes(a));finish(ok);jf.innerHTML=ok?'<span class="good">Correct!</span>':`<span class="bad">Not quite.</span> Answer: ${esc(item.a)}`;jsub.disabled=jrev.disabled=true;});jrev.addEventListener('click',()=>{if(used.has(key))return;finish(false);jf.innerHTML=`Answer: <span class="gold">${esc(item.a)}</span>`;jsub.disabled=jrev.disabled=true;});});jb.appendChild(b);});bumpGame('jeopardy');
+let score=0,used=new Set;
+cats.forEach(c=>{const h=document.createElement('div');h.className='jhead';h.textContent=c;jb.appendChild(h)});
+for(let row=0;row<5;row++)cats.forEach(c=>{
+  const item=DATA.jeopardy[c][row],key=c+row,b=document.createElement('button');
+  b.className='jcell';b.textContent='$'+item.v;
+  b.addEventListener('click',()=>{
+    if(used.has(key))return;
+    jc.innerHTML=`<div class="badge">${esc(c)} • $${item.v}</div>
+      <div class="question">${esc(item.clue)}</div>
+      <input id="ji" list="jeopardyAnswers" placeholder="Start typing an answer…" autocomplete="off" aria-label="Jeopardy answer">
+      <datalist id="jeopardyAnswers">${dataListHTML}</datalist>
+      <div class="muted" style="margin-top:8px;font-size:13px">Start typing to search all Jeopardy answers, then choose from the dropdown.</div>
+      <div class="actions"><button id="jsub" class="primary">Submit</button><button id="jrev" class="secondary">Reveal</button></div>
+      <div id="jf" class="feedback"></div>`;
+    function finish(ok){
+      used.add(key);b.classList.add('used');b.disabled=true;
+      if(ok){score+=item.v;record(c,true,item.v)}
+      else{score=Math.max(0,score-item.v);record(c,false,0)}
+      js.textContent='$'+score;
+    }
+    function submitAnswer(){
+      if(used.has(key))return;
+      const g=ji.value.trim().toLowerCase(),a=item.a.toLowerCase(),ok=g.length>2&&(a.includes(g)||g.includes(a));
+      finish(ok);
+      jf.innerHTML=ok?'<span class="good">Correct!</span>':`<span class="bad">Not quite.</span> Answer: ${esc(item.a)}`;
+      jsub.disabled=jrev.disabled=true;
+      ji.disabled=true;
+    }
+    jsub.addEventListener('click',submitAnswer);
+    ji.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submitAnswer();}});
+    jrev.addEventListener('click',()=>{
+      if(used.has(key))return;
+      finish(false);
+      jf.innerHTML=`Answer: <span class="gold">${esc(item.a)}</span>`;
+      jsub.disabled=jrev.disabled=true;
+      ji.disabled=true;
+    });
+    setTimeout(()=>ji.focus(),0);
+  });
+  jb.appendChild(b);
+});
+bumpGame('jeopardy');
 }
 
 function statsPage(){
@@ -170,7 +213,13 @@ reset.addEventListener('click',()=>{if(confirm('Reset all WDWQuest v0.2 stats st
 function changelog(){
 app.innerHTML=`<section class="hero"><div class="eyebrow">Project log</div><h2>WDWQuest Changelog</h2></section>
 <div class="card">
-<h3>v0.3.0</h3>
+<h3>v0.3.1</h3>
+<div class="list">
+<div class="row"><span>🔎 Added searchable answer dropdown to WDW Jeopardy</span><strong>NEW</strong></div>
+<div class="row"><span>⌨️ Typing filters the answer suggestions automatically</span><strong>NEW</strong></div>
+<div class="row"><span>↵ Enter key now submits the Jeopardy answer</span><strong>NEW</strong></div>
+</div>
+<h3 style="margin-top:24px">v0.3.0</h3>
 <div class="list">
 <div class="row"><span>📍 Published WDW Pin Drop as an endless map game</span><strong>NEW</strong></div>
 <div class="row"><span>🗺️ Added interactive map guessing and distance scoring</span><strong>NEW</strong></div>
