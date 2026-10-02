@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.4</title>
+<title>WDWQuest Board Game v0.5</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -17,6 +17,8 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .center{grid-row:2/7;grid-column:2/7;background:radial-gradient(circle at 50% 30%,rgba(125,211,252,.11),transparent 45%),var(--panel);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px;min-width:0}.center h1{font-size:clamp(22px,4vw,44px);margin:0 0 4px}.dice{font-size:clamp(40px,8vw,78px);line-height:1;margin:8px;background:#f7f8fc;color:#07111f;border:2px solid #d7deea;border-radius:16px;min-width:88px;min-height:88px;padding:4px;box-shadow:inset 0 -5px 0 rgba(0,0,0,.12),0 8px 20px rgba(0,0,0,.28);display:grid;place-items:center}.dice.rolling{animation:diceRoll .16s linear infinite}.dice:disabled{opacity:.75}.turn{font-weight:900;margin-bottom:4px}
 @keyframes pawnHop{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.14)}}@keyframes diceRoll{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(12deg) scale(1.08)}100%{transform:rotate(0deg) scale(1)}}@media(prefers-reduced-motion:reduce){.token.moving,.dice.rolling{animation:none!important}}.status{color:var(--muted);line-height:1.4;max-width:520px;min-height:42px}.legend{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}.legend span{font-size:11px;color:var(--muted)}
 .log{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:12px}.log h3{margin:0 0 8px}.log-list{display:grid;gap:6px;max-height:160px;overflow:auto}.log-item{font-size:13px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:5px}
+.landed-card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;background:#0b1527;border:1px solid var(--border);border-radius:14px;padding:12px;margin:12px 0 4px}.landed-icon{font-size:34px;line-height:1}.landed-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:900}.landed-name{font-size:18px;font-weight:950;margin:2px 0}.landed-details{display:flex;gap:7px;flex-wrap:wrap;margin-top:5px}.landed-detail{font-size:11px;border:1px solid var(--border);border-radius:999px;padding:4px 7px;color:var(--muted)}
+
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:16px;z-index:100}.modal{width:min(620px,96vw);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:18px}.modal h2{margin:0 0 8px}.question{font-size:clamp(20px,4vw,30px);line-height:1.25;margin:15px 0}.answers{display:grid;grid-template-columns:1fr 1fr;gap:9px}.answer{background:#14223a;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:left;font-weight:800}.answer.correct{outline:2px solid var(--good)}.answer.wrong{outline:2px solid var(--bad)}.result{font-weight:850;margin-top:12px;min-height:28px}.hidden{display:none!important}
 @media(max-width:760px){.scoreboard{grid-template-columns:1fr 1fr}.player-row{grid-template-columns:1fr}.player-row label{margin-bottom:-6px}.player-row .secondary{width:100%}.answers{grid-template-columns:1fr}.shell{padding:10px}.panel{padding:14px}.board{width:min(96vw,650px)}}
 @media(max-width:420px){.board{gap:2px;padding:2px;border-radius:12px}.space{padding:2px;border-radius:5px}.token{width:19px;height:19px;font-size:12px}.token:after{width:7px;height:3px;bottom:-3px}.dice{min-width:72px;min-height:72px}.center{padding:7px}.center .actions{display:grid;width:100%;gap:7px}.center .actions button{width:100%}.scoreboard{gap:6px}.player-card{padding:8px}}
@@ -26,7 +28,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.4 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.5 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -321,6 +323,37 @@ function pickQuestion(badge,finalMode){
  if(QUESTION_BANK.indexOf(q)===lastQuestion&&pool.length>1){q=pool[(idx+1)%pool.length]}
  lastQuestion=QUESTION_BANK.indexOf(q);return q;
 }
+function landedSpotMarkup(spaceIndex,questionBadge){
+ const s=SPACES[spaceIndex]||SPACES[0];
+ let kind='Board Space';
+ let details=[];
+ if(s.type==='property'){
+   kind='Attraction';
+   details.push(s.badge||questionBadge||'Trivia');
+   details.push('Buy $'+s.cost);
+   details.push('Rent $'+s.rent);
+   details.push(owners[spaceIndex]===undefined?'Unowned':'Owned by '+players[owners[spaceIndex]].name);
+ }else if(s.type==='trivia'){
+   kind=s.badge==='Disney History'?'History Challenge':'Trivia Challenge';
+   details.push(s.badge||questionBadge||'Random category');
+ }else if(s.type==='final'){
+   kind='Final Challenge';
+   details.push('Collect all 6 badges to play for the win');
+ }else if(s.type==='transport'){
+   kind='Transportation';
+   details.push('Moves ahead '+s.move+' spaces');
+ }else if(s.type==='special'){
+   kind='Special Space';
+ }else if(s.type==='start'){
+   kind='Park Entrance';
+ }
+ return '<div class="landed-card">'+
+   '<div class="landed-icon">'+s.icon+'</div>'+
+   '<div><div class="landed-kicker">You landed on • '+esc(kind)+'</div>'+
+   '<div class="landed-name">'+esc(s.name)+'</div>'+
+   (details.length?'<div class="landed-details">'+details.map(function(x){return '<span class="landed-detail">'+esc(x)+'</span>'}).join('')+'</div>':'')+
+   '</div></div>';
+}
 function askQuestion(badge,ctx){
  const p=players[currentPlayer];
  if(ctx.mode==='badge'&&!badge){
@@ -328,7 +361,8 @@ function askQuestion(badge,ctx){
    if(missing.length)badge=missing[Math.floor(Math.random()*missing.length)];
  }
  const q=pickQuestion(badge,ctx.mode==='final');
- modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">'+esc(ctx.mode==='final'?'FINAL CHALLENGE':q.badge)+'</div><h2>'+(ctx.mode==='property'?'Answer to unlock the attraction':'Trivia Challenge')+'</h2><div class="question">'+esc(q.q)+'</div><div class="answers" id="qAnswers"></div><div class="result" id="qResult"></div><div class="actions" id="qActions"></div></div></div>';
+ const landedInfo=landedSpotMarkup(p.pos,q.badge);
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">'+esc(ctx.mode==='final'?'FINAL CHALLENGE':q.badge)+'</div>'+landedInfo+'<h2>'+(ctx.mode==='property'?'Answer to unlock the attraction':'Trivia Challenge')+'</h2><div class="question">'+esc(q.q)+'</div><div class="answers" id="qAnswers"></div><div class="result" id="qResult"></div><div class="actions" id="qActions"></div></div></div>';
  const answers=document.getElementById('qAnswers');
  shuffle(q.choices).forEach(function(choice){
    const b=document.createElement('button');b.className='answer';b.textContent=choice;
