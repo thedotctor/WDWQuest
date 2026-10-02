@@ -1,5 +1,12 @@
 # WDWQuest Changelog
 
+## v0.10.4 - 3D Rolling Dice
+- Replaced the flat Board Game die with a 3D cube.
+- Rolling now launches a larger 3D die across the screen with a tumbling animation.
+- The animation settles on the actual rolled value before the player token begins moving.
+- Transportation bonus rolls use the same 3D dice animation.
+- Reduced-motion preferences skip the traveling animation and show the final face immediately.
+
 ## v0.10.3 - Near-Square Board Spaces
 - Kept the 62-space consecutive loop and the same 1020px overall board size.
 - Reshaped top and bottom spaces to be much less tall and skinny.
