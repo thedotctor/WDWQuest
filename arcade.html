@@ -10,7 +10,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <!-- WDWQuest homepage refresh build: 2026-10-01 -->
-<title>WDWQuest v0.6.2</title>
+<title>WDWQuest v0.6.3</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--panel3:#0c1729;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--accent2:#c4b5fd;--good:#86efac;--bad:#fca5a5;--gold:#fde68a;--shadow:0 18px 50px rgba(0,0,0,.23)}
 *{box-sizing:border-box}html{color-scheme:dark}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 10% -10%,rgba(125,211,252,.13),transparent 30%),radial-gradient(circle at 90% 0%,rgba(196,181,253,.12),transparent 27%),var(--bg);color:var(--text);min-height:100vh}
@@ -31,11 +31,9 @@ nav{display:flex;gap:6px;flex-wrap:wrap}nav button{background:transparent;color:
 .jwrap{overflow-x:auto}.jboard{min-width:850px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.jhead{background:#152749;border:1px solid var(--border);padding:14px 10px;border-radius:10px;text-align:center;font-weight:900;min-height:74px;display:flex;align-items:center;justify-content:center}.jcell{background:#193768;color:var(--gold);font-size:24px;min-height:88px}.jcell.used{opacity:.2}
 .list{display:grid;gap:8px;margin-top:12px}.row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border);padding:9px 0}footer{text-align:center;color:#7f8ba6;font-size:12px;padding:0 18px 26px}
 
-.j-answer-wrap{position:relative;max-width:620px}
-.j-answer-row{display:flex;gap:8px;align-items:stretch}
-.j-answer-row input{width:100%;flex:1;min-width:0}
-.j-pick-btn{flex:0 0 auto;white-space:nowrap}
-.j-suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:50;background:#0b1527;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);max-height:280px;overflow-y:auto;display:none}
+.j-answer-wrap{position:relative;max-width:520px}
+.j-answer-wrap input{width:100%}
+.j-suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:50;background:#0b1527;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);max-height:240px;overflow-y:auto;display:none}
 .j-suggestions.open{display:block}
 .j-suggestion{display:block;width:100%;text-align:left;background:transparent;color:var(--text);border:0;border-bottom:1px solid var(--border);padding:11px 12px}
 .j-suggestion:last-child{border-bottom:0}
@@ -201,7 +199,7 @@ h1,h2,h3,.question,.lead,.row,.badge,.photo-credit{overflow-wrap:anywhere}
 </head>
 <body>
 <header class="site-header">
-<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.6.2</small></button>
+<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.6.3</small></button>
 <nav>
 <button data-nav="home">Home</button>
 <button data-nav="trivia">Trivia</button>
@@ -237,7 +235,7 @@ function nav(v){history.replaceState(null,'','#'+v);render(v);window.scrollTo({t
 document.addEventListener('click',e=>{const b=e.target.closest('[data-nav]');if(b)nav(b.dataset.nav);});
 
 function home(){
-return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.6.2 keeps Jeopardy answer suggestions hidden until you start typing, while leaving the Answers picker available on demand.</p></section>
+return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.6.3 keeps Jeopardy answer suggestions completely hidden until you start typing.</p></section>
 <section class="stats-row">
 <div class="stat"><div class="n">${stats.totalScore}</div><div class="label">Total score</div></div>
 <div class="stat"><div class="n">${pct()}%</div><div class="label">Accuracy</div></div>
@@ -432,22 +430,19 @@ function renderBoard(){
       jc.innerHTML=`<div class="badge">${esc(c)} • $${item.v}</div>
         <div class="question">${esc(item.clue)}</div>
         <div class="j-answer-wrap">
-          <div class="j-answer-row">
-            <input id="ji" placeholder="Start typing or choose an answer…" autocomplete="off" aria-label="Jeopardy answer">
-            <button id="jpick" class="secondary j-pick-btn" type="button" aria-label="Show Jeopardy answers">Answers ▾</button>
-          </div>
+          <input id="ji" placeholder="Start typing an answer…" autocomplete="off" aria-label="Jeopardy answer">
           <div id="jsuggest" class="j-suggestions" role="listbox"></div>
         </div>
-        <div class="muted" style="margin-top:8px;font-size:13px">Type to search or tap Answers ▾ to choose from all answers on this board.</div>
+        <div class="muted" style="margin-top:8px;font-size:13px">Start typing and matching answers from this board will appear.</div>
         <div class="actions"><button id="jsub" class="primary">Submit</button><button id="jrev" class="secondary">Reveal</button></div>
         <div id="jf" class="feedback"></div>`;
 
       let activeIndex=-1;
       let currentMatches=[];
 
-      function renderSuggestions(showAll=false){
+      function renderSuggestions(){
         const q=ji.value.trim().toLowerCase();
-        if(!q&&!showAll){
+        if(!q){
           jsuggest.className='j-suggestions';
           jsuggest.innerHTML='';
           currentMatches=[];
@@ -455,7 +450,7 @@ function renderBoard(){
           return;
         }
 
-        currentMatches=(q?answerOptions.filter(a=>a.toLowerCase().includes(q)):answerOptions).slice(0,25);
+        currentMatches=answerOptions.filter(a=>a.toLowerCase().includes(q)).slice(0,10);
         activeIndex=-1;
 
         if(!currentMatches.length){
@@ -505,18 +500,7 @@ function renderBoard(){
         jsuggest.className='j-suggestions';
       }
 
-      ji.addEventListener('input',()=>renderSuggestions(false));
-      jpick.addEventListener('click',()=>{
-        if(jsuggest.classList.contains('open')&&!ji.value.trim()){
-          jsuggest.className='j-suggestions';
-          jsuggest.innerHTML='';
-          currentMatches=[];
-          activeIndex=-1;
-        }else{
-          renderSuggestions(true);
-          ji.focus();
-        }
-      });
+      ji.addEventListener('input',renderSuggestions);
       ji.addEventListener('keydown',e=>{
         if(jsuggest.classList.contains('open')&&currentMatches.length){
           if(e.key==='ArrowDown'){e.preventDefault();activeIndex=(activeIndex+1)%currentMatches.length;updateActive();return;}
@@ -565,7 +549,12 @@ reset.addEventListener('click',()=>{if(confirm('Reset all WDWQuest v0.2 stats st
 function changelog(){
 app.innerHTML=`<section class="hero"><div class="eyebrow">Project log</div><h2>WDWQuest Changelog</h2></section>
 <div class="card">
-<h3>v0.6.2</h3>
+<h3>v0.6.3</h3>
+<div class="list">
+<div class="row"><span>⌨️ Jeopardy answer suggestions now appear only after typing begins</span><strong>FIXED</strong></div>
+<div class="row"><span>🔽 Removed the manual Answers picker that could open immediately on iPhone</span><strong>FIXED</strong></div>
+</div>
+<h3 style="margin-top:24px">v0.6.2</h3>
 <div class="list">
 <div class="row"><span>⌨️ Jeopardy answer suggestions now stay hidden until typing begins</span><strong>FIXED</strong></div>
 <div class="row"><span>🔽 Answers ▾ still opens the full board answer list on demand</span><strong>UPDATED</strong></div>
