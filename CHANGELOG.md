@@ -1,5 +1,12 @@
 # WDWQuest Changelog
 
+## v0.8.3 - Automatic Turn Rotation
+- Automatically advances to the next player after each completed question or round.
+- Solo games remain on Player 1.
+- Trivia, Clues, History, Jeopardy, and Pin Drop rotate after the answer/result is completed.
+- Photo Mode rotates after the photo is correctly completed.
+- Points are awarded to the current player before the turn advances.
+
 ## v0.8.2 - Arcade Repair
 - Repaired broken player-score JavaScript that could print source code onto the page.
 - Restored the Home screen, shared player scoreboards, and Jeopardy board rendering.
