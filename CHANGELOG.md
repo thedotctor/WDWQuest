@@ -1,5 +1,14 @@
 # WDWQuest Changelog
 
+## v0.8.0 - Team Play Everywhere
+- Added a Team Setup page before Trivia, Photo, Clues, History, Jeopardy, and Pin Drop.
+- Start with 2 teams and add up to 4 total.
+- Added separate live team scores to every game.
+- Tap a team during play to choose who is answering or playing the current round.
+- Pin Drop now carries the selected team names into the map game and scores each team separately.
+- Removed the overall stats scoreboard from the Home page so the arcade launcher is cleaner.
+- The full Stats page remains available from navigation.
+
 ## v0.7.0 - Jeopardy Team Play
 - Added a team setup screen before Jeopardy category selection.
 - Start with 2 teams and add up to 4 total.
