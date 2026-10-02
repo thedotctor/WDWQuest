@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.10</title>
+<title>WDWQuest Board Game v0.11</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -13,8 +13,8 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 
 .setup-grid{display:grid;gap:10px;max-width:720px}.player-row{display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center}.player-row input{width:100%;background:#0b1527;color:var(--text);border:1px solid var(--border);border-radius:11px;padding:11px 12px;min-height:44px;font-size:16px}
 .game-layout{display:grid;gap:14px}.scoreboard{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.player-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:10px;min-width:0}.player-card.active{outline:2px solid var(--accent);background:#17304a}.player-card .name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.player-card .cash{font-size:20px;font-weight:900;margin:3px 0}.mini{font-size:12px;color:var(--muted);line-height:1.35}
-.board-wrap{overflow:auto;-webkit-overflow-scrolling:touch}.board{width:min(94vw,850px);aspect-ratio:1;margin:auto;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);gap:3px;background:#08111f;border:3px solid var(--border);border-radius:18px;padding:3px}.space{position:relative;background:#14223a;border:1px solid var(--border);border-radius:7px;padding:4px;overflow:hidden;min-width:0}.space.property{background:#17243d}.space.trivia{background:#18293b}.space.special{background:#24223d}.space.transport{background:#162b31}.space.final{background:#312a19}.space .icon{font-size:clamp(12px,2.2vw,22px);line-height:1}.space .sname{font-size:clamp(7px,1.25vw,12px);font-weight:850;line-height:1.05;margin-top:2px;overflow-wrap:anywhere}.space .price{font-size:clamp(7px,1.05vw,10px);color:var(--muted);margin-top:2px}.space .owner{font-size:clamp(7px,1.05vw,10px);color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tokens{position:absolute;left:3px;right:3px;bottom:3px;display:flex;gap:2px;flex-wrap:wrap}.token{width:24px;height:24px;border-radius:50% 50% 42% 42%;color:#07111f;font-size:15px;font-weight:950;display:grid;place-items:center;border:2px solid rgba(255,255,255,.9);box-shadow:0 2px 5px rgba(0,0,0,.35);position:relative}.token:after{content:'';position:absolute;width:9px;height:4px;border-radius:999px;background:rgba(7,17,31,.75);bottom:-4px}.token.p0{background:#7dd3fc}.token.p1{background:#fde68a}.token.p2{background:#86efac}.token.p3{background:#fca5a5}.token.p4{background:#c4b5fd}.token.p5{background:#fdba74}.token.p6{background:#f9a8d4}.token.p7{background:#a7f3d0}.token.moving{animation:pawnHop .22s ease-in-out}.space.current-space{outline:2px solid var(--accent);outline-offset:-2px}
-.center{grid-row:2/7;grid-column:2/7;background:radial-gradient(circle at 50% 30%,rgba(125,211,252,.11),transparent 45%),var(--panel);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px;min-width:0}.center h1{font-size:clamp(22px,4vw,44px);margin:0 0 4px}.dice{font-size:clamp(40px,8vw,78px);line-height:1;margin:8px;background:#f7f8fc;color:#07111f;border:2px solid #d7deea;border-radius:16px;min-width:88px;min-height:88px;padding:4px;box-shadow:inset 0 -5px 0 rgba(0,0,0,.12),0 8px 20px rgba(0,0,0,.28);display:grid;place-items:center}.dice.rolling{animation:diceRoll .16s linear infinite}.dice:disabled{opacity:.75}.turn{font-weight:900;margin-bottom:4px}
+.board-wrap{overflow:auto;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;border-radius:18px}.board{width:1020px;aspect-ratio:17/16;margin:auto;display:grid;grid-template-columns:repeat(17,minmax(0,1fr));grid-template-rows:repeat(16,minmax(0,1fr));gap:3px;background:#08111f;border:3px solid var(--border);border-radius:18px;padding:3px}.space{position:relative;background:#14223a;border:1px solid var(--border);border-radius:7px;padding:4px;overflow:hidden;min-width:0}.space.property{background:#17243d}.space.trivia{background:#18293b}.space.special{background:#24223d}.space.transport{background:#263343;border:2px solid var(--gold)}.space.final{background:#312a19}.space.park-magic-kingdom{background:#2b2649;border-color:#63588a}.space.park-epcot{background:#17334d;border-color:#376b91}.space.park-hollywood-studios{background:#48292a;border-color:#865151}.space.park-animal-kingdom{background:#243a2b;border-color:#4f7658}.space.special.park-magic-kingdom,.space.special.park-epcot,.space.special.park-hollywood-studios,.space.special.park-animal-kingdom{box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}.space.final.park-magic-kingdom{background:#493b1e;border-color:#9a7b38}.space .icon{font-size:18px;line-height:1}.space .sname{font-size:9px;font-weight:850;line-height:1.05;margin-top:2px;overflow-wrap:anywhere}.space .price{font-size:8px;color:var(--muted);margin-top:2px}.space .owner{font-size:8px;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tokens{position:absolute;left:3px;right:3px;bottom:3px;display:flex;gap:2px;flex-wrap:wrap}.token{width:24px;height:24px;border-radius:50% 50% 42% 42%;color:#07111f;font-size:15px;font-weight:950;display:grid;place-items:center;border:2px solid rgba(255,255,255,.9);box-shadow:0 2px 5px rgba(0,0,0,.35);position:relative}.token:after{content:'';position:absolute;width:9px;height:4px;border-radius:999px;background:rgba(7,17,31,.75);bottom:-4px}.token.p0{background:#7dd3fc}.token.p1{background:#fde68a}.token.p2{background:#86efac}.token.p3{background:#fca5a5}.token.p4{background:#c4b5fd}.token.p5{background:#fdba74}.token.p6{background:#f9a8d4}.token.p7{background:#a7f3d0}.token.moving{animation:pawnHop .22s ease-in-out}.space.current-space{outline:2px solid var(--accent);outline-offset:-2px}
+.turn-panel{display:flex;flex-direction:column;align-items:center;text-align:center}.center{grid-row:2/16;grid-column:2/17;background:radial-gradient(circle at 50% 30%,rgba(125,211,252,.11),transparent 45%),var(--panel);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px;min-width:0}.center h1{font-size:44px;margin:0 0 12px}.park-compass{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;max-width:520px}.park-compass span{border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-weight:900;background:#0b1527}.dice{font-size:clamp(40px,8vw,78px);line-height:1;margin:8px;background:#f7f8fc;color:#07111f;border:2px solid #d7deea;border-radius:16px;min-width:88px;min-height:88px;padding:4px;box-shadow:inset 0 -5px 0 rgba(0,0,0,.12),0 8px 20px rgba(0,0,0,.28);display:grid;place-items:center}.dice.rolling{animation:diceRoll .16s linear infinite}.dice:disabled{opacity:.75}.turn{font-weight:900;margin-bottom:4px}
 @keyframes pawnHop{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.14)}}@keyframes diceRoll{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(12deg) scale(1.08)}100%{transform:rotate(0deg) scale(1)}}@media(prefers-reduced-motion:reduce){.token.moving,.dice.rolling{animation:none!important}}.status{color:var(--muted);line-height:1.4;max-width:520px;min-height:42px}.legend{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}.legend span{font-size:11px;color:var(--muted)}
 .board-key{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden}.board-key summary{cursor:pointer;list-style:none;padding:12px 14px;font-weight:950;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:10px}.board-key summary::-webkit-details-marker{display:none}.board-key summary:after{content:'▸';color:var(--accent);font-size:18px}.board-key[open] summary:after{content:'▾'}.board-key[open] summary{border-bottom:1px solid var(--border)}.key-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:12px 14px}.key-item{display:grid;grid-template-columns:34px minmax(0,1fr);gap:9px;align-items:start;background:#0b1527;border:1px solid var(--border);border-radius:12px;padding:10px}.key-icon{font-size:25px;line-height:1.15;text-align:center}.key-item strong{display:block;margin-bottom:3px}.key-item p{margin:0;color:var(--muted);font-size:12px;line-height:1.4}.key-note{color:var(--gold);font-weight:800}@media(max-width:620px){.key-grid{grid-template-columns:1fr}}
 
@@ -22,7 +22,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .landed-card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;background:#0b1527;border:1px solid var(--border);border-radius:14px;padding:12px;margin:12px 0 4px}.landed-icon{font-size:34px;line-height:1}.landed-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:900}.landed-name{font-size:18px;font-weight:950;margin:2px 0}.landed-details{display:flex;gap:7px;flex-wrap:wrap;margin-top:5px}.landed-detail{font-size:11px;border:1px solid var(--border);border-radius:999px;padding:4px 7px;color:var(--muted)}
 
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:16px;z-index:100}.modal{width:min(620px,96vw);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:18px}.modal h2{margin:0 0 8px}.question{font-size:clamp(20px,4vw,30px);line-height:1.25;margin:15px 0}.answers{display:grid;grid-template-columns:1fr 1fr;gap:9px}.answer{background:#14223a;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:left;font-weight:800}.answer.correct{outline:2px solid var(--good)}.answer.wrong{outline:2px solid var(--bad)}.result{font-weight:850;margin-top:12px;min-height:28px}.hidden{display:none!important}
-@media(max-width:760px){.scoreboard{grid-template-columns:1fr 1fr}.player-row{grid-template-columns:1fr}.player-row label{margin-bottom:-6px}.player-row .secondary{width:100%}.answers{grid-template-columns:1fr}.shell{padding:10px}.panel{padding:14px}.board{width:min(96vw,650px)}}
+@media(max-width:760px){.scoreboard{grid-template-columns:1fr 1fr}.player-row{grid-template-columns:1fr}.player-row label{margin-bottom:-6px}.player-row .secondary{width:100%}.answers{grid-template-columns:1fr}.shell{padding:10px}.panel{padding:14px}.board{width:1020px}}
 @media(max-width:420px){.board{gap:2px;padding:2px;border-radius:12px}.space{padding:2px;border-radius:5px}.token{width:19px;height:19px;font-size:12px}.token:after{width:7px;height:3px;bottom:-3px}.dice{min-width:72px;min-height:72px}.center{padding:7px}.center .actions{display:grid;width:100%;gap:7px}.center .actions button{width:100%}.scoreboard{gap:6px}.player-card{padding:8px}}
 </style>
 </head>
@@ -30,7 +30,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.10 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.11 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -53,31 +53,510 @@ const TOKEN_OPTIONS=[
  {id:'dole',icon:'🍍',name:'Dole Whip'}
 ];
 const SPACES=[
- {type:'start',name:'Park Entrance',icon:'🏰'},
- {type:'property',name:'Haunted Mansion',icon:'👻',badge:'Magic Kingdom',cost:200,rent:55},
- {type:'trivia',name:'Trivia Challenge',icon:'❓'},
- {type:'property',name:'Spaceship Earth',icon:'🌐',badge:'EPCOT',cost:220,rent:60},
- {type:'special',name:'Pixie Dust',icon:'✨',amount:100},
- {type:'property',name:'Tower of Terror',icon:'🏨',badge:'Hollywood Studios',cost:240,rent:65},
- {type:'transport',name:'Monorail',icon:'🚝',move:4},
- {type:'property',name:'Kilimanjaro Safaris',icon:'🦒',badge:'Animal Kingdom',cost:220,rent:60},
- {type:'trivia',name:'Trivia Challenge',icon:'❓'},
- {type:'property',name:'Contemporary Resort',icon:'🏨',badge:'Resorts & Dining',cost:180,rent:45},
- {type:'trivia',name:'Disney History',icon:'🕰️',badge:'Disney History'},
- {type:'property',name:'Pirates of the Caribbean',icon:'🏴‍☠️',badge:'Magic Kingdom',cost:210,rent:55},
- {type:'special',name:'Snack Break',icon:'🍿',amount:-50},
- {type:'property',name:'Test Track',icon:'🏎️',badge:'EPCOT',cost:230,rent:60},
- {type:'trivia',name:'Trivia Challenge',icon:'❓'},
- {type:'property',name:'Rise of the Resistance',icon:'🚀',badge:'Hollywood Studios',cost:260,rent:70},
- {type:'transport',name:'Disney Bus',icon:'🚌',move:3},
- {type:'property',name:'Expedition Everest',icon:'🏔️',badge:'Animal Kingdom',cost:230,rent:60},
- {type:'property',name:'BoardWalk Resort',icon:'🎡',badge:'Resorts & Dining',cost:190,rent:50},
- {type:'trivia',name:'Trivia Challenge',icon:'❓'},
- {type:'property',name:'Seven Dwarfs Mine Train',icon:'⛏️',badge:'Magic Kingdom',cost:250,rent:70},
- {type:'transport',name:'Disney Skyliner',icon:'🚡',move:3},
- {type:'property',name:'Guardians of the Galaxy',icon:'🎧',badge:'EPCOT',cost:260,rent:70},
- {type:'final',name:'Castle Finale',icon:'🎆'}
-];
+ {
+  "type": "transport",
+  "name": "Monorail Transportation Hub",
+  "icon": "🚝",
+  "corner": true
+ },
+ {
+  "type": "property",
+  "name": "Main Street, U.S.A.",
+  "icon": "🏛️",
+  "badge": "Magic Kingdom",
+  "park": "Magic Kingdom",
+  "cost": 180,
+  "rent": 45
+ },
+ {
+  "type": "trivia",
+  "name": "Magic Kingdom Trivia",
+  "icon": "❓",
+  "badge": "Magic Kingdom",
+  "park": "Magic Kingdom"
+ },
+ {
+  "type": "property",
+  "name": "Haunted Mansion",
+  "icon": "👻",
+  "badge": "Magic Kingdom",
+  "park": "Magic Kingdom",
+  "cost": 230,
+  "rent": 60
+ },
+ {
+  "type": "special",
+  "name": "Pixie Dust",
+  "icon": "✨",
+  "amount": 100,
+  "park": "Magic Kingdom"
+ },
+ {
+  "type": "property",
+  "name": "Pirates of the Caribbean",
+  "icon": "🏴‍☠️",
+  "badge": "Magic Kingdom",
+  "park": "Magic Kingdom",
+  "cost": 220,
+  "rent": 55
+ },
+ {
+  "type": "property",
+  "name": "Jungle Cruise",
+  "icon": "🛶",
+  "badge": "Magic Kingdom",
+  "park": "Magic Kingdom",
+  "cost": 210,
+  "rent": 55
+ },
+ {
+  "type": "trivia",
+  "name": "Magic Kingdom Trivia",
+  "icon": "❓",
+  "badge": "Magic Kingdom",
+  "park": "Magic Kingdom"
+ },
+ {
+  "type": "final",
+  "name": "Cinderella Castle Finale",
+  "icon": "🎆",
+  "park": "Magic Kingdom"
+ },
+ {
+  "type": "property",
+  "name": "Space Mountain",
+  "icon": "🌌",
+  "badge": "Magic Kingdom",
+  "park": "Magic Kingdom",
+  "cost": 280,
+  "rent": 75
+ },
+ {
+  "type": "special",
+  "name": "Snack Break",
+  "icon": "🍿",
+  "amount": -50,
+  "park": "Magic Kingdom"
+ },
+ {
+  "type": "property",
+  "name": "Big Thunder Mountain",
+  "icon": "🚂",
+  "badge": "Magic Kingdom",
+  "park": "Magic Kingdom",
+  "cost": 250,
+  "rent": 65
+ },
+ {
+  "type": "trivia",
+  "name": "Magic Kingdom Trivia",
+  "icon": "❓",
+  "badge": "Magic Kingdom",
+  "park": "Magic Kingdom"
+ },
+ {
+  "type": "property",
+  "name": "Seven Dwarfs Mine Train",
+  "icon": "⛏️",
+  "badge": "Magic Kingdom",
+  "park": "Magic Kingdom",
+  "cost": 290,
+  "rent": 80
+ },
+ {
+  "type": "property",
+  "name": "Tiana's Bayou Adventure",
+  "icon": "🐸",
+  "badge": "Magic Kingdom",
+  "park": "Magic Kingdom",
+  "cost": 270,
+  "rent": 70
+ },
+ {
+  "type": "property",
+  "name": "TRON Lightcycle / Run",
+  "icon": "🏍️",
+  "badge": "Magic Kingdom",
+  "park": "Magic Kingdom",
+  "cost": 320,
+  "rent": 90
+ },
+ {
+  "type": "transport",
+  "name": "Disney Bus Transportation Hub",
+  "icon": "🚌",
+  "corner": true
+ },
+ {
+  "type": "property",
+  "name": "Spaceship Earth",
+  "icon": "🌐",
+  "badge": "EPCOT",
+  "park": "EPCOT",
+  "cost": 220,
+  "rent": 55
+ },
+ {
+  "type": "trivia",
+  "name": "EPCOT Trivia",
+  "icon": "❓",
+  "badge": "EPCOT",
+  "park": "EPCOT"
+ },
+ {
+  "type": "property",
+  "name": "Living with the Land",
+  "icon": "🌱",
+  "badge": "EPCOT",
+  "park": "EPCOT",
+  "cost": 190,
+  "rent": 45
+ },
+ {
+  "type": "special",
+  "name": "Pixie Dust",
+  "icon": "✨",
+  "amount": 100,
+  "park": "EPCOT"
+ },
+ {
+  "type": "property",
+  "name": "Frozen Ever After",
+  "icon": "❄️",
+  "badge": "EPCOT",
+  "park": "EPCOT",
+  "cost": 260,
+  "rent": 70
+ },
+ {
+  "type": "property",
+  "name": "Remy's Ratatouille Adventure",
+  "icon": "🐀",
+  "badge": "EPCOT",
+  "park": "EPCOT",
+  "cost": 260,
+  "rent": 70
+ },
+ {
+  "type": "trivia",
+  "name": "EPCOT Trivia",
+  "icon": "❓",
+  "badge": "EPCOT",
+  "park": "EPCOT"
+ },
+ {
+  "type": "property",
+  "name": "Test Track",
+  "icon": "🏎️",
+  "badge": "EPCOT",
+  "park": "EPCOT",
+  "cost": 280,
+  "rent": 75
+ },
+ {
+  "type": "special",
+  "name": "Snack Break",
+  "icon": "🍿",
+  "amount": -50,
+  "park": "EPCOT"
+ },
+ {
+  "type": "property",
+  "name": "Soarin' Around the World",
+  "icon": "🪂",
+  "badge": "EPCOT",
+  "park": "EPCOT",
+  "cost": 250,
+  "rent": 65
+ },
+ {
+  "type": "property",
+  "name": "Journey Into Imagination",
+  "icon": "🐉",
+  "badge": "EPCOT",
+  "park": "EPCOT",
+  "cost": 200,
+  "rent": 50
+ },
+ {
+  "type": "trivia",
+  "name": "EPCOT Trivia",
+  "icon": "❓",
+  "badge": "EPCOT",
+  "park": "EPCOT"
+ },
+ {
+  "type": "property",
+  "name": "Mission: SPACE",
+  "icon": "🛰️",
+  "badge": "EPCOT",
+  "park": "EPCOT",
+  "cost": 240,
+  "rent": 60
+ },
+ {
+  "type": "property",
+  "name": "Guardians of the Galaxy",
+  "icon": "🎧",
+  "badge": "EPCOT",
+  "park": "EPCOT",
+  "cost": 330,
+  "rent": 95
+ },
+ {
+  "type": "transport",
+  "name": "Disney Skyliner Transportation Hub",
+  "icon": "🚡",
+  "corner": true
+ },
+ {
+  "type": "property",
+  "name": "Tower of Terror",
+  "icon": "🏨",
+  "badge": "Hollywood Studios",
+  "park": "Hollywood Studios",
+  "cost": 280,
+  "rent": 75
+ },
+ {
+  "type": "trivia",
+  "name": "Hollywood Studios Trivia",
+  "icon": "❓",
+  "badge": "Hollywood Studios",
+  "park": "Hollywood Studios"
+ },
+ {
+  "type": "property",
+  "name": "Mickey & Minnie's Runaway Railway",
+  "icon": "🚂",
+  "badge": "Hollywood Studios",
+  "park": "Hollywood Studios",
+  "cost": 260,
+  "rent": 70
+ },
+ {
+  "type": "special",
+  "name": "Pixie Dust",
+  "icon": "✨",
+  "amount": 100,
+  "park": "Hollywood Studios"
+ },
+ {
+  "type": "property",
+  "name": "Slinky Dog Dash",
+  "icon": "🐕",
+  "badge": "Hollywood Studios",
+  "park": "Hollywood Studios",
+  "cost": 270,
+  "rent": 70
+ },
+ {
+  "type": "property",
+  "name": "Toy Story Mania!",
+  "icon": "🎯",
+  "badge": "Hollywood Studios",
+  "park": "Hollywood Studios",
+  "cost": 230,
+  "rent": 60
+ },
+ {
+  "type": "trivia",
+  "name": "Hollywood Studios Trivia",
+  "icon": "❓",
+  "badge": "Hollywood Studios",
+  "park": "Hollywood Studios"
+ },
+ {
+  "type": "property",
+  "name": "Millennium Falcon: Smugglers Run",
+  "icon": "🚀",
+  "badge": "Hollywood Studios",
+  "park": "Hollywood Studios",
+  "cost": 300,
+  "rent": 85
+ },
+ {
+  "type": "special",
+  "name": "Snack Break",
+  "icon": "🍿",
+  "amount": -50,
+  "park": "Hollywood Studios"
+ },
+ {
+  "type": "property",
+  "name": "Rise of the Resistance",
+  "icon": "⚔️",
+  "badge": "Hollywood Studios",
+  "park": "Hollywood Studios",
+  "cost": 340,
+  "rent": 100
+ },
+ {
+  "type": "property",
+  "name": "Star Tours",
+  "icon": "🤖",
+  "badge": "Hollywood Studios",
+  "park": "Hollywood Studios",
+  "cost": 220,
+  "rent": 55
+ },
+ {
+  "type": "trivia",
+  "name": "Hollywood Studios Trivia",
+  "icon": "❓",
+  "badge": "Hollywood Studios",
+  "park": "Hollywood Studios"
+ },
+ {
+  "type": "property",
+  "name": "Indiana Jones Stunt Show",
+  "icon": "🤠",
+  "badge": "Hollywood Studios",
+  "park": "Hollywood Studios",
+  "cost": 210,
+  "rent": 50
+ },
+ {
+  "type": "property",
+  "name": "Fantasmic!",
+  "icon": "🐉",
+  "badge": "Hollywood Studios",
+  "park": "Hollywood Studios",
+  "cost": 250,
+  "rent": 65
+ },
+ {
+  "type": "property",
+  "name": "Hollywood Brown Derby",
+  "icon": "🍽️",
+  "badge": "Hollywood Studios",
+  "park": "Hollywood Studios",
+  "cost": 200,
+  "rent": 50
+ },
+ {
+  "type": "transport",
+  "name": "Friendship Boat Transportation Hub",
+  "icon": "🛥️",
+  "corner": true
+ },
+ {
+  "type": "property",
+  "name": "Kilimanjaro Safaris",
+  "icon": "🦒",
+  "badge": "Animal Kingdom",
+  "park": "Animal Kingdom",
+  "cost": 260,
+  "rent": 70
+ },
+ {
+  "type": "trivia",
+  "name": "Animal Kingdom Trivia",
+  "icon": "❓",
+  "badge": "Animal Kingdom",
+  "park": "Animal Kingdom"
+ },
+ {
+  "type": "property",
+  "name": "Expedition Everest",
+  "icon": "🏔️",
+  "badge": "Animal Kingdom",
+  "park": "Animal Kingdom",
+  "cost": 290,
+  "rent": 80
+ },
+ {
+  "type": "special",
+  "name": "Pixie Dust",
+  "icon": "✨",
+  "amount": 100,
+  "park": "Animal Kingdom"
+ },
+ {
+  "type": "property",
+  "name": "Na'vi River Journey",
+  "icon": "🌌",
+  "badge": "Animal Kingdom",
+  "park": "Animal Kingdom",
+  "cost": 240,
+  "rent": 60
+ },
+ {
+  "type": "property",
+  "name": "Avatar Flight of Passage",
+  "icon": "🪽",
+  "badge": "Animal Kingdom",
+  "park": "Animal Kingdom",
+  "cost": 320,
+  "rent": 90
+ },
+ {
+  "type": "trivia",
+  "name": "Animal Kingdom Trivia",
+  "icon": "❓",
+  "badge": "Animal Kingdom",
+  "park": "Animal Kingdom"
+ },
+ {
+  "type": "property",
+  "name": "Kali River Rapids",
+  "icon": "🌊",
+  "badge": "Animal Kingdom",
+  "park": "Animal Kingdom",
+  "cost": 220,
+  "rent": 55
+ },
+ {
+  "type": "special",
+  "name": "Snack Break",
+  "icon": "🍿",
+  "amount": -50,
+  "park": "Animal Kingdom"
+ },
+ {
+  "type": "property",
+  "name": "Festival of the Lion King",
+  "icon": "🦁",
+  "badge": "Animal Kingdom",
+  "park": "Animal Kingdom",
+  "cost": 230,
+  "rent": 60
+ },
+ {
+  "type": "property",
+  "name": "Feathered Friends in Flight",
+  "icon": "🦜",
+  "badge": "Animal Kingdom",
+  "park": "Animal Kingdom",
+  "cost": 180,
+  "rent": 45
+ },
+ {
+  "type": "trivia",
+  "name": "Animal Kingdom Trivia",
+  "icon": "❓",
+  "badge": "Animal Kingdom",
+  "park": "Animal Kingdom"
+ },
+ {
+  "type": "property",
+  "name": "Gorilla Falls Exploration Trail",
+  "icon": "🦍",
+  "badge": "Animal Kingdom",
+  "park": "Animal Kingdom",
+  "cost": 190,
+  "rent": 45
+ },
+ {
+  "type": "property",
+  "name": "Finding Nemo: The Big Blue... and Beyond!",
+  "icon": "🐠",
+  "badge": "Animal Kingdom",
+  "park": "Animal Kingdom",
+  "cost": 210,
+  "rent": 50
+ }
+]
 let setupPlayers=[{name:''}];
 let players=[];
 let currentPlayer=0;
@@ -183,7 +662,7 @@ function renderGame(){
  if(!players.length){showSetup();return}
  const missingToken=players.findIndex(function(p){return !p.token});
  if(missingToken>=0){showTokenSetup(missingToken);return}
- app.innerHTML='<div class="game-layout"><section class="scoreboard" id="scoreboard"></section><div class="board-wrap"><div class="board" id="board"><div class="center"><h1>🏰 WDWQuest</h1><div class="turn" id="turnText"></div><button class="dice" id="dice" type="button" aria-label="Roll dice">⚀</button><div class="status" id="status">Roll the dice to begin.</div><div class="actions"><button class="primary" id="rollBtn">Roll Dice</button><button class="secondary" id="rulesBtn">Quick Rules</button></div><div class="legend"><span>❓ trivia</span><span>🏠 own attractions</span><span>💵 pay rent</span><span>🎟️ collect 6 badges</span></div></div></div></div><details class="board-key"><summary>🗺️ Board Key • What Each Space Does</summary><div class="key-grid"><div class="key-item"><div class="key-icon">🏰</div><div><strong>Park Entrance</strong><p>Pass it and collect <span class="key-note">$200</span>. If your move ends here, you also get the <span class="key-note">$100 landing bonus</span>.</p></div></div><div class="key-item"><div class="key-icon">🏠</div><div><strong>Attractions</strong><p>If unowned, answer trivia first. A correct answer lets you buy it. If another player owns it, pay the rent shown on the space. Your own attraction is free to land on.</p></div></div><div class="key-item"><div class="key-icon">❓</div><div><strong>Trivia Challenge</strong><p>Answer a trivia question. A correct answer earns its category badge. If you already have that badge, you get <span class="key-note">$100</span> instead.</p></div></div><div class="key-item"><div class="key-icon">✨</div><div><strong>Pixie Dust</strong><p>Answer a trivia question, then receive <span class="key-note">$100</span> whether the answer is right or wrong. Correct trivia can still earn a badge.</p></div></div><div class="key-item"><div class="key-icon">🍿</div><div><strong>Snack Break</strong><p>Answer a trivia question, then spend <span class="key-note">$50</span> whether the answer is right or wrong. Correct trivia can still earn a badge.</p></div></div><div class="key-item"><div class="key-icon">🚝</div><div><strong>Monorail</strong><p>Immediately travel <span class="key-note">4 more spaces</span>. The space where you arrive then takes effect.</p></div></div><div class="key-item"><div class="key-icon">🚌</div><div><strong>Disney Bus</strong><p>Immediately travel <span class="key-note">3 more spaces</span>. The destination space then takes effect.</p></div></div><div class="key-item"><div class="key-icon">🚡</div><div><strong>Disney Skyliner</strong><p>Immediately travel <span class="key-note">3 more spaces</span>. The destination space then takes effect.</p></div></div><div class="key-item"><div class="key-icon">🎆</div><div><strong>Castle Finale</strong><p>With all <span class="key-note">6 badges</span>, answer the Final Challenge correctly to win. If you are still missing badges, you get a Disney History question instead.</p></div></div></div></details><details class="log"><summary>Game Log</summary><div class="log-list" id="logList"></div></details></div>';
+ app.innerHTML='<div class="game-layout"><section class="scoreboard" id="scoreboard"></section><section class="panel turn-panel"><div class="turn" id="turnText"></div><button class="dice" id="dice" type="button" aria-label="Roll dice">⚀</button><div class="status" id="status">Roll the dice to begin.</div><div class="actions"><button class="primary" id="rollBtn">Roll Dice</button><button class="secondary" id="rulesBtn">Quick Rules</button></div></section><div class="board-wrap"><div class="board" id="board"><div class="center"><h1>🏰 WDWQuest</h1><div class="park-compass"><span>🏰 Magic Kingdom</span><span>🌐 EPCOT</span><span>🎬 Hollywood Studios</span><span>🌳 Animal Kingdom</span></div><div class="mini">62 spaces • transportation corners give an optional bonus roll</div></div></div></div><details class="board-key"><summary>🗺️ Board Key • What Each Space Does</summary><div class="key-grid"><div class="key-item"><div class="key-icon">🏰</div><div><strong>Magic Kingdom Side</strong><p>The top side of the board. Attractions and trivia here use Magic Kingdom questions.</p></div></div><div class="key-item"><div class="key-icon">🌐</div><div><strong>EPCOT Side</strong><p>The right side of the board. Attractions and trivia here use EPCOT questions.</p></div></div><div class="key-item"><div class="key-icon">🎬</div><div><strong>Hollywood Studios Side</strong><p>The bottom side of the board. Attractions and trivia here use Hollywood Studios questions.</p></div></div><div class="key-item"><div class="key-icon">🌳</div><div><strong>Animal Kingdom Side</strong><p>The left side of the board. Attractions and trivia here use Animal Kingdom questions.</p></div></div><div class="key-item"><div class="key-icon">🚝</div><div><strong>Transportation Corners</strong><p>All four corners are transportation hubs. Land exactly on one and you may choose to roll the die again for bonus movement.</p></div></div><div class="key-item"><div class="key-icon">🏠</div><div><strong>Attractions</strong><p>If unowned, answer park trivia first. A correct answer lets you buy it. Land on another player\'s attraction and pay the rent shown.</p></div></div><div class="key-item"><div class="key-icon">❓</div><div><strong>Trivia Challenge</strong><p>Answer a question themed to that side\'s park. Correct answers earn badges or $100 if you already have that badge.</p></div></div><div class="key-item"><div class="key-icon">✨</div><div><strong>Pixie Dust</strong><p>Answer trivia, then receive <span class="key-note">$100</span> whether the answer is right or wrong.</p></div></div><div class="key-item"><div class="key-icon">🍿</div><div><strong>Snack Break</strong><p>Answer trivia, then spend <span class="key-note">$50</span> whether the answer is right or wrong.</p></div></div><div class="key-item"><div class="key-icon">🎆</div><div><strong>Castle Finale</strong><p>On the Magic Kingdom side. With all 6 badges, answer the Final Challenge correctly to win.</p></div></div><div class="key-item"><div class="key-icon">💵</div><div><strong>Complete a Lap</strong><p>Every time you pass the first transportation corner and complete a full lap, collect <span class="key-note">$200</span>.</p></div></div></div></details><details class="log"><summary>Game Log</summary><div class="log-list" id="logList"></div></details></div>';
  buildBoard();
  renderAll();
  document.getElementById('rollBtn').addEventListener('click',rollDice);
@@ -191,17 +670,20 @@ function renderGame(){
  document.getElementById('rulesBtn').addEventListener('click',showRules);
 }
 function perimeterPos(i){
- if(i<=6)return {r:1,c:i+1};
- if(i<=11)return {r:i-5,c:7};
- if(i<=18)return {r:7,c:19-i};
- return {r:25-i,c:1};
+ if(i<=16)return {r:1,c:i+1};
+ if(i<=31)return {r:i-15,c:17};
+ if(i<=47)return {r:16,c:48-i};
+ return {r:63-i,c:1};
+}
+function parkClass(park){
+ return String(park||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
 function buildBoard(){
  const board=document.getElementById('board');
  SPACES.forEach(function(s,i){
    const p=perimeterPos(i);
    const d=document.createElement('div');
-   d.className='space '+s.type;
+   d.className='space '+s.type+(s.park?' park-'+parkClass(s.park):'');
    d.id='space'+i;
    d.style.gridRow=String(p.r);d.style.gridColumn=String(p.c);
    const price=s.type==='property'?'<div class="price">$'+s.cost+' • rent $'+s.rent+'</div>':'';
@@ -267,7 +749,7 @@ async function movePlayerSpaces(steps,label){
    p.pos=(p.pos+1)%SPACES.length;
    if(before===SPACES.length-1&&p.pos===0){
      p.cash+=200;
-     addLog(p.name+' passed Park Entrance and collected $200.');
+     addLog(p.name+' completed a lap and collected $200.');
      renderScores();
    }
    renderTokens();
@@ -277,15 +759,15 @@ async function movePlayerSpaces(steps,label){
  movingPlayer=-1;
  renderTokens();
 }
-function landingTriggersQuestion(idx){
+function landingNeedsPause(idx){
  const s=SPACES[idx];
  if(!s)return false;
- if(s.type==='trivia'||s.type==='final'||s.type==='special')return true;
+ if(s.type==='trivia'||s.type==='final'||s.type==='special'||s.type==='transport')return true;
  if(s.type==='property'&&owners[idx]===undefined)return true;
  return false;
 }
-async function pauseBeforeQuestion(idx){
- if(!landingTriggersQuestion(idx))return;
+async function pauseAfterLanding(idx){
+ if(!landingNeedsPause(idx))return;
  await wait(1200);
 }
 async function rollDice(){
@@ -300,8 +782,30 @@ async function rollDice(){
  const newPos=p.pos;
  renderScores();
  setStatus(esc(p.name)+' landed on <strong>'+esc(SPACES[newPos].name)+'</strong>.');
- await pauseBeforeQuestion(newPos);
+ await pauseAfterLanding(newPos);
  await resolveSpace(newPos,false);
+}
+function showTransportChoice(spaceIndex){
+ const s=SPACES[spaceIndex],p=players[currentPlayer];
+ const info=landedSpotMarkup(spaceIndex,null);
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">TRANSPORTATION CORNER</div>'+info+'<h2>Bonus Travel</h2><p>'+esc(p.name)+', you landed exactly on a transportation hub. Want to roll again and move that many extra spaces?</p><div class="actions"><button class="primary" id="transportRoll">Roll Again</button><button class="secondary" id="transportStay">End Turn Here</button></div></div></div>';
+ document.getElementById('transportStay').addEventListener('click',function(){closeModal();finishTurn(p.name+' stayed at '+s.name+'.')});
+ document.getElementById('transportRoll').addEventListener('click',async function(){
+   const rollBtn=document.getElementById('transportRoll');
+   const stayBtn=document.getElementById('transportStay');
+   rollBtn.disabled=true;stayBtn.disabled=true;
+   closeModal();
+   const bonus=1+Math.floor(Math.random()*6);
+   setStatus(esc(p.name)+' takes a transportation bonus roll…');
+   await animateDice(bonus);
+   setStatus(esc(p.name)+' rolled <strong>'+bonus+'</strong> for bonus travel.');
+   await movePlayerSpaces(bonus,'travels from '+s.name);
+   const destination=p.pos;
+   renderScores();
+   setStatus(esc(p.name)+' arrived at <strong>'+esc(SPACES[destination].name)+'</strong>.');
+   await pauseAfterLanding(destination);
+   await resolveSpace(destination,true);
+ });
 }
 async function resolveSpace(idx,fromTransport){
  const s=SPACES[idx],p=players[currentPlayer];
@@ -314,14 +818,8 @@ async function resolveSpace(idx,fromTransport){
  if(s.type==='trivia'){askQuestion(s.badge||null,{mode:'badge'});return}
  if(s.type==='special'){askQuestion(null,{mode:'special',space:idx});return}
  if(s.type==='transport'){
-   if(fromTransport){finishTurn(p.name+' arrived by Disney transportation.');return}
-   setStatus(esc(p.name)+' boards <strong>'+esc(s.name)+'</strong> and travels '+s.move+' more spaces.');
-   await wait(reducedMotion()?0:350);
-   await movePlayerSpaces(s.move,'rides '+s.name);
-   renderScores();
-   setStatus(esc(p.name)+' arrived at <strong>'+esc(SPACES[p.pos].name)+'</strong> by '+esc(s.name)+'.');
-   await pauseBeforeQuestion(p.pos);
-   await resolveSpace(p.pos,true);return
+   if(fromTransport){finishTurn(p.name+' arrived at '+s.name+' after bonus travel.');return}
+   showTransportChoice(idx);return
  }
  if(s.type==='final'){
    if(p.badges.length===BADGES.length){askQuestion(null,{mode:'final'});return}
@@ -355,8 +853,8 @@ function landedSpotMarkup(spaceIndex,questionBadge){
    kind='Final Challenge';
    details.push('Collect all 6 badges to play for the win');
  }else if(s.type==='transport'){
-   kind='Transportation';
-   details.push('Moves ahead '+s.move+' spaces');
+   kind='Transportation Corner';
+   details.push('Optional bonus reroll');
  }else if(s.type==='special'){
    kind='Special Space';
    details.push(s.amount>0?'After question: +$'+s.amount:'After question: -$'+Math.abs(s.amount));
@@ -465,7 +963,7 @@ function finishTurn(msg){
  setStatus(esc(msg)+'<br><strong>'+esc(players[currentPlayer].name)+"'s turn.</strong>");
 }
 function showRules(){
- modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><h2>Quick Rules</h2><p>Choose a unique Disney World token for each player, then tap the die or Roll Dice and watch that token move around Walt Disney World. Unowned attractions can only be bought after a correct trivia answer. Land on somebody else’s attraction and pay rent.</p><p>Correct trivia earns category badges. If you already own that badge, you get $100 instead. Collect all six badges, then land on <strong>Castle Finale</strong> and answer the final question correctly to win.</p><p>Passing Park Entrance pays $200. Disney transportation moves you ahead. Special spaces can add or remove Disney Dollars.</p><div class="actions"><button class="primary" id="closeRules">Got It</button></div></div></div>';
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><h2>Quick Rules</h2><p>The board has <strong>62 spaces</strong>. Each side is themed to one park: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom.</p><p>Choose a unique token, roll the die, and move around the board. Unowned attractions require a correct park-themed trivia answer before you can buy them. Land on another player\'s attraction and pay rent.</p><p>All four corners are <strong>transportation hubs</strong>. If you land exactly on one, you may choose to roll again and travel that many extra spaces. Completing a full lap earns $200.</p><p>Correct trivia earns category badges. Collect all six badges, then land on <strong>Cinderella Castle Finale</strong> and answer the Final Challenge correctly to win.</p><div class="actions"><button class="primary" id="closeRules">Got It</button></div></div></div>';
  document.getElementById('closeRules').addEventListener('click',closeModal);
 }
 showSetup();
