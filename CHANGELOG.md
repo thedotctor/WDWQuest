@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.8.1 - Solo to Four Players
+- Every WDWQuest game can now be played solo or with up to 4 players.
+- Player Setup now begins with Player 1 instead of forcing two teams.
+- Players can be added or removed until the game has between 1 and 4 players.
+- Updated Pin Drop to support solo play as well.
+
 ## v0.8.0 - Team Play Everywhere
 - Added a Team Setup page before Trivia, Photo, Clues, History, Jeopardy, and Pin Drop.
 - Start with 2 teams and add up to 4 total.
