@@ -1,5 +1,17 @@
 # WDWQuest Changelog
 
+## v0.6.0 - Full iPhone Support
+- Added iPhone-responsive styling across Home, Trivia, Photo, Clues, History, Jeopardy, Stats, and Changelog.
+- Added safe-area spacing for notched and Dynamic Island iPhones.
+- Increased tap targets and made mobile game actions full-width.
+- Set form controls to iPhone-friendly sizing to prevent Safari input zoom.
+- Improved top navigation as a smooth horizontal strip on narrow screens.
+- Improved Photo Mode sizing and one-column answer layouts.
+- Improved History, Stats, and changelog layouts for narrow displays.
+- Improved Jeopardy category selection and horizontal board swiping.
+- Improved Pin Drop photo, map, zoom buttons, scoring controls, and spacing.
+- Removed a touch-action rule that could interfere with map gestures on iPhone.
+
 ## v0.5.0 - 400-Clue Jeopardy Bank
 - Expanded WDW Jeopardy to 20 selectable categories.
 - Every category now contains 20 clues.
