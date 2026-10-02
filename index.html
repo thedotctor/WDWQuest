@@ -150,10 +150,10 @@ pnext.addEventListener('click',next);pp.addEventListener('change',()=>{deck=[];n
 
 
 function geoGame(){
-app.innerHTML=\`<div class="scorebar"><div><div class="eyebrow">Endless mode</div><h2>WDW Pin Drop</h2></div><span class="badge">Up to 5,000 points per location</span></div>
+app.innerHTML=`<div class="scorebar"><div><div class="eyebrow">Endless mode</div><h2>WDW Pin Drop</h2></div><span class="badge">Up to 5,000 points per location</span></div>
 <p class="geo-instructions">Study the photo, then click the map where you think it was taken. Lock your pin to reveal the real location and distance. There is no final round. Your Pin Drop score keeps growing.</p>
 <div class="geo-setup"><label>Challenge area<select id="gfilter"><option>All WDW</option><option>Magic Kingdom</option><option>EPCOT</option><option>Hollywood Studios</option><option>Animal Kingdom</option><option>Resorts + Transportation</option></select></label><button id="gstart" class="primary">Start Endless Game</button></div>
-<section class="panel" id="gpanel"><div class="muted">Choose a challenge area and press Start.</div></section>\`;
+<section class="panel" id="gpanel"><div class="muted">Choose a challenge area and press Start.</div></section>`;
 
 let map=null,guessMarker=null,targetMarker=null,line=null,current=null,deck=[],round=0,locked=false,guessLatLng=null;
 let sessionScore=Number(stats.geoScore||0);
@@ -171,8 +171,8 @@ function refillDeck(){
  }
  deck=pool;
 }
-function targetFor(x){return GEO.targets[x.answer]||GEO.fallbackAreas[\`\${x.park}|\${x.area}\`]||[28.3852,-81.5639];}
-function kmText(m){return m<1000?\`\${Math.round(m)} m\`:\`\${(m/1000).toFixed(m<10000?2:1)} km\`;}
+function targetFor(x){return GEO.targets[x.answer]||GEO.fallbackAreas[`${x.park}|${x.area}`]||[28.3852,-81.5639];}
+function kmText(m){return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(m<10000?2:1)} km`;}
 function distanceMeters(a,b){
  const R=6371000,toRad=x=>x*Math.PI/180;
  const p1=toRad(a.lat),p2=toRad(b.lat),dp=toRad(b.lat-a.lat),dl=toRad(b.lng-a.lng);
@@ -201,12 +201,12 @@ function newRound(){
  if(!deck.length)refillDeck();
  if(!deck.length){gpanel.innerHTML='<span class="bad">No photos in this filter yet.</span>';return;}
  current=deck.pop();round++;locked=false;guessLatLng=null;guessMarker=null;targetMarker=null;line=null;
- gpanel.innerHTML=\`<div class="scorebar"><span class="badge">Location \${round}</span><span class="badge">Pin Drop score: \${sessionScore.toLocaleString()}</span></div>
+ gpanel.innerHTML=`<div class="scorebar"><span class="badge">Location ${round}</span><span class="badge">Pin Drop score: ${sessionScore.toLocaleString()}</span></div>
  <div class="geo-photo"><img id="gimg" alt="WDW location challenge"><div class="round-tag">Where was this taken?</div></div>
  <div id="geoMap"></div>
  <div id="gstatus" class="feedback">Click anywhere on the map to place your pin.</div>
  <div class="actions"><button id="glock" class="primary" disabled>Lock Guess</button><button id="gnext" class="secondary" style="display:none">Next Location</button></div>
- <div id="gresult"></div><div id="gcredit" class="geo-credit"></div>\`;
+ <div id="gresult"></div><div id="gcredit" class="geo-credit"></div>`;
  const img=document.getElementById('gimg');let fallback=false;
  img.onerror=()=>{if(!fallback&&current.fallbackSrc){fallback=true;img.src=current.fallbackSrc}else gstatus.innerHTML='<span class="bad">Photo could not load.</span>'};
  img.src=current.src;initMap();
@@ -219,17 +219,17 @@ function lockGuess(){
  const t=targetFor(current),target={lat:t[0],lng:t[1]};
  const d=distanceMeters(guessLatLng,target),pts=pointsFor(d);
  sessionScore+=pts;stats.geoScore=sessionScore;
- targetMarker=L.circleMarker([target.lat,target.lng],{radius:9,weight:3,fillOpacity:.8}).addTo(map).bindPopup(\`Actual area: \${esc(current.answer)}\`).openPopup();
+ targetMarker=L.circleMarker([target.lat,target.lng],{radius:9,weight:3,fillOpacity:.8}).addTo(map).bindPopup(`Actual area: ${esc(current.answer)}`).openPopup();
  line=L.polyline([[guessLatLng.lat,guessLatLng.lng],[target.lat,target.lng]],{weight:3,dashArray:'8 8'}).addTo(map);
  map.fitBounds(line.getBounds(),{padding:[40,40],maxZoom:17});
- gstatus.innerHTML=\`<span class="good">Locked!</span> \${pts.toLocaleString()} points\`;
- gresult.innerHTML=\`<div class="geo-result">
- <div class="stat"><div class="n">\${pts.toLocaleString()}</div><div class="label">This location</div></div>
- <div class="stat"><div class="n">\${kmText(d)}</div><div class="label">Distance</div></div>
- <div class="stat"><div class="n">\${round}</div><div class="label">Locations played</div></div>
- <div class="stat"><div class="n">\${sessionScore.toLocaleString()}</div><div class="label">Pin Drop score</div></div>
- </div><div class="notice"><b>Location:</b> \${esc(current.answer)} • \${esc(current.area)}</div>\`;
- gcredit.innerHTML=\`Photo: <a href="\${current.source}" target="_blank" rel="noopener">\${esc(current.credit)}</a> • <a href="\${current.licenseUrl}" target="_blank" rel="noopener">\${esc(current.license)}</a>\`;
+ gstatus.innerHTML=`<span class="good">Locked!</span> ${pts.toLocaleString()} points`;
+ gresult.innerHTML=`<div class="geo-result">
+ <div class="stat"><div class="n">${pts.toLocaleString()}</div><div class="label">This location</div></div>
+ <div class="stat"><div class="n">${kmText(d)}</div><div class="label">Distance</div></div>
+ <div class="stat"><div class="n">${round}</div><div class="label">Locations played</div></div>
+ <div class="stat"><div class="n">${sessionScore.toLocaleString()}</div><div class="label">Pin Drop score</div></div>
+ </div><div class="notice"><b>Location:</b> ${esc(current.answer)} • ${esc(current.area)}</div>`;
+ gcredit.innerHTML=`Photo: <a href="${current.source}" target="_blank" rel="noopener">${esc(current.credit)}</a> • <a href="${current.licenseUrl}" target="_blank" rel="noopener">${esc(current.license)}</a>`;
  gnext.style.display='inline-block';
  stats.totalScore+=pts;
  stats.geoRounds=(stats.geoRounds||0)+1;
@@ -268,22 +268,21 @@ let score=0,used=new Set;cats.forEach(c=>{const h=document.createElement('div');
 function statsPage(){
 const parks=Object.entries(stats.byPark).map(([p,s])=>`<div class="row"><span>${esc(p)}</span><strong>${Math.round(s.correct/s.answered*100)}% (${s.correct}/${s.answered})</strong></div>`).join('')||'<div class="muted">Play a few rounds first.</div>';
 const ach=stats.achievements.map(a=>`<div class="row"><span>${esc(a)}</span><span>Unlocked</span></div>`).join('')||'<div class="muted">No achievements yet.</div>';
-app.innerHTML=`<section class="hero"><div class="eyebrow">Local profile</div><h2>Player Stats</h2><p class="lead">Stored only in this browser. No account required.</p></section><section class="stats-row"><div class="stat"><div class="n">${stats.totalScore}</div><div class="label">Total score</div></div><div class="stat"><div class="n">${pct()}%</div><div class="label">Accuracy</div></div><div class="stat"><div class="n">${stats.bestStreak}</div><div class="label">Best streak</div></div><div class="stat"><div class="n">${stats.totalAnswered}</div><div class="label">Answered</div></div></section><div class="history-wrap"><div class="card">
-<h3>v0.3.1</h3>
-<div class="list">
-<div class="row"><span>♾️ Changed WDW Pin Drop to endless play</span><strong>UPDATED</strong></div>
-<div class="row"><span>🏆 Removed round and total-score caps</span><strong>UPDATED</strong></div>
-<div class="row"><span>💾 Pin Drop score keeps accumulating and is saved in the browser</span><strong>UPDATED</strong></div>
-<div class="row"><span>🔄 Photo deck reshuffles automatically when exhausted</span><strong>UPDATED</strong></div>
-</div>
-<h3 style="margin-top:24px">Earlier versions</h3><h3>Park accuracy</h3><div class="list">${parks}</div></div><div class="card"><h3>Achievements</h3><div class="list">${ach}</div></div></div><div class="actions"><button id="reset" class="danger">Reset saved stats</button></div>`;
+app.innerHTML=`<section class="hero"><div class="eyebrow">Local profile</div><h2>Player Stats</h2><p class="lead">Stored only in this browser. No account required.</p></section><section class="stats-row"><div class="stat"><div class="n">${stats.totalScore}</div><div class="label">Total score</div></div><div class="stat"><div class="n">${pct()}%</div><div class="label">Accuracy</div></div><div class="stat"><div class="n">${stats.bestStreak}</div><div class="label">Best streak</div></div><div class="stat"><div class="n">${stats.totalAnswered}</div><div class="label">Answered</div></div></section><section class="stats-row"><div class="stat"><div class="n">${(stats.geoScore||0).toLocaleString()}</div><div class="label">Pin Drop score</div></div><div class="stat"><div class="n">${stats.geoRounds||0}</div><div class="label">Locations played</div></div><div class="stat"><div class="n">${(stats.geoBestRound||0).toLocaleString()}</div><div class="label">Best location</div></div><div class="stat"><div class="n">5,000</div><div class="label">Perfect location</div></div></section><div class="history-wrap"><div class="card"><h3>Park accuracy</h3><div class="list">${parks}</div></div><div class="card"><h3>Achievements</h3><div class="list">${ach}</div></div></div><div class="actions"><button id="reset" class="danger">Reset saved stats</button></div>`;
 reset.addEventListener('click',()=>{if(confirm('Reset all WDWQuest v0.2 stats stored in this browser?')){stats=clone(defaultStats);saveStats();statsPage();}});
 }
 
 function changelog(){
 app.innerHTML=`<section class="hero"><div class="eyebrow">Project log</div><h2>WDWQuest Changelog</h2></section>
 <div class="card">
-<h3>v0.2.5</h3>
+<h3>v0.3.1</h3>
+<div class="list">
+<div class="row"><span>♾️ Changed WDW Pin Drop to endless play</span><strong>UPDATED</strong></div>
+<div class="row"><span>📍 Added interactive map guessing</span><strong>NEW</strong></div>
+<div class="row"><span>💾 Pin Drop score is saved in the browser</span><strong>UPDATED</strong></div>
+<div class="row"><span>🔄 Photo deck reshuffles automatically when exhausted</span><strong>UPDATED</strong></div>
+</div>
+<h3 style="margin-top:24px">v0.2.5</h3>
 <div class="list">
 <div class="row"><span>📸 Reduced Photo Mode image window to 600 × 400 px max on desktop</span><strong>UPDATED</strong></div>
 <div class="row"><span>📱 Kept Photo Mode responsive on smaller screens</span><strong>UPDATED</strong></div>
