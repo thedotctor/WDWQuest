@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.7</title>
+<title>WDWQuest Board Game v0.8</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -28,7 +28,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.7 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.8 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -278,7 +278,7 @@ async function movePlayerSpaces(steps,label){
 function landingTriggersQuestion(idx){
  const s=SPACES[idx];
  if(!s)return false;
- if(s.type==='trivia'||s.type==='final')return true;
+ if(s.type==='trivia'||s.type==='final'||s.type==='special')return true;
  if(s.type==='property'&&owners[idx]===undefined)return true;
  return false;
 }
@@ -310,7 +310,7 @@ async function resolveSpace(idx,fromTransport){
    const owner=players[owners[idx]];p.cash-=s.rent;owner.cash+=s.rent;renderScores();finishTurn(p.name+' paid '+owner.name+' $'+s.rent+' rent at '+s.name+'.');return
  }
  if(s.type==='trivia'){askQuestion(s.badge||null,{mode:'badge'});return}
- if(s.type==='special'){p.cash+=s.amount;renderScores();finishTurn(s.amount>0?p.name+' found Pixie Dust and gained $'+s.amount+'.':p.name+' bought snacks and spent $'+Math.abs(s.amount)+'.');return}
+ if(s.type==='special'){askQuestion(null,{mode:'special',space:idx});return}
  if(s.type==='transport'){
    if(fromTransport){finishTurn(p.name+' arrived by Disney transportation.');return}
    setStatus(esc(p.name)+' boards <strong>'+esc(s.name)+'</strong> and travels '+s.move+' more spaces.');
@@ -357,6 +357,8 @@ function landedSpotMarkup(spaceIndex,questionBadge){
    details.push('Moves ahead '+s.move+' spaces');
  }else if(s.type==='special'){
    kind='Special Space';
+   details.push(s.amount>0?'After question: +$'+s.amount:'After question: -$'+Math.abs(s.amount));
+   details.push(questionBadge||'Random trivia');
  }else if(s.type==='start'){
    kind='Park Entrance';
  }
@@ -383,6 +385,14 @@ function askQuestion(badge,ctx){
    answers.appendChild(b);
  });
 }
+function applySpecialSpace(spaceIndex){
+ const s=SPACES[spaceIndex],p=players[currentPlayer];
+ if(!s||s.type!=='special')return '';
+ p.cash+=s.amount;
+ renderScores();
+ if(s.amount>0)return p.name+' found '+s.name+' and gained $'+s.amount+'.';
+ return p.name+' landed on '+s.name+' and spent $'+Math.abs(s.amount)+'.';
+}
 function gradeQuestion(choice,q,ctx,btn){
  const buttons=Array.from(document.querySelectorAll('#qAnswers .answer'));buttons.forEach(function(b){b.disabled=true;if(b.textContent===q.a)b.classList.add('correct')});
  const ok=choice===q.a;if(!ok)btn.classList.add('wrong');
@@ -390,8 +400,18 @@ function gradeQuestion(choice,q,ctx,btn){
  const p=players[currentPlayer];
  if(!ok){
    result.innerHTML='<span class="bad">Not quite.</span> Answer: '+esc(q.a);
+   if(ctx.mode==='special'){
+     const special=SPACES[ctx.space];
+     result.innerHTML+='<br>'+esc(special.amount>0?special.name+' will still give you $'+special.amount+'.':special.name+' will still cost you $'+Math.abs(special.amount)+'.');
+   }
    actions.innerHTML='<button class="primary" id="qContinue">Continue</button>';
-   document.getElementById('qContinue').addEventListener('click',function(){closeModal();finishTurn(p.name+' missed the '+q.badge+' question.')});
+   document.getElementById('qContinue').addEventListener('click',function(){
+     if(ctx.mode==='special'){
+       const msg=applySpecialSpace(ctx.space);
+       closeModal();finishTurn(p.name+' missed the '+q.badge+' question. '+msg);return;
+     }
+     closeModal();finishTurn(p.name+' missed the '+q.badge+' question.');
+   });
    return;
  }
  if(ctx.mode==='final'){
@@ -404,6 +424,16 @@ function gradeQuestion(choice,q,ctx,btn){
  if(p.badges.indexOf(q.badge)<0){p.badges.push(q.badge);badgeMsg=' You earned the '+q.badge+' badge!';}
  else{p.cash+=100;badgeMsg=' You already had that badge, so you earned $100 instead.';}
  renderScores();
+ if(ctx.mode==='special'){
+   const special=SPACES[ctx.space];
+   result.innerHTML='<span class="good">Correct!</span>'+esc(badgeMsg)+'<br>'+esc(special.amount>0?special.name+' gives you $'+special.amount+'.':special.name+' costs you $'+Math.abs(special.amount)+'.');
+   actions.innerHTML='<button class="primary" id="qContinue">Continue</button>';
+   document.getElementById('qContinue').addEventListener('click',function(){
+     const msg=applySpecialSpace(ctx.space);
+     closeModal();finishTurn(p.name+' answered correctly. '+msg);
+   });
+   return;
+ }
  if(ctx.mode==='property'){
    const s=SPACES[ctx.space];
    result.innerHTML='<span class="good">Correct!</span>'+esc(badgeMsg)+'<br>You may buy <strong>'+esc(s.name)+'</strong> for $'+s.cost+'.';
