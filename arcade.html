@@ -316,7 +316,7 @@ function teamSetup(gameKey){
     activeGameTeam=0;
     if(gameKey==='pin-drop'){
       const encoded=encodeURIComponent(JSON.stringify(gameTeams.map(t=>t.name)));
-      window.location.href='pin-drop.html?teams='+encoded+'&v=080';
+      window.location.href='pin-drop.html?teams='+encoded+'&v=081';
       return;
     }
     launchGame(gameKey);
