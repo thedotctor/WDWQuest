@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.6</title>
+<title>WDWQuest Board Game v0.7</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -28,7 +28,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.6 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.7 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -275,6 +275,17 @@ async function movePlayerSpaces(steps,label){
  movingPlayer=-1;
  renderTokens();
 }
+function landingTriggersQuestion(idx){
+ const s=SPACES[idx];
+ if(!s)return false;
+ if(s.type==='trivia'||s.type==='final')return true;
+ if(s.type==='property'&&owners[idx]===undefined)return true;
+ return false;
+}
+async function pauseBeforeQuestion(idx){
+ if(!landingTriggersQuestion(idx))return;
+ await wait(1200);
+}
 async function rollDice(){
  if(turnLocked||gameOver)return;
  turnLocked=true;renderAll();
@@ -287,6 +298,7 @@ async function rollDice(){
  const newPos=p.pos;
  renderScores();
  setStatus(esc(p.name)+' landed on <strong>'+esc(SPACES[newPos].name)+'</strong>.');
+ await pauseBeforeQuestion(newPos);
  await resolveSpace(newPos,false);
 }
 async function resolveSpace(idx,fromTransport){
@@ -306,6 +318,7 @@ async function resolveSpace(idx,fromTransport){
    await movePlayerSpaces(s.move,'rides '+s.name);
    renderScores();
    setStatus(esc(p.name)+' arrived at <strong>'+esc(SPACES[p.pos].name)+'</strong> by '+esc(s.name)+'.');
+   await pauseBeforeQuestion(p.pos);
    await resolveSpace(p.pos,true);return
  }
  if(s.type==='final'){
