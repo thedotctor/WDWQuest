@@ -1,5 +1,12 @@
 # WDWQuest Changelog
 
+## v0.9.1 - Animated Board Movement
+- Added an animated, tappable six-sided die to the Board Game.
+- Player pawns now move one board space at a time after a roll.
+- Added distinct pawn colors for up to 8 players.
+- Transportation spaces now animate the pawn's extra movement.
+- Added reduced-motion support so the game still works cleanly without animation.
+
 ## v0.9.0 - WDWQuest Board Game
 - Added the first playable WDWQuest Board Game as a separate game page.
 - Board Game supports 1 to 8 players; the other WDWQuest games remain 1 to 4 players.
