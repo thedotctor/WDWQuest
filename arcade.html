@@ -10,7 +10,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <!-- WDWQuest homepage refresh build: 2026-10-01 -->
-<title>WDWQuest v0.6.1</title>
+<title>WDWQuest v0.6.2</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--panel3:#0c1729;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--accent2:#c4b5fd;--good:#86efac;--bad:#fca5a5;--gold:#fde68a;--shadow:0 18px 50px rgba(0,0,0,.23)}
 *{box-sizing:border-box}html{color-scheme:dark}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 10% -10%,rgba(125,211,252,.13),transparent 30%),radial-gradient(circle at 90% 0%,rgba(196,181,253,.12),transparent 27%),var(--bg);color:var(--text);min-height:100vh}
@@ -201,7 +201,7 @@ h1,h2,h3,.question,.lead,.row,.badge,.photo-credit{overflow-wrap:anywhere}
 </head>
 <body>
 <header class="site-header">
-<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.6.1</small></button>
+<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.6.2</small></button>
 <nav>
 <button data-nav="home">Home</button>
 <button data-nav="trivia">Trivia</button>
@@ -237,7 +237,7 @@ function nav(v){history.replaceState(null,'','#'+v);render(v);window.scrollTo({t
 document.addEventListener('click',e=>{const b=e.target.closest('[data-nav]');if(b)nav(b.dataset.nav);});
 
 function home(){
-return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.6.1 makes Jeopardy answers easier to use on every clue, with an always-available answer picker plus type-to-search.</p></section>
+return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.6.2 keeps Jeopardy answer suggestions hidden until you start typing, while leaving the Answers picker available on demand.</p></section>
 <section class="stats-row">
 <div class="stat"><div class="n">${stats.totalScore}</div><div class="label">Total score</div></div>
 <div class="stat"><div class="n">${pct()}%</div><div class="label">Accuracy</div></div>
@@ -506,7 +506,6 @@ function renderBoard(){
       }
 
       ji.addEventListener('input',()=>renderSuggestions(false));
-      ji.addEventListener('focus',()=>{if(!ji.value.trim())renderSuggestions(true);});
       jpick.addEventListener('click',()=>{
         if(jsuggest.classList.contains('open')&&!ji.value.trim()){
           jsuggest.className='j-suggestions';
@@ -566,7 +565,12 @@ reset.addEventListener('click',()=>{if(confirm('Reset all WDWQuest v0.2 stats st
 function changelog(){
 app.innerHTML=`<section class="hero"><div class="eyebrow">Project log</div><h2>WDWQuest Changelog</h2></section>
 <div class="card">
-<h3>v0.6.1</h3>
+<h3>v0.6.2</h3>
+<div class="list">
+<div class="row"><span>⌨️ Jeopardy answer suggestions now stay hidden until typing begins</span><strong>FIXED</strong></div>
+<div class="row"><span>🔽 Answers ▾ still opens the full board answer list on demand</span><strong>UPDATED</strong></div>
+</div>
+<h3 style="margin-top:24px">v0.6.1</h3>
 <div class="list">
 <div class="row"><span>🔽 Added a visible Answers picker to every Jeopardy clue</span><strong>FIXED</strong></div>
 <div class="row"><span>📱 Tapping the Jeopardy answer field now opens the full answer list on iPhone</span><strong>FIXED</strong></div>
