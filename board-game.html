@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.3</title>
+<title>WDWQuest Board Game v0.4</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -26,7 +26,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.3 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.4 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -88,7 +88,7 @@ const modalRoot=document.getElementById('modalRoot');
 function esc(s){return String(s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
 function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=b[i];b[i]=b[j];b[j]=t}return b}
 function showSetup(){
- app.innerHTML='<section class="panel"><div class="badge" id="countBadge">1 player</div><h1>🎲 WDWQuest Board Game</h1><p class="muted">A first playable mix of trivia, attraction ownership, rent, Disney Dollars, category badges, and a final castle challenge.</p><h3>Who is playing?</h3><p class="muted">Play solo or add up to 8 players. The other WDWQuest games stay at 1–4.</p><div class="setup-grid" id="setupGrid"></div><div class="actions"><button class="primary" id="startGame">Choose Tokens</button><button class="secondary" id="addPlayer">Add Player</button></div><div class="muted" id="setupMsg" style="margin-top:10px">Each player starts with $1,500 Disney Dollars.</div></section>';
+ app.innerHTML='<section class="panel"><div class="badge" id="countBadge">1 player</div><h1>🎲 WDWQuest Board Game</h1><p class="muted">A first playable mix of trivia, attraction ownership, rent, Disney Dollars, category badges, and a final castle challenge.</p><h3>Who is playing?</h3><p class="muted">Play solo or add up to 8 players. The other WDWQuest games stay at 1–4.</p><div class="setup-grid" id="setupGrid"></div><div class="actions"><button class="primary" id="startGame">Continue to Token Selection</button><button class="secondary" id="addPlayer">Add Player</button></div><div class="muted" id="setupMsg" style="margin-top:10px">Each player starts with $1,500 Disney Dollars.</div></section>';
  const grid=document.getElementById('setupGrid');
  const add=document.getElementById('addPlayer');
  const count=document.getElementById('countBadge');
@@ -120,7 +120,7 @@ function tokenInfo(id){
 function showTokenSetup(activeIndex){
  if(!players.length){showSetup();return}
  activeIndex=Math.max(0,Math.min(players.length-1,Number(activeIndex)||0));
- app.innerHTML='<section class="panel"><div class="badge">Step 2 of 2 • 12 tokens</div><h1>Choose Your Tokens</h1><p class="muted">Each player gets one unique Disney World-themed piece. The token you choose here is the piece that will move around the board during your turns.</p><div class="token-players" id="tokenPlayers"></div><h2 id="tokenHeading"></h2><div class="token-choice-grid" id="tokenChoices"></div><div class="actions"><button class="primary" id="tokenStart">Start Board Game</button><button class="secondary" id="tokenBack">Back to Players</button></div><div class="muted" id="tokenMsg" style="margin-top:10px"></div></section>';
+ app.innerHTML='<section class="panel"><div class="badge">REQUIRED STEP 2 OF 2 • 12 TOKENS</div><h1>Choose Your Playing Pieces</h1><p class="muted">Each player gets one unique Disney World-themed piece. The token you choose here is the piece that will move around the board during your turns.</p><div class="token-players" id="tokenPlayers"></div><h2 id="tokenHeading"></h2><div class="token-choice-grid" id="tokenChoices"></div><div class="actions"><button class="primary" id="tokenStart">Start Board Game</button><button class="secondary" id="tokenBack">Back to Players</button></div><div class="muted" id="tokenMsg" style="margin-top:10px"></div></section>';
  const playerBar=document.getElementById('tokenPlayers');
  const choices=document.getElementById('tokenChoices');
  const heading=document.getElementById('tokenHeading');
@@ -176,6 +176,9 @@ function showTokenSetup(activeIndex){
 }
 
 function renderGame(){
+ if(!players.length){showSetup();return}
+ const missingToken=players.findIndex(function(p){return !p.token});
+ if(missingToken>=0){showTokenSetup(missingToken);return}
  app.innerHTML='<div class="game-layout"><section class="scoreboard" id="scoreboard"></section><div class="board-wrap"><div class="board" id="board"><div class="center"><h1>🏰 WDWQuest</h1><div class="turn" id="turnText"></div><button class="dice" id="dice" type="button" aria-label="Roll dice">⚀</button><div class="status" id="status">Roll the dice to begin.</div><div class="actions"><button class="primary" id="rollBtn">Roll Dice</button><button class="secondary" id="rulesBtn">Quick Rules</button></div><div class="legend"><span>❓ trivia</span><span>🏠 own attractions</span><span>💵 pay rent</span><span>🎟️ collect 6 badges</span></div></div></div></div><section class="log"><h3>Game Log</h3><div class="log-list" id="logList"></div></section></div>';
  buildBoard();
  renderAll();
