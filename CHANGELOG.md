@@ -1,5 +1,13 @@
 # WDWQuest Changelog
 
+## v0.4.0 - Custom Jeopardy Builder
+- WDW Jeopardy now starts with a category-selection screen.
+- Players choose exactly 5 categories to build their own board.
+- Added 17 selectable categories and 85 Jeopardy clues.
+- Added Surprise Me to choose 5 random categories.
+- Searchable answer suggestions now use the 25 answers on the current board.
+- The board generator already supports multiple clues per dollar value for future question packs.
+
 ## v0.3.2 - Custom Jeopardy Autocomplete
 - Replaced the browser datalist with a custom live-search dropdown.
 - Matching Jeopardy answers appear visibly as the user types.
