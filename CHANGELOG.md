@@ -1,5 +1,13 @@
 # WDWQuest Changelog
 
+## v0.11.8 - Center Castle Finale
+- Moved Cinderella Castle Finale off the perimeter and into its own dedicated center-board space.
+- The outer board remains exactly 62 spaces.
+- The former perimeter Finale space is now a normal Magic Kingdom trivia space again.
+- The center Castle stays locked until the current player has all 6 badges.
+- Once unlocked, the player can enter the Castle Finale instead of rolling.
+- A correct Final Challenge answer wins the game; a wrong answer ends the turn and allows another attempt on a later turn.
+
 ## v0.11.7 - Nighttime Show Property Set
 - Added four Nighttime Show spaces without increasing the 62-space board.
 - Magic Kingdom middle: Happily Ever After.
