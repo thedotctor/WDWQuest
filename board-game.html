@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.82</title>
+<title>WDWQuest Board Game v0.83</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -71,6 +71,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .modal-backdrop{z-index:900}
 .current-player-center{width:min(200%,360px);margin:12px auto 0;text-align:left;flex-shrink:0;zoom:.5}.current-player-center .player-card{background:rgba(17,28,49,.95);box-shadow:0 8px 20px #0005}.current-player-center .stats-buttons{grid-template-columns:1fr 1fr}.center{padding-top:4%}@media(max-width:760px){.current-player-center{width:min(200%,280px);margin-top:8px}.current-player-center .player-card{padding:8px}.current-player-center .cash{font-size:17px}.current-player-center .mini{font-size:10px}.center{padding-top:2%}.center-games{margin-top:10px;gap:10px}}
 .pawn-closeup{position:fixed;inset:0;z-index:140;overflow:hidden;background:#07111f;pointer-events:none}.pawn-closeup-stage{position:absolute;left:0;top:0;transform-origin:0 0;transition:transform .5s ease-in-out;will-change:transform}.pawn-closeup .board{box-shadow:none}.pawn-closeup .space.current-space{z-index:2;overflow:visible}.pawn-closeup .token.moving{z-index:3}@media(prefers-reduced-motion:reduce){.pawn-closeup{display:none}.pawn-closeup-stage{transition:none}}
+.property-trade-list{display:grid;gap:8px}.property-trade-card{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:10px;padding:10px;background:#0b1527}.property-trade-card>span{font-size:28px}.property-trade-card strong{display:block}.property-trade-card small{display:block;color:var(--muted);margin-top:4px}
 .pin-stashes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.pin-stashes>section{min-width:0;border:1px solid var(--border);border-radius:12px;padding:10px;background:#0b1527}.pin-stashes h3{margin:0;font-size:15px}.pin-stashes .pin-grid{grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:8px;margin:10px 0 0}.pin-stashes .pin-art{width:48px;height:48px;font-size:26px}.pin-stashes .pin-card{padding:9px 5px}@media(max-width:480px){.pin-stashes{grid-template-columns:1fr}}
 .pin-exchange-modal{text-align:center}.pin-exchange-names{display:flex;justify-content:space-between;gap:16px;margin:20px 10px 0}.pin-exchange-names strong{max-width:45%;overflow-wrap:anywhere}.pin-exchange-stage{height:270px;position:relative;overflow:hidden}.pin-exchange-piece{position:absolute;top:65px;width:105px;z-index:2}.pin-exchange-piece.give{left:10px}.pin-exchange-piece.take{right:10px}.pin-exchange-piece .pin-card{margin:0;min-height:145px}.pin-exchange-sparkles{position:absolute;inset:105px 0 auto;color:var(--gold);font-size:28px;letter-spacing:14px;opacity:.7;pointer-events:none}.pin-exchange-piece .pin-art{box-shadow:0 0 16px #fde68a66,0 4px 7px #0005}
 .dice-pair{display:flex;flex-direction:column;align-items:center;gap:18px}.turn-panel .dice{min-height:0}.turn-panel{max-height:calc(100vh - 20px);overflow-y:auto}@media(max-width:760px){.dice-pair{gap:12px}}
@@ -81,7 +82,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.82 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.83 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -2172,9 +2173,103 @@ function showAutographBook(playerIndex){
 }
 
 function closeModal(){modalRoot.innerHTML=''}
+let propertyTradeTurn=null;
+function ownedPropertyIndices(playerIndex){
+ return SPACES.map(function(space,i){return space.type==='property'&&owners[i]===playerIndex?i:-1}).filter(function(i){return i>=0});
+}
+function propertyTradePartners(playerIndex){
+ return players.map(function(p,i){return i!==playerIndex&&!p.eliminated&&ownedPropertyIndices(i).length?i:-1}).filter(function(i){return i>=0});
+}
+function validPropertyTradeTurn(session){
+ return !!session&&propertyTradeTurn===session&&!session.settled&&!gameOver&&currentPlayer===session.playerIndex&&!players[currentPlayer].eliminated;
+}
 function finishTurn(msg){
- const messages=[msg];
+ if(propertyTradeTurn)return;
  addLog(msg);
+ if(gameOver||players[currentPlayer].eliminated||!players.some(function(p){return !p.eliminated})){advanceTurn(msg);return}
+ propertyTradeTurn={playerIndex:currentPlayer,message:msg,partnerIndex:null,settled:false};
+ turnLocked=true;movingPlayer=-1;renderAll();
+ setStatus(esc(msg)+'<br>'+esc(players[currentPlayer].name)+', finish your turn or make one property trade.');
+ showEndTurnTradePrompt(propertyTradeTurn);
+}
+function completePropertyTradeTurn(session){
+ if(propertyTradeTurn!==session||session.settled)return;
+ session.settled=true;propertyTradeTurn=null;closeModal();advanceTurn(session.message);
+}
+function showEndTurnTradePrompt(session){
+ if(!validPropertyTradeTurn(session))return;
+ const p=players[session.playerIndex],canTrade=ownedPropertyIndices(session.playerIndex).length>0&&propertyTradePartners(session.playerIndex).length>0;
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">🏁 TURN COMPLETE</div><h2>'+esc(p.name)+', would you like to trade a property?</h2><p>Trade one of your properties for one property owned by another player. They must accept your offer.</p>'+(!canTrade?'<p class="muted">A trade needs two active players who each own a property.</p>':'')+'<div class="actions"><button class="primary" id="endTurnTrade" '+(canTrade?'':'disabled')+'>Trade a Property</button><button class="secondary" id="endTurnDone">No Thanks / Next Player</button></div></div></div>';
+ document.getElementById('endTurnTrade').addEventListener('click',function(){if(!this.disabled&&validPropertyTradeTurn(session))showPropertyTradePartners(session)});
+ document.getElementById('endTurnDone').addEventListener('click',function(){completePropertyTradeTurn(session)});
+}
+function showPropertyTradePartners(session){
+ if(!validPropertyTradeTurn(session))return;
+ const partners=propertyTradePartners(session.playerIndex);
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">🏘️ PROPERTY TRADE</div><h2>'+esc(players[session.playerIndex].name)+', choose someone to trade with</h2><p>Players who own a property are available below.</p><div class="actions">'+partners.map(function(i){return '<button class="primary" data-property-partner="'+i+'">'+esc(players[i].name)+' ('+ownedPropertyIndices(i).length+' properties)</button>'}).join('')+'</div><div class="actions"><button class="secondary" id="propertyTradeSkip">Skip Trading / Next Player</button></div></div></div>';
+ modalRoot.querySelectorAll('[data-property-partner]').forEach(function(button){
+   button.addEventListener('click',function(){
+     const partner=Number(button.dataset.propertyPartner);
+     if(!validPropertyTradeTurn(session)||!propertyTradePartners(session.playerIndex).includes(partner))return;
+     session.partnerIndex=partner;showPropertyTradeSelection(session);
+   });
+ });
+ document.getElementById('propertyTradeSkip').addEventListener('click',function(){completePropertyTradeTurn(session)});
+}
+function propertyTradeCard(index){
+ const space=SPACES[index];
+ return '<div class="property-trade-card"><span aria-hidden="true">'+space.icon+'</span><div><strong>'+esc(space.name)+'</strong><small>'+esc(space.park)+' • Rent $'+rentForSpace(index)+'</small></div></div>';
+}
+function executePropertyTrade(session,giveIndex,takeIndex){
+ if(!validPropertyTradeTurn(session)||session.offered)return false;
+ const playerIndex=session.playerIndex,partnerIndex=session.partnerIndex;
+ if(!Number.isInteger(partnerIndex)||partnerIndex===playerIndex||!players[partnerIndex]||players[partnerIndex].eliminated)return false;
+ if(!Number.isInteger(giveIndex)||!Number.isInteger(takeIndex)||giveIndex===takeIndex||!SPACES[giveIndex]||!SPACES[takeIndex]||SPACES[giveIndex].type!=='property'||SPACES[takeIndex].type!=='property'||owners[giveIndex]!==playerIndex||owners[takeIndex]!==partnerIndex)return false;
+ session.offered=true;
+ owners[giveIndex]=partnerIndex;owners[takeIndex]=playerIndex;
+ players[playerIndex].props=ownedPropertyIndices(playerIndex);
+ players[partnerIndex].props=ownedPropertyIndices(partnerIndex);
+ addLog(players[playerIndex].name+' traded '+SPACES[giveIndex].name+' for '+SPACES[takeIndex].name+' with '+players[partnerIndex].name+'.');
+ renderAll();
+ return true;
+}
+function showPropertyTradeSelection(session){
+ if(!validPropertyTradeTurn(session))return;
+ const partnerIndex=session.partnerIndex;
+ if(!propertyTradePartners(session.playerIndex).includes(partnerIndex)){showPropertyTradePartners(session);return}
+ const mine=ownedPropertyIndices(session.playerIndex),theirs=ownedPropertyIndices(partnerIndex);
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">🏘️ PROPERTY TRADE</div><h2>Trade with '+esc(players[partnerIndex].name)+'</h2><p>Choose exactly one property from each player. No money changes hands.</p><div class="pin-stashes"><section aria-label="Your properties"><h3>'+esc(players[session.playerIndex].name)+' — Your Properties</h3><div class="property-trade-list">'+mine.map(propertyTradeCard).join('')+'</div></section><section aria-label="Other player properties"><h3>'+esc(players[partnerIndex].name)+' — Their Properties</h3><div class="property-trade-list">'+theirs.map(propertyTradeCard).join('')+'</div></section></div><div class="pin-controls"><label>Property you offer<select id="propertyGive"><option value="">Choose your property</option>'+mine.map(propertyTradeOption).join('')+'</select></label><label>Property you want<select id="propertyTake"><option value="">Choose their property</option>'+theirs.map(propertyTradeOption).join('')+'</select></label></div><div class="actions"><button class="primary" id="propertyMakeOffer" disabled>Make Offer</button><button class="secondary" id="propertyChooseAgain">Choose Someone Else</button><button class="secondary" id="propertyTradeSkip">Skip Trading / Next Player</button></div></div></div>';
+ function propertyTradeOption(i){return '<option value="'+i+'">'+esc(SPACES[i].name)+' — '+esc(SPACES[i].park)+'</option>'}
+ const give=document.getElementById('propertyGive'),take=document.getElementById('propertyTake'),offer=document.getElementById('propertyMakeOffer');
+ function update(){offer.disabled=give.value===''||take.value===''}
+ give.addEventListener('change',update);take.addEventListener('change',update);
+ document.getElementById('propertyChooseAgain').addEventListener('click',function(){showPropertyTradePartners(session)});
+ document.getElementById('propertyTradeSkip').addEventListener('click',function(){completePropertyTradeTurn(session)});
+ offer.addEventListener('click',function(){
+   if(this.disabled||!validPropertyTradeTurn(session))return;
+   const giveIndex=Number(give.value),takeIndex=Number(take.value);
+   if(owners[giveIndex]!==session.playerIndex||owners[takeIndex]!==partnerIndex)return;
+   showPropertyTradeOffer(session,giveIndex,takeIndex);
+ });
+}
+function showPropertyTradeOffer(session,giveIndex,takeIndex){
+ if(!validPropertyTradeTurn(session))return;
+ const p=players[session.playerIndex],partner=players[session.partnerIndex];
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">🏘️ PROPERTY TRADE OFFER</div><h2>'+esc(partner.name)+', do you accept this trade?</h2><p>'+esc(p.name)+' offers <strong>'+esc(SPACES[giveIndex].name)+'</strong> for your <strong>'+esc(SPACES[takeIndex].name)+'</strong>.</p><div class="property-trade-list">'+propertyTradeCard(giveIndex)+propertyTradeCard(takeIndex)+'</div><p>One property each. No money changes hands.</p><div class="actions"><button class="primary" id="propertyAccept">Accept Trade</button><button class="secondary" id="propertyDecline">Decline Trade</button></div></div></div>';
+ let answered=false;
+ function settle(accept){
+   if(answered||!validPropertyTradeTurn(session))return;
+   answered=true;
+   const traded=accept&&executePropertyTrade(session,giveIndex,takeIndex);
+   if(!accept)addLog(partner.name+' declined '+p.name+'’s property trade.');
+   modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">🏘️ PROPERTY TRADE</div><h2>'+(traded?'Trade Complete!':accept?'Trade Unavailable':'Trade Declined')+'</h2><p>'+(traded?esc(p.name)+' now owns '+esc(SPACES[takeIndex].name)+'. '+esc(partner.name)+' now owns '+esc(SPACES[giveIndex].name)+'.':accept?'Ownership changed, so the offer could not be completed.':'Both players keep their properties.')+'</p><div class="actions"><button class="primary" id="propertyTradeNext">Next Player</button></div></div></div>';
+   document.getElementById('propertyTradeNext').addEventListener('click',function(){completePropertyTradeTurn(session)});
+ }
+ document.getElementById('propertyAccept').addEventListener('click',function(){settle(true)});
+ document.getElementById('propertyDecline').addEventListener('click',function(){settle(false)});
+}
+function advanceTurn(msg){
+ const messages=[msg];
  if(gameOver){renderAll();return}
  if(!players.some(function(player){return !player.eliminated})){
    gameOver=true;turnLocked=true;movingPlayer=-1;renderAll();setStatus(esc(msg)+'<br>All players have been eliminated. Start a new game to play again.');return;
@@ -2360,7 +2455,7 @@ function showPinTrading(){
 }
 
 function showRules(){
- modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><h2>Quick Rules</h2><p><strong>Pin Traders:</strong> Each player chooses one starting pin after choosing a playing piece. All 20 designs are available, and each starting pin must be different. There are 20 designs in four park sets, and two Magic &amp; Mischief cards add a mystery pin. Land on one of eight Pin Traders spaces (two per park) for one optional one-for-one swap with a Cast Member holding five random pins or another active player. Player trades require that player to accept. Trades cost no money. Choose Finish Visit to end your turn, whether you trade or skip. Duplicate pins can be traded. All five pins from the park where you own every property are required for the Castle Finale.</p><p><strong>Autograph Book:</strong> Correct answers (except the winning Final Challenge) have a 25% chance of a surprise character autograph with confetti and a $50 reward. Every player is guaranteed a visit by their third correct answer since their last autograph. Three Magic &amp; Mischief cards guarantee an autograph. Collect all 50; each new visit chooses a missing character first. After completing your book, repeat autographs still pay $50. Open your book from your player card. Autographs are optional.</p><p>The board has <strong>80 spaces</strong> (19 park spaces on each side, plus four transportation corners). Each side is themed to one park: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom.</p><p>Choose a unique token, roll both dice, and move the combined total (2–12 spaces) around the board. Rolling doubles gives every active player $20 and triggers a BANG celebration, including on transportation bonus rolls. Doubles do not give an extra turn. When you land on an unowned attraction, the game checks whether you can afford it. If you can, choose whether to attempt the purchase; answering the park-themed trivia correctly buys it automatically. If you cannot afford it, your turn ends. Land on another player\'s property to see a rent popup. Choose to pay the rent or use a Magic Rent Pass (the bank pays the owner). If you cannot afford rent and choose &ldquo;I spent all my money at Disney!&rdquo;, your remaining money goes to the owner and you lose the game. Your turns are skipped, your pawn is removed, and your properties return to the bank. Remaining players continue toward the Castle Finale. The four middle-of-the-park <strong>Nighttime Show</strong> spaces cost $200 each and work as a set: rent is $25 with 1 show, $50 with 2, $100 with 3, and $200 with all 4.</p><p>All four corners are <strong>transportation hubs</strong>. If you land exactly on one, you may choose to roll again and travel that many extra spaces. Completing a lap does not pay money.</p><p><strong>Magic &amp; Mischief:</strong> Land on either card space on a park side to draw from the shared pile of 45 cards. Apply its reward, cost, movement, or special perk. Card travel plays the destination normally; laps do not pay money. You may choose to use a Magic Rent Pass in the rent popup; the bank pays the owner. Five Security cards move your pawn to the center Security spot and skip your next turn. Resume from the space you left when you next roll; no lap bonus is paid for being sent to Security. Cards do not repeat until the deck is used up.</p><p>Each of the four parks has its own shuffled deck of <strong>50 questions</strong> (200 park questions total). Questions do not repeat within a park until its deck is used up.</p><p>Correct trivia earns category badges. <strong>Pixie Dust</strong> awards $100 for a correct answer and takes $100 for a wrong answer. <strong>Snack Break</strong> uses a shuffled deck of 30 real Disney food photos; identify the food from four answers to earn $50. To win, collect all six badges, own <strong>all 10 properties in one park, including its Nighttime Show</strong>, and collect <strong>all five pins from that same park</strong>. Then choose the <strong>Cinderella Castle Finale</strong> space in the center instead of rolling and answer the Final Challenge correctly. If you miss the Final Challenge, complete another full lap of the 80-space board before trying again. Backward movement reduces your lap progress; Security trips do not count. Your cash balance and autographs are not win requirements.</p><div class="actions"><button class="primary" id="closeRules">Got It</button></div></div></div>';
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><h2>Quick Rules</h2><p><strong>End-of-Turn Property Trading:</strong> After finishing a turn, choose whether to trade before passing to the next player. Pick another active player, offer exactly one property, and request exactly one of theirs. The other player accepts or declines. One offer per turn; no money changes hands. Ownership, rent, and Castle Finale progress update after an accepted trade. You can skip trading.</p><p><strong>Pin Traders:</strong> Each player chooses one starting pin after choosing a playing piece. All 20 designs are available, and each starting pin must be different. There are 20 designs in four park sets, and two Magic &amp; Mischief cards add a mystery pin. Land on one of eight Pin Traders spaces (two per park) for one optional one-for-one swap with a Cast Member holding five random pins or another active player. Player trades require that player to accept. Trades cost no money. Choose Finish Visit to end your turn, whether you trade or skip. Duplicate pins can be traded. All five pins from the park where you own every property are required for the Castle Finale.</p><p><strong>Autograph Book:</strong> Correct answers (except the winning Final Challenge) have a 25% chance of a surprise character autograph with confetti and a $50 reward. Every player is guaranteed a visit by their third correct answer since their last autograph. Three Magic &amp; Mischief cards guarantee an autograph. Collect all 50; each new visit chooses a missing character first. After completing your book, repeat autographs still pay $50. Open your book from your player card. Autographs are optional.</p><p>The board has <strong>80 spaces</strong> (19 park spaces on each side, plus four transportation corners). Each side is themed to one park: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom.</p><p>Choose a unique token, roll both dice, and move the combined total (2–12 spaces) around the board. Rolling doubles gives every active player $20 and triggers a BANG celebration, including on transportation bonus rolls. Doubles do not give an extra turn. When you land on an unowned attraction, the game checks whether you can afford it. If you can, choose whether to attempt the purchase; answering the park-themed trivia correctly buys it automatically. If you cannot afford it, your turn ends. Land on another player\'s property to see a rent popup. Choose to pay the rent or use a Magic Rent Pass (the bank pays the owner). If you cannot afford rent and choose &ldquo;I spent all my money at Disney!&rdquo;, your remaining money goes to the owner and you lose the game. Your turns are skipped, your pawn is removed, and your properties return to the bank. Remaining players continue toward the Castle Finale. The four middle-of-the-park <strong>Nighttime Show</strong> spaces cost $200 each and work as a set: rent is $25 with 1 show, $50 with 2, $100 with 3, and $200 with all 4.</p><p>All four corners are <strong>transportation hubs</strong>. If you land exactly on one, you may choose to roll again and travel that many extra spaces. Completing a lap does not pay money.</p><p><strong>Magic &amp; Mischief:</strong> Land on either card space on a park side to draw from the shared pile of 45 cards. Apply its reward, cost, movement, or special perk. Card travel plays the destination normally; laps do not pay money. You may choose to use a Magic Rent Pass in the rent popup; the bank pays the owner. Five Security cards move your pawn to the center Security spot and skip your next turn. Resume from the space you left when you next roll; no lap bonus is paid for being sent to Security. Cards do not repeat until the deck is used up.</p><p>Each of the four parks has its own shuffled deck of <strong>50 questions</strong> (200 park questions total). Questions do not repeat within a park until its deck is used up.</p><p>Correct trivia earns category badges. <strong>Pixie Dust</strong> awards $100 for a correct answer and takes $100 for a wrong answer. <strong>Snack Break</strong> uses a shuffled deck of 30 real Disney food photos; identify the food from four answers to earn $50. To win, collect all six badges, own <strong>all 10 properties in one park, including its Nighttime Show</strong>, and collect <strong>all five pins from that same park</strong>. Then choose the <strong>Cinderella Castle Finale</strong> space in the center instead of rolling and answer the Final Challenge correctly. If you miss the Final Challenge, complete another full lap of the 80-space board before trying again. Backward movement reduces your lap progress; Security trips do not count. Your cash balance and autographs are not win requirements.</p><div class="actions"><button class="primary" id="closeRules">Got It</button></div></div></div>';
  document.getElementById('closeRules').addEventListener('click',closeModal);
 }
 showSetup();
