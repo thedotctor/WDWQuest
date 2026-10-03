@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.59</title>
+<title>WDWQuest Board Game v0.60</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -61,7 +61,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.59 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.60 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -1384,6 +1384,19 @@ function showMagicDeckInfo(){
  actions.insertAdjacentHTML('beforeend','<button class="secondary" id="securityTestBtn">Test Security Card</button>');
  document.getElementById('securityTestBtn').disabled=!!players[currentPlayer].inSecurity;
  document.getElementById('securityTestBtn').addEventListener('click',showSecurityCardTest);
+ actions.insertAdjacentHTML('beforeend','<button class="secondary" id="autographTestBtn">Test Autograph</button>');
+ document.getElementById('autographTestBtn').addEventListener('click',showAutographTest);
+}
+function showAutographTest(){
+ if(turnLocked||gameOver)return;
+ const playerIndex=currentPlayer,p=players[playerIndex];
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">📖 AUTOGRAPH TEST</div><h2>Try a Surprise Character Visit</h2><p>This test will show a random character picture and confetti, add the autograph to <strong>'+esc(p.name)+'\'s book</strong>, and add <strong>$50</strong> to their bank.</p><p class="muted">This affects your current game and ends your turn. It does not use a Magic &amp; Mischief card.</p><div class="actions"><button class="primary" id="autographTestApply">Try It — Meet a Character</button><button class="secondary" id="autographTestCancel">Cancel</button></div></div></div>';
+ document.getElementById('autographTestCancel').addEventListener('click',closeModal);
+ document.getElementById('autographTestApply').addEventListener('click',function(){
+   if(this.disabled||turnLocked||gameOver||currentPlayer!==playerIndex)return;
+   this.disabled=true;closeModal();
+   showAutographEncounter(playerIndex,function(){finishTurn(p.name+' tested a surprise autograph encounter.')});
+ });
 }
 function showSecurityCardTest(){
  if(turnLocked||gameOver||players[currentPlayer].inSecurity)return;
