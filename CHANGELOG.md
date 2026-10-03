@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.12.2 - Moving Piece Tracking
+- Added camera-style tracking that follows the active piece as it moves from space to space.
+- The moving pawn now gets a stronger zoom and glow so it stays easy to see.
+- The final landed space is kept centered briefly after movement.
+- Transportation bonus movement uses the same tracking behavior.
+
 ## v0.12.1 - Left-Side Dice Rail
 - Moved the floating dice and turn controls from a sticky top position to a fixed left-side rail.
 - Desktop uses a compact 180px control panel centered vertically on the left edge.
