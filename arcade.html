@@ -10,7 +10,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <!-- WDWQuest homepage refresh build: 2026-10-01 -->
-<title>WDWQuest v0.11.4</title>
+<title>WDWQuest v0.11.5</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--panel3:#0c1729;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--accent2:#c4b5fd;--good:#86efac;--bad:#fca5a5;--gold:#fde68a;--shadow:0 18px 50px rgba(0,0,0,.23)}
 *{box-sizing:border-box}html{color-scheme:dark}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 10% -10%,rgba(125,211,252,.13),transparent 30%),radial-gradient(circle at 90% 0%,rgba(196,181,253,.12),transparent 27%),var(--bg);color:var(--text);min-height:100vh}
@@ -219,7 +219,7 @@ h1,h2,h3,.question,.lead,.row,.badge,.photo-credit{overflow-wrap:anywhere}
 </head>
 <body>
 <header class="site-header">
-<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.11.4</small></button>
+<button class="brand" data-nav="home">🏰 <span>WDWQuest</span> <small>v0.11.5</small></button>
 <nav>
 <button data-nav="home">Home</button>
 <button data-nav="trivia">Trivia</button>
@@ -228,7 +228,7 @@ h1,h2,h3,.question,.lead,.row,.badge,.photo-credit{overflow-wrap:anywhere}
 <button data-nav="clues">Clues</button>
 <button data-nav="history">History</button>
 <button data-nav="jeopardy">Jeopardy</button>
-<button onclick="window.location.href='board-game.html?v=025'">Board Game</button>
+<button onclick="window.location.href='board-game.html?v=026'">Board Game</button>
 <button data-nav="stats">Stats</button>
 <button data-nav="changelog">Changelog</button>
 </nav>
@@ -418,7 +418,7 @@ function advanceGamePlayer(){
 }
 
 function home(){
-return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.11.4 zooms Snack Break photos out so the full food image fits inside the compact popup.</p></section>
+return `<section class="hero"><div class="eyebrow">Free Disney World fan-game arcade</div><h1>WDWQuest</h1><p class="lead">v0.11.5 adds real breathing room around Snack Break photos so they look visibly zoomed out inside the same popup.</p></section>
 <section class="arcade-grid">
 <article class="game-card"><div class="icon">📸</div><h3>Where Am I? Photo</h3><p>Start extremely zoomed in. Every reveal zooms out. Guess early for maximum points.</p><button class="primary" data-nav="photo">Play Photo Mode</button></article>
 <article class="game-card"><div class="icon">🎯</div><h3>WDW Trivia</h3><p>Traditional questions across parks, resorts, attractions, food and transportation.</p><button class="primary" data-nav="trivia">Play Trivia</button></article>
@@ -426,7 +426,7 @@ return `<section class="hero"><div class="eyebrow">Free Disney World fan-game ar
 <article class="game-card"><div class="icon">🕰️</div><h3>What Was Here Before?</h3><p>Disney World history. Match today's attraction or land with what occupied the space before it.</p><button class="primary" data-nav="history">Play History</button></article>
 <article class="game-card"><div class="icon">💰</div><h3>WDW Jeopardy</h3><p>Five categories, five dollar values, typed answers and a running board score.</p><button class="primary" data-nav="jeopardy">Play Jeopardy</button></article>
 <article class="game-card"><div class="icon">📍</div><h3>WDW Pin Drop</h3><p>Study a WDW photo, drop a pin on the map, and keep building your score endlessly.</p><button class="primary" data-nav="pin-drop">Play Pin Drop</button></article>
-<article class="game-card"><div class="icon">🎲</div><h3>WDWQuest Board Game</h3><p>A Monopoly-meets-trivia board game for 1–8 players. Buy attractions, pay rent, collect six badges, and reach the Castle Finale.</p><button class="primary" onclick="window.location.href='board-game.html?v=025'">Play Board Game</button></article>
+<article class="game-card"><div class="icon">🎲</div><h3>WDWQuest Board Game</h3><p>A Monopoly-meets-trivia board game for 1–8 players. Buy attractions, pay rent, collect six badges, and reach the Castle Finale.</p><button class="primary" onclick="window.location.href='board-game.html?v=026'">Play Board Game</button></article>
 </section>`}
 
 function trivia(){
@@ -770,7 +770,12 @@ reset.addEventListener('click',()=>{if(confirm('Reset all WDWQuest v0.2 stats st
 function changelog(){
 app.innerHTML=`<section class="hero"><div class="eyebrow">Project log</div><h2>WDWQuest Changelog</h2></section>
 <div class="card">
-<h3>v0.11.4</h3>
+<h3>v0.11.5</h3>
+<div class="list">
+<div class="row"><span>🖼️ Snack Break photos now render smaller inside the same picture frame for a true zoomed-out look</span><strong>UPDATED</strong></div>
+<div class="row"><span>🙈 Placard blurs now track the image's actual on-screen rectangle</span><strong>FIXED</strong></div>
+</div>
+<h3 style="margin-top:24px">v0.11.4</h3>
 <div class="list">
 <div class="row"><span>🖼️ Snack Break now shows the full food photo instead of cropping it to fill the frame</span><strong>UPDATED</strong></div>
 <div class="row"><span>🙈 Placard blurs now reposition against the actual rendered photo area</span><strong>FIXED</strong></div>
