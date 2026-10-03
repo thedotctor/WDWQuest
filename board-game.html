@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.34</title>
+<title>WDWQuest Board Game v0.35</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -26,13 +26,31 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 @media(max-width:760px){.scoreboard{grid-template-columns:1fr 1fr}.player-row{grid-template-columns:1fr}.player-row label{margin-bottom:-6px}.player-row .secondary{width:100%}.answers{grid-template-columns:1fr}.shell{padding:10px}.panel{padding:14px}.board{width:1020px}.turn-panel{left:4px;top:50%;width:138px;padding:7px}.turn-panel .dice{margin:2px;min-width:58px;min-height:58px;padding:3px}.turn-panel .die-cube{--size:46px;--half:23px}.turn-panel .die-face{font-size:31px;border-radius:9px}.turn-panel .status{margin:2px 0;font-size:10px;line-height:1.2;max-width:124px}.turn-panel .actions{margin-top:3px;gap:5px}.turn-panel .actions button{padding:7px 6px;font-size:11px}.turn-panel .turn{font-size:11px}}
 @media(max-width:420px){.board{padding:2px;border-radius:12px}.space{padding:4px;border-radius:6px}.token{width:31px;height:31px}.dice{min-width:72px;min-height:72px}.center{padding:7px}.center .actions{display:grid;width:100%;gap:7px}.center .actions button{width:100%}.scoreboard{gap:6px}.player-card{padding:8px}.turn-panel{width:124px;left:3px}.turn-panel .die-cube{--size:42px;--half:21px}.turn-panel .die-face{font-size:28px}.turn-panel .status{max-width:112px;font-size:9px}}
 #finaleFireworks{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;opacity:0;transition:opacity .18s ease}#finaleFireworks.active{opacity:1}
+
+/* Larger tiles with separate label and pawn areas. */
+.board-wrap{max-height:78vh;max-height:78dvh;overscroll-behavior:contain;scroll-padding:12px}
+.board{width:2100px;height:2100px}
+.center{left:15%;top:15%;width:70%;height:70%}
+.space{padding:7px 6px}
+.space .sname{overflow-wrap:normal}
+.space .price{white-space:normal}
+.tokens{left:6px;right:auto;bottom:6px;display:grid;grid-template-columns:repeat(2,42px);gap:2px}
+.token{width:42px;height:42px}
+.space.side-left,.space.side-right{padding:7px 182px 7px 7px}
+.space.side-left .icon,.space.side-right .icon{float:none;margin-right:0}
+.space.side-left .sname,.space.side-right .sname{margin-top:5px}
+.space.side-left .price,.space.side-right .price{white-space:normal}
+.space.side-left .owner,.space.side-right .owner{max-width:none}
+.space.side-left .tokens,.space.side-right .tokens{left:auto;right:6px;max-width:none;grid-template-columns:repeat(4,42px)}
+.space.corner{padding:7px}
+.space.corner .tokens{grid-template-columns:repeat(4,42px)}
 </style>
 </head>
 <body>
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.34 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.35 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -803,7 +821,7 @@ function renderGame(){
  document.getElementById('castleFinaleBtn').addEventListener('click',enterCastleFinale);
  document.getElementById('rulesBtn').addEventListener('click',showRules);
 }
-function boardRect(i){ const edge=8; const middle=100-(edge*2); const corner=8; const inner=(100-(corner*2))/15; if(i<=16){ let left,width; if(i===0){left=0;width=corner} else if(i===16){left=100-corner;width=corner} else{left=corner+((i-1)*inner);width=inner} return {top:0,left:left,width:width,height:edge,side:'top'}; } if(i<=30){ const h=middle/14; return {top:edge+((i-17)*h),left:100-edge,width:edge,height:h,side:'right'}; } if(i<=47){ const k=i-31; let left,width; if(k===0){left=100-corner;width=corner} else if(k===16){left=0;width=corner} else{width=inner;left=100-corner-(k*inner)} return {top:100-edge,left:left,width:width,height:edge,side:'bottom'}; } const h=middle/14; const k=i-48; return {top:edge+((13-k)*h),left:0,width:edge,height:h,side:'left'}; }
+function boardRect(i){ const edge=14; const middle=100-(edge*2); const corner=14; const inner=(100-(corner*2))/15; if(i<=16){ let left,width; if(i===0){left=0;width=corner} else if(i===16){left=100-corner;width=corner} else{left=corner+((i-1)*inner);width=inner} return {top:0,left:left,width:width,height:edge,side:'top'}; } if(i<=30){ const h=middle/14; return {top:edge+((i-17)*h),left:100-edge,width:edge,height:h,side:'right'}; } if(i<=47){ const k=i-31; let left,width; if(k===0){left=100-corner;width=corner} else if(k===16){left=0;width=corner} else{width=inner;left=100-corner-(k*inner)} return {top:100-edge,left:left,width:width,height:edge,side:'bottom'}; } const h=middle/14; const k=i-48; return {top:edge+((13-k)*h),left:0,width:edge,height:h,side:'left'}; }
 function parkClass(park){
  return String(park||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
@@ -832,7 +850,7 @@ function buildBoard(){
  SPACES.forEach(function(s,i){
    const p=boardRect(i);
    const d=document.createElement('div');
-   d.className='space '+s.type+(isShowSpace(s)?' show':'')+' side-'+p.side+(s.park?' park-'+parkClass(s.park):'');
+   d.className='space '+(i===0||i===16||i===31||i===47?'corner ':'')+s.type+(isShowSpace(s)?' show':'')+' side-'+p.side+(s.park?' park-'+parkClass(s.park):'');
    d.id='space'+i;
    d.style.top=p.top+'%';
    d.style.left=p.left+'%';
