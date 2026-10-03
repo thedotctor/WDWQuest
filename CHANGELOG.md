@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.11.9 - Castle Finale Fireworks
+- Added a full-screen fireworks canvas effect when a player enters Cinderella Castle Finale.
+- Added a short dramatic pause before the Final Challenge appears.
+- A correct Final Challenge answer triggers a second, longer fireworks celebration.
+- Added a dedicated Finale Fireworks test page for quick replay testing.
+
 ## v0.11.8 - Center Castle Finale
 - Moved Cinderella Castle Finale off the perimeter and into its own dedicated center-board space.
 - The outer board remains exactly 62 spaces.
