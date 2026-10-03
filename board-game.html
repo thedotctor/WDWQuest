@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.76</title>
+<title>WDWQuest Board Game v0.77</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -71,13 +71,14 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .pin-stashes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.pin-stashes>section{min-width:0;border:1px solid var(--border);border-radius:12px;padding:10px;background:#0b1527}.pin-stashes h3{margin:0;font-size:15px}.pin-stashes .pin-grid{grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:8px;margin:10px 0 0}.pin-stashes .pin-art{width:48px;height:48px;font-size:26px}.pin-stashes .pin-card{padding:9px 5px}@media(max-width:480px){.pin-stashes{grid-template-columns:1fr}}
 .pin-exchange-modal{text-align:center}.pin-exchange-names{display:flex;justify-content:space-between;gap:16px;margin:20px 10px 0}.pin-exchange-names strong{max-width:45%;overflow-wrap:anywhere}.pin-exchange-stage{height:270px;position:relative;overflow:hidden}.pin-exchange-piece{position:absolute;top:65px;width:105px;z-index:2}.pin-exchange-piece.give{left:10px}.pin-exchange-piece.take{right:10px}.pin-exchange-piece .pin-card{margin:0;min-height:145px}.pin-exchange-sparkles{position:absolute;inset:105px 0 auto;color:var(--gold);font-size:28px;letter-spacing:14px;opacity:.7;pointer-events:none}.pin-exchange-piece .pin-art{box-shadow:0 0 16px #fde68a66,0 4px 7px #0005}
 .dice-pair{display:flex;flex-direction:column;align-items:center;gap:18px}.turn-panel .dice{min-height:0}.turn-panel{max-height:calc(100vh - 20px);overflow-y:auto}@media(max-width:760px){.dice-pair{gap:12px}}
+.doubles-bang{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse,#23314de6,#07111fee);isolation:isolate}.doubles-burst{position:absolute;width:min(95vw,900px);height:min(90vh,700px);background:linear-gradient(135deg,#fde047,#fb923c,#ef4444);clip-path:polygon(50% 0,57% 24%,74% 6%,73% 31%,100% 23%,81% 45%,100% 57%,75% 62%,88% 89%,63% 76%,53% 100%,44% 77%,20% 95%,26% 67%,0 71%,20% 50%,0 29%,29% 31%,20% 5%,43% 25%);animation:doublesBurst .65s cubic-bezier(.16,1,.3,1) both;opacity:.95}.doubles-bang-content{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;max-width:90vw;animation:doublesBang .7s cubic-bezier(.16,1,.3,1) both}.doubles-bang-content strong{font-size:clamp(65px,18vw,210px);font-weight:1000;font-style:italic;line-height:1;color:#fff;text-shadow:5px 5px 0 #17223d,-2px -2px 0 #17223d;transform:rotate(-7deg)}.doubles-bang-content span{font-size:clamp(24px,5vw,44px);font-weight:950;color:#17223d}.doubles-bang-content b{background:#17223d;color:#fff6b2;border-radius:12px;padding:12px 18px;font-size:clamp(16px,3vw,28px)}@keyframes doublesBurst{from{transform:scale(.15) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(0deg);opacity:.95}}@keyframes doublesBang{from{transform:scale(.25);opacity:0}to{transform:scale(1);opacity:1}}.doubles-bang.reduced-motion .doubles-burst,.doubles-bang.reduced-motion .doubles-bang-content{animation:none}@media(prefers-reduced-motion:reduce){.doubles-burst,.doubles-bang-content{animation:none}}
 </style>
 </head>
 <body>
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.76 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.77 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -1335,6 +1336,27 @@ async function animateDice(values){
  setRestingDice(values);
  setStatus('Rolled <strong>'+values[0]+' + '+values[1]+' = '+(values[0]+values[1])+'</strong>. Get ready to move…');
 }
+async function rewardDoubles(values){
+ if(gameOver||!Array.isArray(values)||values.length!==2||values[0]!==values[1]||!Number.isInteger(values[0])||values[0]<1||values[0]>6)return false;
+ const active=players.filter(function(p){return !p.eliminated});
+ if(!active.length)return false;
+ active.forEach(function(p){p.cash+=20});
+ renderScores();
+ addLog(players[currentPlayer].name+' rolled doubles ('+values[0]+' + '+values[1]+'). Every active player received $20.');
+ setStatus('<strong>DOUBLES!</strong> Every active player receives $20.');
+ const overlay=document.createElement('div');
+ overlay.className='doubles-bang'+(reducedMotion()?' reduced-motion':'');
+ overlay.setAttribute('role','status');
+ overlay.innerHTML='<div class="doubles-burst" aria-hidden="true"></div><div class="doubles-bang-content"><strong>BANG!</strong><span>DOUBLE '+values[0]+'s!</span><b>+$20 TO EVERY ACTIVE PLAYER</b></div>';
+ document.body.appendChild(overlay);
+ try{
+   await wait(reducedMotion()?1100:1800);
+   if(!reducedMotion()&&overlay.animate){
+     try{await overlay.animate([{opacity:1},{opacity:0}],{duration:350,fill:'forwards'}).finished}catch(e){}
+   }
+ }finally{overlay.remove()}
+ return true;
+}
 function trackMovingPiece(spaceIndex){
  const space=document.getElementById('space'+spaceIndex);
  if(!space)return;
@@ -1429,6 +1451,7 @@ async function rollDice(){
  const p=players[currentPlayer];
  setStatus(esc(p.name)+' is rolling…');
  await animateDice(diceValues);
+   await rewardDoubles(diceValues);
  setStatus(esc(p.name)+' rolled <strong>'+diceValues[0]+' + '+diceValues[1]+' = '+roll+'</strong>. Moving '+roll+' spaces…');
  await movePlayerSpaces(roll,'moves');
  const newPos=p.pos;
@@ -1450,6 +1473,7 @@ function showTransportChoice(spaceIndex){
    const diceValues=rollTwoDice(),bonus=diceValues[0]+diceValues[1];
    setStatus(esc(p.name)+' takes a transportation bonus roll…');
    await animateDice(diceValues);
+   await rewardDoubles(diceValues);
    setStatus(esc(p.name)+' rolled <strong>'+diceValues[0]+' + '+diceValues[1]+' = '+bonus+'</strong> for bonus travel.');
    await movePlayerSpaces(bonus,'travels from '+s.name);
    const destination=p.pos;
@@ -2113,7 +2137,7 @@ function showPinTrading(){
 }
 
 function showRules(){
- modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><h2>Quick Rules</h2><p><strong>Pin Traders:</strong> Each player starts with three random pins. There are 20 designs in four park sets, and two Magic &amp; Mischief cards add a mystery pin. Land on one of eight Pin Traders spaces (two per park) for one optional one-for-one swap with a Cast Member holding five random pins or another active player. Player trades require that player to accept. Trades cost no money. Choose Finish Visit to end your turn, whether you trade or skip. Duplicate pins can be traded. Pins are optional for the Castle Finale.</p><p><strong>Autograph Book:</strong> Correct answers (except the winning Final Challenge) have a 25% chance of a surprise character autograph with confetti and a $50 reward. Every player is guaranteed a visit by their third correct answer since their last autograph. Three Magic &amp; Mischief cards guarantee an autograph. Collect all 50; each new visit chooses a missing character first. After completing your book, repeat autographs still pay $50. Open your book from your player card. Autographs are optional.</p><p>The board has <strong>80 spaces</strong> (19 park spaces on each side, plus four transportation corners). Each side is themed to one park: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom.</p><p>Choose a unique token, roll both dice, and move the combined total (2–12 spaces) around the board. When you land on an unowned attraction, the game checks whether you can afford it. If you can, choose whether to attempt the purchase; answering the park-themed trivia correctly buys it automatically. If you cannot afford it, your turn ends. Land on another player\'s property to see a rent popup. Choose to pay the rent or use a Magic Rent Pass (the bank pays the owner). If you cannot afford rent and choose &ldquo;I spent all my money at Disney!&rdquo;, your remaining money goes to the owner and you lose the game. Your turns are skipped, your pawn is removed, and your properties return to the bank. Remaining players continue toward the Castle Finale. The four middle-of-the-park <strong>Nighttime Show</strong> spaces cost $200 each and work as a set: rent is $25 with 1 show, $50 with 2, $100 with 3, and $200 with all 4.</p><p>All four corners are <strong>transportation hubs</strong>. If you land exactly on one, you may choose to roll again and travel that many extra spaces. Completing a lap does not pay money.</p><p><strong>Magic &amp; Mischief:</strong> Land on either card space on a park side to draw from the shared pile of 45 cards. Apply its reward, cost, movement, or special perk. Card travel plays the destination normally; laps do not pay money. You may choose to use a Magic Rent Pass in the rent popup; the bank pays the owner. Five Security cards move your pawn to the center Security spot and skip your next turn. Resume from the space you left when you next roll; no lap bonus is paid for being sent to Security. Cards do not repeat until the deck is used up.</p><p>Each of the four parks has its own shuffled deck of <strong>50 questions</strong> (200 park questions total). Questions do not repeat within a park until its deck is used up.</p><p>Correct trivia earns category badges. <strong>Pixie Dust</strong> awards $100 for a correct answer and takes $100 for a wrong answer. <strong>Snack Break</strong> uses a shuffled deck of 30 real Disney food photos; identify the food from four answers to earn $50. Collect all six badges, then choose the <strong>Cinderella Castle Finale</strong> space in the center instead of rolling. Answer the Final Challenge correctly to win.</p><div class="actions"><button class="primary" id="closeRules">Got It</button></div></div></div>';
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><h2>Quick Rules</h2><p><strong>Pin Traders:</strong> Each player starts with three random pins. There are 20 designs in four park sets, and two Magic &amp; Mischief cards add a mystery pin. Land on one of eight Pin Traders spaces (two per park) for one optional one-for-one swap with a Cast Member holding five random pins or another active player. Player trades require that player to accept. Trades cost no money. Choose Finish Visit to end your turn, whether you trade or skip. Duplicate pins can be traded. Pins are optional for the Castle Finale.</p><p><strong>Autograph Book:</strong> Correct answers (except the winning Final Challenge) have a 25% chance of a surprise character autograph with confetti and a $50 reward. Every player is guaranteed a visit by their third correct answer since their last autograph. Three Magic &amp; Mischief cards guarantee an autograph. Collect all 50; each new visit chooses a missing character first. After completing your book, repeat autographs still pay $50. Open your book from your player card. Autographs are optional.</p><p>The board has <strong>80 spaces</strong> (19 park spaces on each side, plus four transportation corners). Each side is themed to one park: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom.</p><p>Choose a unique token, roll both dice, and move the combined total (2–12 spaces) around the board. Rolling doubles gives every active player $20 and triggers a BANG celebration, including on transportation bonus rolls. Doubles do not give an extra turn. When you land on an unowned attraction, the game checks whether you can afford it. If you can, choose whether to attempt the purchase; answering the park-themed trivia correctly buys it automatically. If you cannot afford it, your turn ends. Land on another player\'s property to see a rent popup. Choose to pay the rent or use a Magic Rent Pass (the bank pays the owner). If you cannot afford rent and choose &ldquo;I spent all my money at Disney!&rdquo;, your remaining money goes to the owner and you lose the game. Your turns are skipped, your pawn is removed, and your properties return to the bank. Remaining players continue toward the Castle Finale. The four middle-of-the-park <strong>Nighttime Show</strong> spaces cost $200 each and work as a set: rent is $25 with 1 show, $50 with 2, $100 with 3, and $200 with all 4.</p><p>All four corners are <strong>transportation hubs</strong>. If you land exactly on one, you may choose to roll again and travel that many extra spaces. Completing a lap does not pay money.</p><p><strong>Magic &amp; Mischief:</strong> Land on either card space on a park side to draw from the shared pile of 45 cards. Apply its reward, cost, movement, or special perk. Card travel plays the destination normally; laps do not pay money. You may choose to use a Magic Rent Pass in the rent popup; the bank pays the owner. Five Security cards move your pawn to the center Security spot and skip your next turn. Resume from the space you left when you next roll; no lap bonus is paid for being sent to Security. Cards do not repeat until the deck is used up.</p><p>Each of the four parks has its own shuffled deck of <strong>50 questions</strong> (200 park questions total). Questions do not repeat within a park until its deck is used up.</p><p>Correct trivia earns category badges. <strong>Pixie Dust</strong> awards $100 for a correct answer and takes $100 for a wrong answer. <strong>Snack Break</strong> uses a shuffled deck of 30 real Disney food photos; identify the food from four answers to earn $50. Collect all six badges, then choose the <strong>Cinderella Castle Finale</strong> space in the center instead of rolling. Answer the Final Challenge correctly to win.</p><div class="actions"><button class="primary" id="closeRules">Got It</button></div></div></div>';
  document.getElementById('closeRules').addEventListener('click',closeModal);
 }
 showSetup();
