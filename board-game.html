@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.71</title>
+<title>WDWQuest Board Game v0.72</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -74,7 +74,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.71 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.72 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -1969,9 +1969,9 @@ function showPinTradersInfo(){
 function startPinTradersVisit(spaceIndex){
  const p=players[currentPlayer];
  if(gameOver||p.eliminated||SPACES[spaceIndex].type!=='pin')return;
- pinTradeVisit={playerIndex:currentPlayer,spaceIndex:spaceIndex};
- castMemberPins=shuffle(PIN_DESIGNS).slice(0,5).map(function(pin){return pin.id});
- turnLocked=true;renderAll();showPinTrading();
+ pinTradeVisit={playerIndex:currentPlayer,spaceIndex:spaceIndex,partnerIndex:null,castReady:false};
+ castMemberPins=[];
+ turnLocked=true;renderAll();showPinPartnerChoice();
 }
 function finishPinTradersVisit(){
  if(!pinTradeVisit||pinTradeVisit.playerIndex!==currentPlayer)return;
@@ -1982,7 +1982,7 @@ function canTradePins(playerIndex){
  return !gameOver&&pinTradeVisit&&pinTradeVisit.playerIndex===playerIndex&&players[playerIndex].pos===pinTradeVisit.spaceIndex&&SPACES[pinTradeVisit.spaceIndex].type==='pin'&&playerIndex===currentPlayer&&!players[playerIndex].eliminated&&!(players[playerIndex].pinTradesThisTurn>0);
 }
 function executePinTrade(playerIndex,partnerIndex,giveId,takeId){
- if(!canTradePins(playerIndex))return false;
+ if(!canTradePins(playerIndex)||pinTradeVisit.partnerIndex!==partnerIndex)return false;
  const p=players[playerIndex];
  if(partnerIndex!==-1&&(partnerIndex===playerIndex||!players[partnerIndex]||players[partnerIndex].eliminated))return false;
  const otherPins=partnerIndex===-1?castMemberPins:(players[partnerIndex].pins||[]);
@@ -1992,25 +1992,49 @@ function executePinTrade(playerIndex,partnerIndex,giveId,takeId){
  addLog(p.name+' traded '+pinInfo(giveId).name+' for '+pinInfo(takeId).name+' with '+(partnerIndex===-1?'the Cast Member':players[partnerIndex].name)+'.');
  return true;
 }
+function showPinPartnerChoice(){
+ if(!pinTradeVisit||pinTradeVisit.playerIndex!==currentPlayer||gameOver)return;
+ const p=players[currentPlayer];
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">📌 PIN TRADERS</div><h2>'+esc(p.name)+', who would you like to trade with?</h2><p>Choose a Cast Member or another player to see their available pins.</p><div class="actions"><button class="primary" data-pin-partner="-1">🧑‍💼 Cast Member</button>'+players.map(function(other,i){return i!==currentPlayer&&!other.eliminated?'<button class="secondary" data-pin-partner="'+i+'">'+esc(other.name)+'</button>':''}).join('')+'</div><div class="actions"><button class="secondary" id="pinChoiceSkip">Skip Trading / Finish Visit</button></div></div></div>';
+ modalRoot.querySelectorAll('[data-pin-partner]').forEach(function(button){
+   button.addEventListener('click',function(){
+     const partnerIndex=Number(button.dataset.pinPartner);
+     if(!pinTradeVisit||partnerIndex!==-1&&(!players[partnerIndex]||players[partnerIndex].eliminated||partnerIndex===currentPlayer))return;
+     pinTradeVisit.partnerIndex=partnerIndex;
+     if(partnerIndex===-1&&!pinTradeVisit.castReady){
+       castMemberPins=shuffle(PIN_DESIGNS).slice(0,5).map(function(pin){return pin.id});
+       pinTradeVisit.castReady=true;
+     }
+     showPinTrading();
+   });
+ });
+ document.getElementById('pinChoiceSkip').addEventListener('click',finishPinTradersVisit);
+}
 function showPinTrading(){
  if(!pinTradeVisit||pinTradeVisit.playerIndex!==currentPlayer||gameOver||players[currentPlayer].eliminated)return;
- const playerIndex=currentPlayer,p=players[playerIndex];
- modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">📌 PIN TRADERS</div><h2>Trade a Little Park Magic</h2><p>'+esc(p.name)+' • '+new Set(p.pins||[]).size+' designs collected</p><p class="muted">You landed on Pin Traders! Choose the Cast Member or another player for one optional one-for-one trade. No money changes hands. The other player must accept a player trade.</p><h3>🧑‍💼 Cast Member’s Five Pins</h3><div class="pin-grid">'+castMemberPins.map(function(id){return pinMarkup(pinInfo(id),1,false)}).join('')+'</div>'+(p.pinTradesThisTurn>0?'<p class="gold">You have already traded this turn. You can trade again on your next turn.</p>':'<div class="pin-controls"><label>Your offer<select id="pinGive"></select></label><label>Trade with<select id="pinPartner"><option value="-1">Cast Member</option>'+players.map(function(other,i){return i!==playerIndex&&!other.eliminated?'<option value="'+i+'">'+esc(other.name)+'</option>':''}).join('')+'</select></label><label>Pin you want<select id="pinTake"></select></label></div><p id="pinTradeMessage" class="muted"></p>')+'<div class="actions">'+(p.pinTradesThisTurn>0?'':'<button class="primary" id="pinOffer">Trade / Make Offer</button>')+'<button class="secondary" id="pinTradeClose">Finish Visit</button></div></div></div>';
+ const playerIndex=currentPlayer,p=players[playerIndex],partnerIndex=pinTradeVisit.partnerIndex;
+ if(partnerIndex===null||partnerIndex===undefined){showPinPartnerChoice();return}
+ if(partnerIndex!==-1&&(!players[partnerIndex]||players[partnerIndex].eliminated||partnerIndex===playerIndex)){showPinPartnerChoice();return}
+ const available=partnerIndex===-1?castMemberPins:(players[partnerIndex].pins||[]);
+ const partnerName=partnerIndex===-1?'Cast Member':players[partnerIndex].name;
+ const display=[...new Set(available)].map(function(id){return pinMarkup(pinInfo(id),available.filter(function(value){return value===id}).length,false)}).join('');
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">📌 PIN TRADERS</div><h2>Trade with '+esc(partnerName)+'</h2><p>'+esc(p.name)+' • '+new Set(p.pins||[]).size+' designs collected</p><p class="muted">One optional one-for-one trade. No money changes hands. Player offers require acceptance.</p><h3>'+(partnerIndex===-1?'🧑‍💼 Cast Member’s Five Pins':esc(partnerName)+' — All Owned Pins')+'</h3>'+(available.length?'<div class="pin-grid">'+display+'</div>':'<p>This player has no pins to trade yet.</p>')+(p.pinTradesThisTurn>0?'<p class="gold">Trade complete! You have used your trade for this turn.</p>':'<div class="pin-controls"><label>Your offer<select id="pinGive"></select></label><label>Pin you want<select id="pinTake"></select></label></div><p id="pinTradeMessage" class="muted"></p>')+'<div class="actions">'+(p.pinTradesThisTurn>0?'':'<button class="primary" id="pinOffer">Trade / Make Offer</button><button class="secondary" id="pinChooseAgain">Choose Someone Else</button>')+'<button class="secondary" id="pinTradeClose">Finish Visit</button></div></div></div>';
  document.getElementById('pinTradeClose').addEventListener('click',finishPinTradersVisit);
  if(p.pinTradesThisTurn>0)return;
+ document.getElementById('pinChooseAgain').addEventListener('click',showPinPartnerChoice);
  function options(ids){return [...new Set(ids)].map(function(id){const pin=pinInfo(id),quantity=ids.filter(function(value){return value===id}).length;return '<option value="'+id+'">'+esc(pin.name)+' ('+quantity+')</option>'}).join('')}
- const give=document.getElementById('pinGive'),partner=document.getElementById('pinPartner'),take=document.getElementById('pinTake'),offer=document.getElementById('pinOffer');
+ const give=document.getElementById('pinGive'),take=document.getElementById('pinTake'),offer=document.getElementById('pinOffer');
  give.innerHTML=options(p.pins||[]);
  function update(){
-   const partnerIndex=Number(partner.value),available=partnerIndex===-1?castMemberPins:(players[partnerIndex].pins||[]);
-   take.innerHTML=options(available.filter(function(id){return id!==give.value}));
+   const pins=partnerIndex===-1?castMemberPins:(players[partnerIndex].pins||[]);
+   take.innerHTML=options(pins.filter(function(id){return id!==give.value}));
    offer.disabled=!give.value||!take.value;
-   document.getElementById('pinTradeMessage').textContent=offer.disabled?'No different pin is available for this offer. Choose another pin or partner.':'';
+   document.getElementById('pinTradeMessage').textContent=offer.disabled?'No different pin is available for this offer. Choose another pin or trading partner.':'';
  }
- give.addEventListener('change',update);partner.addEventListener('change',update);update();
+ give.addEventListener('change',update);update();
  offer.addEventListener('click',function(){
    if(offer.disabled||!canTradePins(playerIndex))return;
-   const partnerIndex=Number(partner.value),giveId=give.value,takeId=take.value;
+   const giveId=give.value,takeId=take.value;
    if(partnerIndex===-1){if(executePinTrade(playerIndex,-1,giveId,takeId)){renderAll();showPinTrading()}return}
    turnLocked=true;renderAll();
    modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">📌 PLAYER TRADE OFFER</div><h2>'+esc(players[partnerIndex].name)+', would you like to trade?</h2><p>'+esc(p.name)+' offers <strong>'+esc(pinInfo(giveId).name)+'</strong> for your <strong>'+esc(pinInfo(takeId).name)+'</strong>.</p><div class="pin-grid">'+pinMarkup(pinInfo(giveId),1,false)+pinMarkup(pinInfo(takeId),1,false)+'</div><p>No money changes hands.</p><div class="actions"><button class="primary" id="pinTradeAccept">Accept Trade</button><button class="secondary" id="pinTradeDecline">Decline</button></div></div></div>';
