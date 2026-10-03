@@ -70,13 +70,14 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .pawn-closeup{position:fixed;inset:0;z-index:140;overflow:hidden;background:#07111f;pointer-events:none}.pawn-closeup-stage{position:absolute;left:0;top:0;transform-origin:0 0;transition:transform .5s ease-in-out;will-change:transform}.pawn-closeup .board{box-shadow:none}.pawn-closeup .space.current-space{z-index:2;overflow:visible}.pawn-closeup .token.moving{z-index:3}@media(prefers-reduced-motion:reduce){.pawn-closeup{display:none}.pawn-closeup-stage{transition:none}}
 .turn-panel{display:none!important}.shell:has(.game-layout){padding-left:14px}.pin-test-controls{margin-bottom:14px}.pin-test-controls a{color:var(--accent)}
 .pin-stashes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.pin-stashes>section{min-width:0;border:1px solid var(--border);border-radius:12px;padding:10px;background:#0b1527}.pin-stashes h3{margin:0;font-size:15px}.pin-stashes .pin-grid{grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:8px;margin:10px 0 0}.pin-stashes .pin-art{width:48px;height:48px;font-size:26px}.pin-stashes .pin-card{padding:9px 5px}@media(max-width:480px){.pin-stashes{grid-template-columns:1fr}}
+.pin-exchange-modal{text-align:center}.pin-exchange-names{display:flex;justify-content:space-between;gap:16px;margin:20px 10px 0}.pin-exchange-names strong{max-width:45%;overflow-wrap:anywhere}.pin-exchange-stage{height:270px;position:relative;overflow:hidden}.pin-exchange-piece{position:absolute;top:65px;width:105px;z-index:2}.pin-exchange-piece.give{left:10px}.pin-exchange-piece.take{right:10px}.pin-exchange-piece .pin-card{margin:0;min-height:145px}.pin-exchange-sparkles{position:absolute;inset:105px 0 auto;color:var(--gold);font-size:28px;letter-spacing:14px;opacity:.7;pointer-events:none}.pin-exchange-piece .pin-art{box-shadow:0 0 16px #fde68a66,0 4px 7px #0005}
 </style>
 </head>
 <body>
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.73 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.74 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -2012,6 +2013,33 @@ function showPinPartnerChoice(){
  });
  document.getElementById('pinChoiceSkip').addEventListener('click',finishPinTradersVisit);
 }
+async function animatePinExchange(playerIndex,partnerIndex,giveId,takeId){
+ if(reducedMotion())return;
+ const p=players[playerIndex],partnerName=partnerIndex===-1?'Cast Member':players[partnerIndex].name;
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal pin-exchange-modal"><div class="badge">✨ TRADE COMPLETE</div><h2>A Little Pin Magic!</h2><div class="pin-exchange-names"><strong>'+esc(p.name)+'</strong><strong>'+esc(partnerName)+'</strong></div><div class="pin-exchange-stage" id="pinExchangeStage"><div class="pin-exchange-piece give" id="pinExchangeGive">'+pinMarkup(pinInfo(giveId),1,false)+'</div><div class="pin-exchange-piece take" id="pinExchangeTake">'+pinMarkup(pinInfo(takeId),1,false)+'</div><div class="pin-exchange-sparkles" aria-hidden="true">✨ ✦ ✨</div></div><p id="pinExchangeCaption" aria-live="polite">Passing your pins to their new owners…</p></div></div>';
+ try{
+   const stage=document.getElementById('pinExchangeStage'),give=document.getElementById('pinExchangeGive'),take=document.getElementById('pinExchangeTake');
+   if(!stage||!give||!take||!give.animate||!take.animate)return;
+   const distance=Math.max(0,stage.clientWidth-give.offsetWidth-20);
+   await wait(200);
+   const outgoing=give.animate([
+     {transform:'translate(0,0) rotate(0deg)',offset:0},
+     {transform:'translate('+(distance*.5)+'px,-45px) rotate(12deg)',offset:.5},
+     {transform:'translate('+distance+'px,0) rotate(0deg)',offset:1}
+   ],{duration:1500,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
+   const incoming=take.animate([
+     {transform:'translate(0,0) rotate(0deg)',offset:0},
+     {transform:'translate('+(-distance*.5)+'px,45px) rotate(-12deg)',offset:.5},
+     {transform:'translate('+(-distance)+'px,0) rotate(0deg)',offset:1}
+   ],{duration:1500,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
+   await Promise.all([outgoing.finished,incoming.finished]);
+   const caption=document.getElementById('pinExchangeCaption');
+   if(caption)caption.textContent=p.name+' received '+pinInfo(takeId).name+' • '+partnerName+' received '+pinInfo(giveId).name;
+   await wait(650);
+ }catch(animationError){
+   // The completed trade stays valid even if the visual animation is interrupted.
+ }
+}
 function showPinTrading(){
  if(!pinTradeVisit||pinTradeVisit.playerIndex!==currentPlayer||gameOver||players[currentPlayer].eliminated)return;
  const playerIndex=currentPlayer,p=players[playerIndex],partnerIndex=pinTradeVisit.partnerIndex;
@@ -2036,18 +2064,28 @@ function showPinTrading(){
    document.getElementById('pinTradeMessage').textContent=offer.disabled?'No different pin is available for this offer. Choose another pin or trading partner.':'';
  }
  give.addEventListener('change',update);update();
- offer.addEventListener('click',function(){
+ offer.addEventListener('click',async function(){
    if(offer.disabled||!canTradePins(playerIndex))return;
    const giveId=give.value,takeId=take.value;
-   if(partnerIndex===-1){if(executePinTrade(playerIndex,-1,giveId,takeId)){renderAll();showPinTrading()}return}
+   if(partnerIndex===-1){
+     offer.disabled=true;
+     if(executePinTrade(playerIndex,-1,giveId,takeId)){
+       turnLocked=true;renderAll();
+       await animatePinExchange(playerIndex,-1,giveId,takeId);
+       renderAll();showPinTrading();
+     }else offer.disabled=false;
+     return;
+   }
    turnLocked=true;renderAll();
    modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">📌 PLAYER TRADE OFFER</div><h2>'+esc(players[partnerIndex].name)+', would you like to trade?</h2><p>'+esc(p.name)+' offers <strong>'+esc(pinInfo(giveId).name)+'</strong> for your <strong>'+esc(pinInfo(takeId).name)+'</strong>.</p><div class="pin-grid">'+pinMarkup(pinInfo(giveId),1,false)+pinMarkup(pinInfo(takeId),1,false)+'</div><p>No money changes hands.</p><div class="actions"><button class="primary" id="pinTradeAccept">Accept Trade</button><button class="secondary" id="pinTradeDecline">Decline</button></div></div></div>';
    let settled=false;
-   function complete(accept){
+   async function complete(accept){
      if(settled)return;settled=true;
-     if(accept)executePinTrade(playerIndex,partnerIndex,giveId,takeId);
-     else addLog(players[partnerIndex].name+' declined the pin trade.');
-     turnLocked=true;renderAll();showPinTrading();
+     const traded=accept&&executePinTrade(playerIndex,partnerIndex,giveId,takeId);
+     if(!accept)addLog(players[partnerIndex].name+' declined the pin trade.');
+     turnLocked=true;renderAll();
+     if(traded)await animatePinExchange(playerIndex,partnerIndex,giveId,takeId);
+     renderAll();showPinTrading();
    }
    document.getElementById('pinTradeAccept').addEventListener('click',function(){complete(true)});
    document.getElementById('pinTradeDecline').addEventListener('click',function(){complete(false)});
