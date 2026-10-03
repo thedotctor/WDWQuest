@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.26</title>
+<title>WDWQuest Board Game v0.27</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -21,7 +21,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .log{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden}.log summary{cursor:pointer;list-style:none;padding:12px 14px;font-weight:900;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:10px}.log summary::-webkit-details-marker{display:none}.log summary:after{content:'▸';color:var(--accent);font-size:18px}.log[open] summary:after{content:'▾'}.log[open] summary{border-bottom:1px solid var(--border)}.log-list{display:grid;gap:6px;max-height:180px;overflow:auto;padding:12px 14px}.log-item{font-size:13px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:5px}
 .landed-card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;background:#0b1527;border:1px solid var(--border);border-radius:14px;padding:12px;margin:12px 0 4px}.landed-icon{font-size:34px;line-height:1}.landed-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:900}.landed-name{font-size:18px;font-weight:950;margin:2px 0}.landed-details{display:flex;gap:7px;flex-wrap:wrap;margin-top:5px}.landed-detail{font-size:11px;border:1px solid var(--border);border-radius:999px;padding:4px 7px;color:var(--muted)}
 
-.snack-picture{margin:7px auto 5px;width:min(100%,500px);height:min(32vh,260px);border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#091526;box-shadow:0 8px 18px rgba(0,0,0,.24);display:grid;place-items:center}.snack-picture img{display:block;width:auto;height:auto;max-width:92%;max-height:90%;object-fit:contain;border-radius:10px}.snack-name-mask{position:absolute;pointer-events:none;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(238,226,188,.20);border:1px solid rgba(255,255,255,.16);box-shadow:0 0 14px rgba(0,0,0,.10);transform:rotate(-1deg)}.snack-picture{position:relative}.snack-load-error{padding:24px;text-align:center;color:var(--muted);font-weight:800}.snack-credit{text-align:center;color:var(--muted);font-size:9px;line-height:1.2;margin:0 auto 6px;max-width:500px}.snack-credit a{color:var(--accent);text-decoration:none}.snack-kicker{text-align:center;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;margin-top:3px}.snack-question{text-align:center;font-size:clamp(20px,3vw,27px);font-weight:950;line-height:1.1;margin:5px 0 7px}.snack-reward{text-align:center;color:var(--gold);font-size:13px;font-weight:900;margin:0 0 7px}.snack-modal{width:min(700px,calc(100vw - 18px));max-height:96dvh;overflow:hidden;padding:12px 14px}.snack-modal>.badge{display:block;width:max-content;margin:0 auto 3px}.snack-modal .answers{grid-template-columns:1fr 1fr!important;gap:7px}.snack-modal .answer{padding:9px 10px;min-height:44px;font-size:14px;line-height:1.15}.snack-modal .result{margin-top:7px;min-height:0;font-size:13px}.snack-modal .actions{margin-top:7px}.snack-modal .actions button{padding:8px 12px}@media(max-height:700px){.snack-picture{height:min(27vh,190px)}.snack-question{font-size:20px}.snack-modal .answer{min-height:40px;padding:7px 9px}}@media(max-width:520px){.snack-modal{padding:10px}.snack-picture{height:min(29vh,210px)}.snack-modal .answer{font-size:12px;padding:7px;min-height:42px}.snack-kicker{font-size:9px}.snack-reward{font-size:11px}}
+.snack-picture{margin:7px auto 5px;width:min(100%,430px);aspect-ratio:4/3;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#091526;box-shadow:0 8px 18px rgba(0,0,0,.24);display:grid;place-items:center}.snack-picture img{display:block;width:100%;height:100%;object-fit:cover}.snack-name-mask{position:absolute;pointer-events:none;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(238,226,188,.20);border:1px solid rgba(255,255,255,.16);box-shadow:0 0 14px rgba(0,0,0,.10);transform:rotate(-1deg)}.snack-picture{position:relative}.snack-load-error{padding:24px;text-align:center;color:var(--muted);font-weight:800}.snack-credit{text-align:center;color:var(--muted);font-size:9px;line-height:1.2;margin:0 auto 6px;max-width:500px}.snack-credit a{color:var(--accent);text-decoration:none}.snack-kicker{text-align:center;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;margin-top:3px}.snack-question{text-align:center;font-size:clamp(20px,3vw,27px);font-weight:950;line-height:1.1;margin:5px 0 7px}.snack-reward{text-align:center;color:var(--gold);font-size:13px;font-weight:900;margin:0 0 7px}.snack-modal{width:min(700px,calc(100vw - 18px));max-height:96dvh;overflow:hidden;padding:12px 14px}.snack-modal>.badge{display:block;width:max-content;margin:0 auto 3px}.snack-modal .answers{grid-template-columns:1fr 1fr!important;gap:7px}.snack-modal .answer{padding:9px 10px;min-height:44px;font-size:14px;line-height:1.15}.snack-modal .result{margin-top:7px;min-height:0;font-size:13px}.snack-modal .actions{margin-top:7px}.snack-modal .actions button{padding:8px 12px}@media(max-height:700px){.snack-picture{width:min(100%,360px);aspect-ratio:4/3}.snack-question{font-size:20px}.snack-modal .answer{min-height:40px;padding:7px 9px}}@media(max-width:520px){.snack-modal{padding:10px}.snack-picture{width:min(100%,360px);aspect-ratio:4/3}.snack-modal .answer{font-size:12px;padding:7px;min-height:42px}.snack-kicker{font-size:9px}.snack-reward{font-size:11px}}
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:16px;z-index:100}.modal{width:min(620px,96vw);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:18px}.modal h2{margin:0 0 8px}.question{font-size:clamp(20px,4vw,30px);line-height:1.25;margin:15px 0}.answers{display:grid;grid-template-columns:1fr 1fr;gap:9px}.answer{background:#14223a;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:left;font-weight:800}.answer.correct{outline:2px solid var(--good)}.answer.wrong{outline:2px solid var(--bad)}.result{font-weight:850;margin-top:12px;min-height:28px}.hidden{display:none!important}
 @media(max-width:760px){.scoreboard{grid-template-columns:1fr 1fr}.player-row{grid-template-columns:1fr}.player-row label{margin-bottom:-6px}.player-row .secondary{width:100%}.answers{grid-template-columns:1fr}.shell{padding:10px}.panel{padding:14px}.board{width:1020px}}
 @media(max-width:420px){.board{padding:2px;border-radius:12px}.space{padding:4px;border-radius:6px}.token{width:19px;height:19px;font-size:12px}.token:after{width:7px;height:3px;bottom:-3px}.dice{min-width:72px;min-height:72px}.center{padding:7px}.center .actions{display:grid;width:100%;gap:7px}.center .actions button{width:100%}.scoreboard{gap:6px}.player-card{padding:8px}}
@@ -31,7 +31,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.26 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.27 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -53,18 +53,19 @@ function snackNameMask(snack){
  return '<div class="snack-name-mask" id="snackNameMask" aria-hidden="true"></div>';
 }
 function positionSnackNameMask(snack,photo){
- if(!snack.mask||!photo)return;
+ if(!snack.mask||!photo||!photo.naturalWidth||!photo.naturalHeight)return;
  const mask=document.getElementById('snackNameMask');
  const frame=document.getElementById('snackPicture');
  if(!mask||!frame)return;
- const pr=photo.getBoundingClientRect();
- const fr=frame.getBoundingClientRect();
+ const fw=frame.clientWidth,fh=frame.clientHeight;
+ const scale=Math.max(fw/photo.naturalWidth,fh/photo.naturalHeight);
+ const rw=photo.naturalWidth*scale,rh=photo.naturalHeight*scale;
+ const ox=(fw-rw)/2,oy=(fh-rh)/2;
  const m=snack.mask;
- const ox=pr.left-fr.left,oy=pr.top-fr.top;
- mask.style.left=(ox+(m.left/100)*pr.width)+'px';
- mask.style.top=(oy+(m.top/100)*pr.height)+'px';
- mask.style.width=((m.width/100)*pr.width)+'px';
- mask.style.height=((m.height/100)*pr.height)+'px';
+ mask.style.left=(ox+(m.left/100)*rw)+'px';
+ mask.style.top=(oy+(m.top/100)*rh)+'px';
+ mask.style.width=((m.width/100)*rw)+'px';
+ mask.style.height=((m.height/100)*rh)+'px';
 }
 function refillSnackDeck(){
  snackDeck=shuffle(SNACK_BREAKS.map(function(s,i){return i}));
