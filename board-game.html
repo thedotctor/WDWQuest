@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.85</title>
+<title>WDWQuest Board Game v0.86</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -82,7 +82,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.85 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.86 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -1002,7 +1002,7 @@ const modalRoot=document.getElementById('modalRoot');
 function esc(s){return String(s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
 function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=b[i];b[i]=b[j];b[j]=t}return b}
 function showSetup(){
- app.innerHTML='<section class="panel"><div class="badge" id="countBadge">1 player</div><h1>🎲 WDWQuest Board Game</h1><p class="muted">A first playable mix of trivia, attraction ownership, rent, Disney Dollars, category badges, and a final castle challenge.</p><h3>Who is playing?</h3><p class="muted">Play solo or add up to 8 players. The other WDWQuest games stay at 1–4.</p><div class="setup-grid" id="setupGrid"></div><div class="actions"><button class="primary" id="startGame">Continue to Token Selection</button><button class="secondary" id="addPlayer">Add Player</button></div><div class="muted" id="setupMsg" style="margin-top:10px">Each player starts with $1,500 Disney Dollars.</div></section>';
+ app.innerHTML='<section class="panel"><div class="badge" id="countBadge">1 player</div><h1>🎲 WDWQuest Board Game</h1><p class="muted">A first playable mix of trivia, attraction ownership, rent, Disney Dollars, category badges, and a final castle challenge.</p><h3>Who is playing?</h3><p class="muted">Play solo or add up to 8 players. The other WDWQuest games stay at 1–4.</p><div class="setup-grid" id="setupGrid"></div><div class="actions"><button class="primary" id="startGame">Continue to Token Selection</button><button class="secondary" id="addPlayer">Add Player</button></div><div class="muted" id="setupMsg" style="margin-top:10px">Each player starts with $1,000 Disney Dollars.</div></section>';
  const grid=document.getElementById('setupGrid');
  const add=document.getElementById('addPlayer');
  const count=document.getElementById('countBadge');
@@ -1023,7 +1023,7 @@ function showSetup(){
    const cleaned=setupPlayers.map(function(p,i){return (p.name||'').trim()||('Player '+(i+1))});
    const keys=cleaned.map(function(x){return x.toLowerCase()});
    if(new Set(keys).size!==keys.length){document.getElementById('setupMsg').textContent='Give each player a different name.';document.getElementById('setupMsg').className='bad';return}
-   players=cleaned.map(function(name){return {name:name,cash:1500,pos:0,badges:[],props:[],autographs:[],token:null}});
+   players=cleaned.map(function(name){return {name:name,cash:1000,pos:0,badges:[],props:[],autographs:[],token:null}});
    showTokenSetup(0);
  });
  draw();
