@@ -1,5 +1,10 @@
 # WDWQuest Changelog
 
+## v0.11.1 - Snack Photo Placard Blur
+- Added blur masks to all 8 Steven Miller Snack Break photos that use visible food-name placards.
+- Kept the food itself visible while hiding the giveaway label area.
+- Updated the dedicated Snack Break tester to use the same masked 30-photo deck as the live board.
+
 ## v0.11.0 - Attraction Purchase Flow
 - Unowned attractions now check affordability before starting trivia.
 - If the player can afford the attraction, the game asks whether they want to try to buy it.
