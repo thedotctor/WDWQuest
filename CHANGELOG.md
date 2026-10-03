@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.11.6 - Square Snack Photo Frame
+- Returned Snack Break photos to full-bleed fill.
+- Changed the Snack Break photo window to a more square 4:3 frame to reduce aggressive cropping while keeping the popup compact.
+- Updated placard mask positioning to account for object-fit cover cropping.
+- Updated the dedicated Snack Break tester to match.
+
 ## v0.11.5 - Extra Snack Photo Zoom-Out
 - Snack Break photos now render smaller inside the same compact photo frame, creating visible breathing room around the image.
 - This makes the food photo feel genuinely zoomed out instead of merely switching crop modes.
