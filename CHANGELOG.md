@@ -1,5 +1,12 @@
 # WDWQuest Changelog
 
+## v0.11.3 - Compact Snack Break Popup
+- Reworked Snack Break to fit inside the popup without requiring a scroll to reach the answer choices on normal screens.
+- Removed the redundant landed-space card from inside the Snack Break popup.
+- Reduced photo height and tightened spacing, credits, reward text, and buttons.
+- Kept all four multiple-choice answers visible in a 2×2 grid, including on narrower screens.
+- Updated the dedicated Snack Break tester to use the same compact layout.
+
 ## v0.11.2 - Green Leaf Placard Blur Fix
 - Moved the Green Leaf Salad Snack Break blur from the lower-middle to the actual lower-right food placard.
 - Enlarged the Green Leaf Salad mask to cover both the dish name and smaller ingredient text.
