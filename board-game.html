@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.63</title>
+<title>WDWQuest Board Game v0.64</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -56,13 +56,14 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .autograph-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}.autograph-page{background:#fff7dc;color:#27314b;border:2px solid #d6b663;border-radius:12px;padding:14px;text-align:center}.autograph-page.missing{background:#18243a;color:#a4b2ca;border-color:#34425a}.autograph-signature{font-family:"Brush Script MT","Segoe Script",cursive;font-style:italic;font-size:28px;line-height:1.3;margin:12px 0;overflow-wrap:break-word}.autograph-character{font-size:58px}.autograph-modal{position:relative;overflow:hidden}.autograph-modal .autograph-page{position:relative;z-index:1;margin:16px auto;max-width:330px}.autograph-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}.autograph-confetti i{position:absolute;top:-20px;width:8px;height:13px;background:var(--confetti-color);animation:autographFall 2.8s ease-in forwards;animation-delay:var(--confetti-delay)}@keyframes autographFall{to{transform:translateY(650px) rotate(660deg);opacity:0}}@media(prefers-reduced-motion:reduce){.autograph-confetti i{animation:none;top:var(--confetti-top);transform:rotate(25deg)}}
 .autograph-portrait{position:relative;overflow:hidden;width:220px;height:220px;max-width:100%;margin:0 auto 8px;border-radius:12px;background:#fff}.autograph-portrait img{width:100%;height:100%;object-fit:contain;display:block}.autograph-portrait.small{width:120px;height:120px}.autograph-portrait.crop img{position:absolute;top:0;left:0;width:220%;height:auto;max-width:none;object-fit:unset}.autograph-portrait.crop-right img{left:-100%}.autograph-image-credit{display:block;font-size:9px;line-height:1.3;margin-bottom:9px}.autograph-image-credit a{color:#536480}.autograph-picture-fallback{font-size:64px;line-height:220px}.autograph-portrait.small .autograph-picture-fallback{font-size:48px;line-height:120px}.autograph-portrait img[hidden]{display:none}.autograph-locked{font-size:40px;margin:20px 0}
 .player-card.eliminated{opacity:.6;border-color:#d76a6a}.player-card.eliminated .bad{font-weight:850}
+.rent-pass-ready{background:linear-gradient(135deg,#166744,#234b43);color:#fff5bc;border:2px solid #ffd166;box-shadow:0 0 10px #ffd16688,0 0 24px #ffd16644;animation:rentPassGlow 1.6s ease-in-out infinite alternate}@keyframes rentPassGlow{to{box-shadow:0 0 17px #ffd166cc,0 0 32px #ffd16666}}@media(prefers-reduced-motion:reduce){.rent-pass-ready{animation:none}}
 </style>
 </head>
 <body>
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.63 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.64 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -1380,7 +1381,7 @@ function showRentPayment(spaceIndex){
  const visitorIndex=currentPlayer,p=players[visitorIndex],ownerIndex=owners[spaceIndex],owner=players[ownerIndex],s=SPACES[spaceIndex],rent=rentForSpace(spaceIndex);
  turnLocked=true;renderAll();
  const canPay=p.cash>=rent,hasPass=p.rentPasses>0;
- modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">💵 RENT DUE</div>'+landedSpotMarkup(spaceIndex,null)+'<h2>'+esc(p.name)+', rent is due!</h2><p>This property belongs to <strong>'+esc(owner.name)+'</strong>. You owe <strong>$'+rent+'</strong> in rent.</p><p>Your bank: <strong>$'+p.cash.toLocaleString()+'</strong> • Magic Rent Passes: '+(p.rentPasses||0)+'</p><div class="actions"><button class="primary" id="rentPay" '+(canPay?'':'disabled')+'>Pay $'+rent+'</button><button class="secondary" id="rentPass" '+(hasPass?'':'disabled')+'>Use Magic Rent Pass</button><button class="secondary" id="rentBroke" '+(canPay?'disabled':'')+'>I spent all my money at Disney!</button></div><p class="muted">A Magic Rent Pass lets the bank pay the owner instead. If you cannot afford rent and choose the last option, you hand over your remaining money and are eliminated from this game. Your properties return to the bank.</p></div></div></div>';
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">💵 RENT DUE</div>'+landedSpotMarkup(spaceIndex,null)+'<h2>'+esc(p.name)+', rent is due!</h2><p>This property belongs to <strong>'+esc(owner.name)+'</strong>. You owe <strong>$'+rent+'</strong> in rent.</p><p>Your bank: <strong>$'+p.cash.toLocaleString()+'</strong> • Magic Rent Passes: '+(p.rentPasses||0)+'</p><div class="actions"><button class="primary" id="rentPay" '+(canPay?'':'disabled')+'>Pay $'+rent+'</button><button class="secondary '+(hasPass?'rent-pass-ready':'')+'" id="rentPass" '+(hasPass?'':'disabled')+'>Use Magic Rent Pass</button><button class="secondary" id="rentBroke" '+(canPay?'disabled':'')+'>I spent all my money at Disney!</button></div><p class="muted">A Magic Rent Pass lets the bank pay the owner instead. If you cannot afford rent and choose the last option, you hand over your remaining money and are eliminated from this game. Your properties return to the bank.</p></div></div></div>';
  let settled=false;
  function settle(method){
    if(settled||gameOver||currentPlayer!==visitorIndex||p.eliminated)return;
@@ -1792,27 +1793,7 @@ function showRules(){
  modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><h2>Quick Rules</h2><p><strong>Autograph Book:</strong> Correct answers (except the winning Final Challenge) have a 25% chance of a surprise character autograph with confetti and a $50 reward. Three Magic &amp; Mischief cards guarantee an autograph. Collect all 50; each new visit chooses a missing character first. After completing your book, repeat autographs still pay $50. Open your book from your player card. Autographs are optional.</p><p>The board has <strong>72 spaces</strong> (17 park spaces on each side, plus four transportation corners). Each side is themed to one park: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom.</p><p>Choose a unique token, roll the die, and move around the board. When you land on an unowned attraction, the game checks whether you can afford it. If you can, choose whether to attempt the purchase; answering the park-themed trivia correctly buys it automatically. If you cannot afford it, your turn ends. Land on another player\'s property to see a rent popup. Choose to pay the rent or use a Magic Rent Pass (the bank pays the owner). If you cannot afford rent and choose &ldquo;I spent all my money at Disney!&rdquo;, your remaining money goes to the owner and you lose the game. Your turns are skipped, your pawn is removed, and your properties return to the bank. Remaining players continue toward the Castle Finale. The four middle-of-the-park <strong>Nighttime Show</strong> spaces cost $200 each and work as a set: rent is $25 with 1 show, $50 with 2, $100 with 3, and $200 with all 4.</p><p>All four corners are <strong>transportation hubs</strong>. If you land exactly on one, you may choose to roll again and travel that many extra spaces. Completing a full lap earns $200.</p><p><strong>Magic &amp; Mischief:</strong> Land on either card space on a park side to draw from the shared pile of 43 cards. Apply its reward, cost, movement, or special perk. Card travel plays the destination normally; backward travel does not collect the lap bonus. You may choose to use a Magic Rent Pass in the rent popup; the bank pays the owner. Five Security cards move your pawn to the center Security spot and skip your next turn. Resume from the space you left when you next roll; no lap bonus is paid for being sent to Security. Cards do not repeat until the deck is used up.</p><p>Each of the four parks has its own shuffled deck of <strong>50 questions</strong> (200 park questions total). Questions do not repeat within a park until its deck is used up.</p><p>Correct trivia earns category badges. <strong>Pixie Dust</strong> awards $100 for a correct answer and takes $100 for a wrong answer. <strong>Snack Break</strong> uses a shuffled deck of 30 real Disney food photos; identify the food from four answers to earn $50. Collect all six badges, then choose the <strong>Cinderella Castle Finale</strong> space in the center instead of rolling. Answer the Final Challenge correctly to win.</p><div class="actions"><button class="primary" id="closeRules">Got It</button></div></div></div>';
  document.getElementById('closeRules').addEventListener('click',closeModal);
 }
-function startRentDemo(mode){
- closeModal();
- const rentedSpace=SPACES.findIndex(function(s){return s.type==='property'&&!s.show});
- const visitorProperty=SPACES.findIndex(function(s,i){return i!==rentedSpace&&s.type==='property'&&!s.show});
- players=['Visiting Player','Property Owner','Next Player'].map(function(name,i){return {name:name,cash:1000,pos:i===0?rentedSpace:0,badges:[],props:[],autographs:[],token:TOKEN_OPTIONS[i].id,rentPasses:0,eliminated:false}});
- currentPlayer=0;owners={};owners[rentedSpace]=1;owners[visitorProperty]=0;
- players[1].props=[rentedSpace];players[0].props=[visitorProperty];
- gameOver=false;turnLocked=false;movingPlayer=-1;
- questionDecks={};lastQuestionsByBadge={};lastQuestion=-1;resetMagicDeck();
- const rent=rentForSpace(rentedSpace);
- players[0].cash=mode==='pass'||mode==='broke'?Math.max(0,rent-5):mode==='zero'?0:rent+50;
- players[0].rentPasses=mode==='pass'?1:0;
- renderGame();
- app.insertAdjacentHTML('afterbegin','<section class="panel" style="margin-bottom:12px"><div class="badge">RENT TEST • DEMO PLAYERS ONLY</div><p>Pick a scenario. Each button resets this demo; it does not change a regular game.</p><div class="actions"><button class="primary" data-rent-demo="pay">Test Pay Rent</button><button class="secondary" data-rent-demo="pass">Test Magic Rent Pass</button><button class="secondary" data-rent-demo="broke">Test Out of Money</button><button class="secondary" data-rent-demo="zero">Test $0 Balance</button><a class="secondary" href="board-game.html">Back to Regular Game</a></div><p class="mini">Watch the visiting player and owner balances. The out-of-money option pays the remaining cash and removes the visiting player. Their property becomes available again, and play moves to the owner.</p></section>');
- app.querySelectorAll('[data-rent-demo]').forEach(function(button){button.addEventListener('click',function(){startRentDemo(button.dataset.rentDemo)})});
- addLog('Rent demo: '+mode+'.');
- if(mode==='choose')setStatus('Choose a rent test above.');
- else showRentPayment(rentedSpace);
-}
-if(new URLSearchParams(window.location.search).get('rentTest')==='1')startRentDemo('choose');
-else showSetup();
+showSetup();
 </script>
 </body>
 </html>
