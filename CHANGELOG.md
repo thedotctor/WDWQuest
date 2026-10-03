@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.11.2 - Green Leaf Placard Blur Fix
+- Moved the Green Leaf Salad Snack Break blur from the lower-middle to the actual lower-right food placard.
+- Enlarged the Green Leaf Salad mask to cover both the dish name and smaller ingredient text.
+- Increased Snack Break placard blur strength.
+- Updated the dedicated Snack Break test page to load Green Leaf Salad first for immediate verification.
+
 ## v0.11.1 - Snack Photo Placard Blur
 - Added blur masks to all 8 Steven Miller Snack Break photos that use visible food-name placards.
 - Kept the food itself visible while hiding the giveaway label area.
