@@ -1,5 +1,16 @@
 # WDWQuest Changelog
 
+## v0.11.7 - Nighttime Show Property Set
+- Added four Nighttime Show spaces without increasing the 62-space board.
+- Magic Kingdom middle: Happily Ever After.
+- EPCOT middle: Luminous: The Symphony of Us.
+- Hollywood Studios middle: Fantasmic!.
+- Animal Kingdom middle: Tree of Life Awakenings.
+- Each show costs $200 and uses that park's trivia to purchase.
+- Show rent scales as one player collects the set: 1 show = $25, 2 = $50, 3 = $100, 4 = $200.
+- Moved Cinderella Castle Finale one space left so Magic Kingdom could keep its final challenge while Happily Ever After occupies the exact center.
+- Preserved Test Track and Millennium Falcon: Smugglers Run by shifting them into adjacent spaces.
+
 ## v0.11.6 - Square Snack Photo Frame
 - Returned Snack Break photos to full-bleed fill.
 - Changed the Snack Break photo window to a more square 4:3 frame to reduce aggressive cropping while keeping the popup compact.
