@@ -1,5 +1,12 @@
 # WDWQuest Changelog
 
+## v0.12.3 - 3D Board Game Pawns
+- Replaced the Board Game's flat emoji-style pieces with 12 collectible 3D pawn designs.
+- Added Castle, Monorail, Spaceship Earth, Tree of Life, Fireworks, Teacup, Pirate Wheel, Rocket, Dole Whip, Magic Wand, Hollywood Spotlight, and Safari Compass choices.
+- The token selector, player tabs, scoreboard, and board movement all show the selected 3D pawn.
+- 3D pieces retain the existing movement camera tracking, hop animation, and active-piece glow.
+- Packed the pawn artwork into an optimized browser-loaded sprite to keep the game responsive.
+
 ## v0.12.2 - Moving Piece Tracking
 - Added camera-style tracking that follows the active piece as it moves from space to space.
 - The moving pawn now gets a stronger zoom and glow so it stays easy to see.
