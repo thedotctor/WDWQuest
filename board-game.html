@@ -1222,7 +1222,10 @@ function renderTokens(){
  const securitySpot=document.getElementById('securitySpot');
  if(securitySpot)securitySpot.classList.remove('current-space');
  players.forEach(function(p,i){
-   if(i!==currentPlayer||p.eliminated)return;
+   if(p.eliminated)return;
+   const active=players[currentPlayer];
+   const sharesActiveSpace=active&&!active.eliminated&&(p.inSecurity?!!active.inSecurity:!active.inSecurity&&p.pos===active.pos);
+   if(i!==currentPlayer&&sharesActiveSpace)return;
    const el=document.getElementById(p.inSecurity?'securityTokens':'tokens'+p.pos);
    if(el){const tok=tokenInfo(p.token);el.innerHTML+='<span class="token p'+i+(i===movingPlayer?' moving':'')+'" style="--token-x:'+tok.x+'%;--token-y:'+tok.y+'%;" title="'+esc(p.name)+' - '+esc(tok.name)+'"></span>';}
  });
