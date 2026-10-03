@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.50</title>
+<title>WDWQuest Board Game v0.51</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -29,10 +29,10 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .key-badges{margin:6px 0 9px;padding-left:19px;color:var(--muted);font-size:12px;line-height:1.6}
 
 /* Keep the earlier side-space styling and use it on all four sides. */
-.shell:has(.game-layout){max-width:none;padding-left:170px}
-.turn-panel{width:150px}
+.shell:has(.game-layout){max-width:none;padding-left:clamp(10px,calc(176.44px - 3.5vw),170px)}
+.turn-panel{width:clamp(90px,calc(156.44px - 3.5vw),150px)}
 .board-wrap{overflow:visible;min-width:0}
-.board{width:1557px;max-width:90%;height:auto;aspect-ratio:1;margin-left:auto;margin-right:auto}
+.board{width:1790.55px;max-width:100%;height:auto;aspect-ratio:1;margin-left:auto;margin-right:auto}
 .space,.space.side-left,.space.side-right{padding:4px 6px}
 .space .icon,.space.side-left .icon,.space.side-right .icon{float:left;margin-right:5px}
 .space .sname,.space.side-left .sname,.space.side-right .sname{margin-top:0}
@@ -41,13 +41,17 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .space .tokens,.space.side-left .tokens,.space.side-right .tokens{left:auto;right:3px;max-width:70px;justify-content:flex-end}
 @media(max-width:760px){.shell:has(.game-layout){padding-left:10px}.turn-panel{width:138px}}
 @media(max-width:420px){.turn-panel{width:124px}}
+
+/* Give top and bottom titles the full width and wrap only between words. */
+.space .sname{overflow-wrap:normal;word-break:normal;hyphens:none}
+.space.side-top .icon,.space.side-bottom .icon{float:none;margin:0 0 3px}
 </style>
 </head>
 <body>
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.50 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.51 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -826,6 +830,7 @@ function renderGame(){
  if(missingToken>=0){showTokenSetup(missingToken);return}
  app.innerHTML='<div class="game-layout"><section class="scoreboard" id="scoreboard"></section><section class="panel turn-panel"><div class="turn" id="turnText"></div><button class="dice" id="dice" type="button" aria-label="Roll dice"><span class="die-cube" id="dieCube" aria-hidden="true"><span class="die-face front">⚀</span><span class="die-face right">⚁</span><span class="die-face top">⚂</span><span class="die-face bottom">⚃</span><span class="die-face left">⚄</span><span class="die-face back">⚅</span></span></button><div class="status" id="status">Roll the dice to begin.</div><div class="actions"><button class="primary" id="rollBtn">Roll Dice</button><button class="secondary" id="rulesBtn">Quick Rules</button></div></section><div class="board-wrap"><div class="board" id="board"><div class="center"><h1>WDWQuest</h1><button class="castle-finale-space" id="castleFinaleBtn" type="button"><span class="castle-icon">🏰</span><strong>Cinderella Castle Finale</strong><span class="finale-status" id="castleFinaleStatus">Collect all 6 badges to unlock</span></button><div class="mini" style="margin-top:10px">64-space four-park loop • the Castle Finale lives in the center</div></div></div></div><details class="board-key"><summary>🗺️ Board Key • What Each Space Does</summary><div class="key-grid"><div class="key-item"><div class="key-icon">🏰</div><div><strong>Magic Kingdom Side</strong><p>The top side of the board. Attractions and trivia here use Magic Kingdom questions.</p></div></div><div class="key-item"><div class="key-icon">🌐</div><div><strong>EPCOT Side</strong><p>The right side of the board. Attractions and trivia here use EPCOT questions.</p></div></div><div class="key-item"><div class="key-icon">🎬</div><div><strong>Hollywood Studios Side</strong><p>The bottom side of the board. Attractions and trivia here use Hollywood Studios questions.</p></div></div><div class="key-item"><div class="key-icon">🌳</div><div><strong>Animal Kingdom Side</strong><p>The left side of the board. Attractions and trivia here use Animal Kingdom questions.</p></div></div><div class="key-item"><div class="key-icon">🚝</div><div><strong>Transportation Corners</strong><p>All four corners are transportation hubs. Land exactly on one and you may choose to roll the die again for bonus movement.</p></div></div><div class="key-item"><div class="key-icon">🏠</div><div><strong>Attractions</strong><p>If unowned, the game checks your money first. If you can afford it, choose whether to try to buy it; a correct park-trivia answer completes the purchase. If you cannot afford it, your turn ends. Land on another player\'s attraction and pay the rent shown.</p></div></div><div class="key-item"><div class="key-icon">🎆</div><div><strong>Nighttime Show Set</strong><p>The middle of each park side is a $200 show space. Rent grows with the number of shows the same player owns: <span class="key-note">1=$25 • 2=$50 • 3=$100 • 4=$200</span>.</p></div></div><div class="key-item"><div class="key-icon">❓</div><div><strong>Trivia Challenge</strong><p>Answer a question themed to that side\'s park. Correct answers earn badges or $100 if you already have that badge.</p></div></div><div class="key-item"><div class="key-icon">🏅</div><div><strong>All 6 Badges</strong><ul class="key-badges">'+BADGES.map(function(b){return '<li>'+esc(b)+'</li>'}).join('')+'</ul><p>Collect all six to unlock the Cinderella Castle Finale.</p></div></div><div class="key-item"><div class="key-icon">✨</div><div><strong>Pixie Dust</strong><p>Answer the trivia question. Correct earns <span class="key-note">$100</span>; wrong loses <span class="key-note">$100</span>.</p></div></div><div class="key-item"><div class="key-icon">🍿</div><div><strong>Snack Break</strong><p>See one of 30 real Disney food photos and choose its name from four answers. Get it right and earn <span class="key-note">$50</span>.</p></div></div><div class="key-item"><div class="key-icon">🏰</div><div><strong>Cinderella Castle Finale</strong><p>The Castle is its own space in the center of the board. Once you have all 6 badges, choose the Castle instead of rolling and answer the Final Challenge correctly to win.</p></div></div><div class="key-item"><div class="key-icon">💵</div><div><strong>Complete a Lap</strong><p>Every time you pass the first transportation corner and complete a full lap, collect <span class="key-note">$200</span>.</p></div></div></div></details><details class="log"><summary>Game Log</summary><div class="log-list" id="logList"></div></details></div>';
  buildBoard();
+ updateBoardSpaceLayout();
  renderAll();
  document.getElementById('rollBtn').addEventListener('click',rollDice);
  document.getElementById('dice').addEventListener('click',rollDice);
@@ -833,7 +838,10 @@ function renderGame(){
  document.getElementById('rulesBtn').addEventListener('click',showRules);
 }
 function boardRect(i){
- const corner=7*1.10*1.22*1.25,along=(100-2*corner)/15,depth=corner;
+ const board=document.getElementById('board');
+ const previousOuter=Math.min(1557,(window.innerWidth-(window.innerWidth<=760?20:184))*.9);
+ const corner=(7*1.10*1.22*1.25)*(previousOuter-6)/board.clientWidth;
+ const along=(100-2*corner)/15,depth=corner;
  const side=Math.floor(i/16),step=i%16;
  const cornerSize=corner;
  if(step===0){
@@ -845,6 +853,23 @@ function boardRect(i){
  if(side===2)return {top:100-depth,left:100-offset-along,width:along,height:depth,side:'bottom'};
  return {top:100-offset-along,left:0,width:depth,height:along,side:'left'};
 }
+
+function updateBoardSpaceLayout(){
+ const board=document.getElementById('board');
+ if(!board)return;
+ SPACES.forEach(function(s,i){
+   const el=document.getElementById('space'+i);
+   if(!el)return;
+   const r=boardRect(i);
+   el.style.top=r.top+'%';el.style.left=r.left+'%';
+   el.style.width=r.width+'%';el.style.height=r.height+'%';
+ });
+ const inset=boardRect(0).width+.2;
+ const center=board.querySelector('.center');
+ if(center){center.style.left=inset+'%';center.style.top=inset+'%';center.style.width=(100-2*inset)+'%';center.style.height=(100-2*inset)+'%'}
+}
+window.addEventListener('resize',updateBoardSpaceLayout);
+
 function parkClass(park){
  return String(park||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
