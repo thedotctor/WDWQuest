@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.11.5 - Extra Snack Photo Zoom-Out
+- Snack Break photos now render smaller inside the same compact photo frame, creating visible breathing room around the image.
+- This makes the food photo feel genuinely zoomed out instead of merely switching crop modes.
+- Placard blur masks now position themselves using the photo's actual rendered rectangle, so they stay aligned after the photo size changes.
+- Updated the dedicated Snack Break tester to match.
+
 ## v0.11.4 - Full-Fit Snack Photos
 - Changed Snack Break photos from cropped cover mode to full-image contain mode.
 - Keeps the compact popup size while showing the entire food photo whenever possible.
