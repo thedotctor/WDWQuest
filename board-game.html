@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.29</title>
+<title>WDWQuest Board Game v0.30</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -25,17 +25,19 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:16px;z-index:100}.modal{width:min(620px,96vw);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:18px}.modal h2{margin:0 0 8px}.question{font-size:clamp(20px,4vw,30px);line-height:1.25;margin:15px 0}.answers{display:grid;grid-template-columns:1fr 1fr;gap:9px}.answer{background:#14223a;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:left;font-weight:800}.answer.correct{outline:2px solid var(--good)}.answer.wrong{outline:2px solid var(--bad)}.result{font-weight:850;margin-top:12px;min-height:28px}.hidden{display:none!important}
 @media(max-width:760px){.scoreboard{grid-template-columns:1fr 1fr}.player-row{grid-template-columns:1fr}.player-row label{margin-bottom:-6px}.player-row .secondary{width:100%}.answers{grid-template-columns:1fr}.shell{padding:10px}.panel{padding:14px}.board{width:1020px}}
 @media(max-width:420px){.board{padding:2px;border-radius:12px}.space{padding:4px;border-radius:6px}.token{width:19px;height:19px;font-size:12px}.token:after{width:7px;height:3px;bottom:-3px}.dice{min-width:72px;min-height:72px}.center{padding:7px}.center .actions{display:grid;width:100%;gap:7px}.center .actions button{width:100%}.scoreboard{gap:6px}.player-card{padding:8px}}
+#finaleFireworks{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;opacity:0;transition:opacity .18s ease}#finaleFireworks.active{opacity:1}
 </style>
 </head>
 <body>
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.29 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.30 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
 <div id="modalRoot"></div>
+<canvas id="finaleFireworks" aria-hidden="true"></canvas>
 <script>
 const QUESTION_BANK=[{"q":"Which Magic Kingdom attraction uses Doom Buggies?","a":"Haunted Mansion","choices":["Haunted Mansion","Peter Pan's Flight","Pirates of the Caribbean","Space Mountain"],"badge":"Magic Kingdom","diff":"Casual"},{"q":"Which EPCOT pavilion is home to Frozen Ever After?","a":"Norway","choices":["Norway","Germany","France","Canada"],"badge":"EPCOT","diff":"Casual"},{"q":"Which Hollywood Studios land is home to Slinky Dog Dash?","a":"Toy Story Land","choices":["Toy Story Land","Galaxy's Edge","Sunset Boulevard","Echo Lake"],"badge":"Hollywood Studios","diff":"Casual"},{"q":"Which Animal Kingdom attraction explores the Harambe Wildlife Reserve?","a":"Kilimanjaro Safaris","choices":["Kilimanjaro Safaris","Kali River Rapids","Na'vi River Journey","Expedition Everest"],"badge":"Animal Kingdom","diff":"Casual"},{"q":"Which resort has the monorail pass directly through its main building?","a":"Disney's Contemporary Resort","choices":["Disney's Contemporary Resort","Disney's Polynesian Village Resort","Disney's Grand Floridian Resort & Spa","Disney's Wilderness Lodge"],"badge":"Resorts & Dining","diff":"Casual"},{"q":"Which EPCOT attraction includes working greenhouses?","a":"Living with the Land","choices":["Living with the Land","Spaceship Earth","Mission: SPACE","Journey Into Imagination With Figment"],"badge":"EPCOT","diff":"Fan"},{"q":"Which Hollywood Studios restaurant seats many guests in classic convertible-style tables?","a":"Sci-Fi Dine-In Theater Restaurant","choices":["Sci-Fi Dine-In Theater Restaurant","50's Prime Time Café","Hollywood & Vine","The Hollywood Brown Derby"],"badge":"Hollywood Studios","diff":"Fan"},{"q":"Which Magic Kingdom land contains the Hall of Presidents?","a":"Liberty Square","choices":["Liberty Square","Frontierland","Main Street, U.S.A.","Adventureland"],"badge":"Magic Kingdom","diff":"Fan"},{"q":"What is the rooftop restaurant at Disney's Riviera Resort?","a":"Topolino's Terrace","choices":["Topolino's Terrace","California Grill","Toledo","Narcoossee's"],"badge":"Resorts & Dining","diff":"Fan"},{"q":"Which Disney Springs venue is themed to Jock Lindsey?","a":"Jock Lindsey's Hangar Bar","choices":["Jock Lindsey's Hangar Bar","The BOATHOUSE","Raglan Road","Wine Bar George"],"badge":"Resorts & Dining","diff":"Fan"},{"q":"Which Animal Kingdom walking trail is located in Asia?","a":"Maharajah Jungle Trek","choices":["Maharajah Jungle Trek","Gorilla Falls Exploration Trail","Discovery Island Trails","The Oasis Exhibits"],"badge":"Animal Kingdom","diff":"Expert"},{"q":"Which EPCOT restaurant sits inside the Mexico pavilion pyramid and overlooks a boat ride?","a":"San Angel Inn Restaurante","choices":["San Angel Inn Restaurante","La Hacienda de San Angel","Tutto Italia","Spice Road Table"],"badge":"EPCOT","diff":"Expert"},{"q":"Which resort is divided into villages named for Caribbean islands?","a":"Disney's Caribbean Beach Resort","choices":["Disney's Caribbean Beach Resort","Disney's Old Key West Resort","Disney's Port Orleans Resort - Riverside","Disney's Coronado Springs Resort"],"badge":"Resorts & Dining","diff":"Expert"},{"q":"What is the name of the large pool complex shared by Disney's Yacht Club and Beach Club Resorts?","a":"Stormalong Bay","choices":["Stormalong Bay","Lava Pool","Uzima Springs Pool","Big Blue Pool"],"badge":"Resorts & Dining","diff":"Expert"},{"q":"Which Magic Kingdom restaurant is divided into colonial-era rooms named for historical figures?","a":"Liberty Tree Tavern","choices":["Liberty Tree Tavern","The Crystal Palace","Columbia Harbour House","The Diamond Horseshoe"],"badge":"Magic Kingdom","diff":"Expert"},{"q":"Before Tiana's Bayou Adventure, what was here?","a":"Splash Mountain","choices":["Splash Mountain","The Living Seas","The Great Movie Ride","World of Motion"],"badge":"Disney History","diff":"Expert"},{"q":"Before Mickey & Minnie's Runaway Railway, what was here?","a":"The Great Movie Ride","choices":["The Great Movie Ride","The Living Seas","World of Motion","Maelstrom"],"badge":"Disney History","diff":"Expert"},{"q":"Before Frozen Ever After, what was here?","a":"Maelstrom","choices":["Maelstrom","The Great Movie Ride","Camp Minnie-Mickey","Splash Mountain"],"badge":"Disney History","diff":"Expert"},{"q":"Before Mission: SPACE, what was here?","a":"Horizons","choices":["Horizons","The Living Seas","World of Motion","The Great Movie Ride"],"badge":"Disney History","diff":"Expert"},{"q":"Before Test Track, what was here?","a":"World of Motion","choices":["World of Motion","Splash Mountain","The Living Seas","Horizons"],"badge":"Disney History","diff":"Expert"},{"q":"Before Pandora – The World of Avatar, what was here?","a":"Camp Minnie-Mickey","choices":["Camp Minnie-Mickey","The Great Movie Ride","Maelstrom","Mr. Toad's Wild Ride"],"badge":"Disney History","diff":"Expert"},{"q":"Before The Many Adventures of Winnie the Pooh, what was here?","a":"Mr. Toad's Wild Ride","choices":["Mr. Toad's Wild Ride","Horizons","Camp Minnie-Mickey","Splash Mountain"],"badge":"Disney History","diff":"Expert"},{"q":"Before The Seas with Nemo & Friends, what was here?","a":"The Living Seas","choices":["The Living Seas","Splash Mountain","Mr. Toad's Wild Ride","The Great Movie Ride"],"badge":"Disney History","diff":"Expert"}];
 const BADGES=['Magic Kingdom','EPCOT','Hollywood Studios','Animal Kingdom','Resorts & Dining','Disney History'];
@@ -823,6 +825,105 @@ function buildBoard(){
    board.appendChild(d);
  });
 }
+const finaleFireworksCanvas=document.getElementById('finaleFireworks');
+const finaleFireworksCtx=finaleFireworksCanvas.getContext('2d');
+let finaleFireworksParticles=[];
+let finaleFireworksRunning=false;
+let finaleFireworksFrame=0;
+let finaleFireworksBurstTimer=0;
+let finaleFireworksStopTimer=0;
+function resizeFinaleFireworks(){
+ const dpr=Math.min(window.devicePixelRatio||1,2);
+ finaleFireworksCanvas.width=Math.round(window.innerWidth*dpr);
+ finaleFireworksCanvas.height=Math.round(window.innerHeight*dpr);
+ finaleFireworksCanvas.style.width=window.innerWidth+'px';
+ finaleFireworksCanvas.style.height=window.innerHeight+'px';
+ finaleFireworksCtx.setTransform(dpr,0,0,dpr,0,0);
+}
+function burstFinaleFirework(x,y,count){
+ const colors=['#ffd166','#ff5d8f','#7bdff2','#b8f2e6','#cdb4db','#ffffff','#ffadad','#f4d35e'];
+ const total=count||54;
+ for(let i=0;i<total;i++){
+   const angle=((Math.PI*2)/total)*i+(Math.random()*.18);
+   const speed=2.6+Math.random()*5.2;
+   finaleFireworksParticles.push({
+     x:x,y:y,
+     vx:Math.cos(angle)*speed,
+     vy:Math.sin(angle)*speed,
+     life:58+Math.random()*28,
+     maxLife:86,
+     size:1.8+Math.random()*2.6,
+     color:colors[Math.floor(Math.random()*colors.length)]
+   });
+ }
+}
+function launchFinaleFirework(){
+ const w=window.innerWidth,h=window.innerHeight;
+ burstFinaleFirework(
+   w*(.1+Math.random()*.8),
+   h*(.10+Math.random()*.48),
+   44+Math.floor(Math.random()*24)
+ );
+}
+function drawFinaleFireworks(){
+ finaleFireworksCtx.clearRect(0,0,window.innerWidth,window.innerHeight);
+ for(let i=finaleFireworksParticles.length-1;i>=0;i--){
+   const p=finaleFireworksParticles[i];
+   p.x+=p.vx;p.y+=p.vy;p.vy+=.038;p.vx*=.994;p.life-=1;
+   const alpha=Math.max(0,p.life/p.maxLife);
+   finaleFireworksCtx.globalAlpha=alpha;
+   finaleFireworksCtx.shadowBlur=10;
+   finaleFireworksCtx.shadowColor=p.color;
+   finaleFireworksCtx.fillStyle=p.color;
+   finaleFireworksCtx.beginPath();
+   finaleFireworksCtx.arc(p.x,p.y,p.size,0,Math.PI*2);
+   finaleFireworksCtx.fill();
+   if(p.life<=0)finaleFireworksParticles.splice(i,1);
+ }
+ finaleFireworksCtx.globalAlpha=1;
+ finaleFireworksCtx.shadowBlur=0;
+ if(finaleFireworksRunning||finaleFireworksParticles.length){
+   finaleFireworksFrame=requestAnimationFrame(drawFinaleFireworks);
+ }else{
+   finaleFireworksCtx.clearRect(0,0,window.innerWidth,window.innerHeight);
+ }
+}
+function stopFinaleFireworks(){
+ finaleFireworksRunning=false;
+ clearInterval(finaleFireworksBurstTimer);
+ clearTimeout(finaleFireworksStopTimer);
+ cancelAnimationFrame(finaleFireworksFrame);
+ finaleFireworksParticles=[];
+ finaleFireworksCtx.clearRect(0,0,window.innerWidth,window.innerHeight);
+ finaleFireworksCanvas.classList.remove('active');
+}
+function startFinaleFireworks(duration){
+ stopFinaleFireworks();
+ resizeFinaleFireworks();
+ if(reducedMotion()){
+   finaleFireworksCanvas.classList.add('active');
+   burstFinaleFirework(window.innerWidth*.3,window.innerHeight*.25,30);
+   burstFinaleFirework(window.innerWidth*.7,window.innerHeight*.28,30);
+   drawFinaleFireworks();
+   finaleFireworksStopTimer=setTimeout(stopFinaleFireworks,900);
+   return;
+ }
+ finaleFireworksRunning=true;
+ finaleFireworksCanvas.classList.add('active');
+ burstFinaleFirework(window.innerWidth*.18,window.innerHeight*.32,62);
+ burstFinaleFirework(window.innerWidth*.50,window.innerHeight*.18,72);
+ burstFinaleFirework(window.innerWidth*.82,window.innerHeight*.34,62);
+ finaleFireworksBurstTimer=setInterval(launchFinaleFirework,240);
+ drawFinaleFireworks();
+ finaleFireworksStopTimer=setTimeout(function(){
+   finaleFireworksRunning=false;
+   clearInterval(finaleFireworksBurstTimer);
+   setTimeout(function(){finaleFireworksCanvas.classList.remove('active')},850);
+ },duration||3200);
+}
+window.addEventListener('resize',function(){
+ if(finaleFireworksRunning)resizeFinaleFireworks();
+});
 function renderFinale(){
  const btn=document.getElementById('castleFinaleBtn');
  const status=document.getElementById('castleFinaleStatus');
@@ -835,13 +936,15 @@ function renderFinale(){
  else if(unlocked)status.textContent='Unlocked for '+p.name+' • Enter instead of rolling';
  else status.textContent=(BADGES.length-p.badges.length)+' more badge'+((BADGES.length-p.badges.length)===1?'':'s')+' needed';
 }
-function enterCastleFinale(){
+async function enterCastleFinale(){
  if(turnLocked||gameOver)return;
  const p=players[currentPlayer];
  if(p.badges.length!==BADGES.length)return;
  turnLocked=true;
  renderAll();
  setStatus(esc(p.name)+' enters <strong>Cinderella Castle Finale</strong>…');
+ startFinaleFireworks(3300);
+ await wait(reducedMotion()?350:1250);
  askQuestion(null,{mode:'final',centerFinale:true});
 }
 function renderAll(){
@@ -1168,6 +1271,7 @@ function gradeQuestion(choice,q,ctx,btn){
    return;
  }
  if(ctx.mode==='final'){
+   startFinaleFireworks(4200);
    result.innerHTML='<span class="good">Correct!</span> '+esc(p.name)+' wins WDWQuest!';
    actions.innerHTML='<button class="primary" id="winClose">See Final Board</button>';
    document.getElementById('winClose').addEventListener('click',function(){gameOver=true;closeModal();setStatus('<span class="gold">🏆 '+esc(p.name)+' wins WDWQuest!</span>');renderAll();addLog(p.name+' won the game!')});
