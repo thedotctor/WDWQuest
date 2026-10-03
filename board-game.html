@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.69</title>
+<title>WDWQuest Board Game v0.70</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -74,7 +74,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.69 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.70 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -1297,8 +1297,25 @@ function showPawnCloseup(spaceIndex){
  const scale=2.2,x=pawn.left-bounds.left+pawn.width/2,y=pawn.top-bounds.top+pawn.height/2;
  stage.style.transform='translate('+(view.width/2-x*scale)+'px,'+(view.height/2-y*scale)+'px) scale('+scale+')';
 }
-function hidePawnCloseup(){
- const camera=document.getElementById('pawnCloseup');if(camera)camera.remove();
+async function hidePawnCloseup(spaceIndex){
+ const camera=document.getElementById('pawnCloseup');if(!camera)return;
+ try{
+   const board=document.getElementById('board'),stage=camera.firstElementChild;
+   if(!reducedMotion()&&board&&stage&&stage.animate){
+     const space=document.getElementById('space'+spaceIndex);
+     if(space)space.scrollIntoView({behavior:'instant',block:'center',inline:'center'});
+     const bounds=board.getBoundingClientRect(),view=camera.getBoundingClientRect();
+     stage.getAnimations().forEach(function(animation){animation.cancel()});
+     await stage.animate([
+       {transform:stage.style.transform},
+       {transform:'translate('+(bounds.left-view.left)+'px,'+(bounds.top-view.top)+'px) scale(1)'}
+     ],{duration:1100,easing:'cubic-bezier(.22,1,.36,1)',fill:'forwards'}).finished;
+   }
+ }catch(animationError){
+   // Interrupted camera animations must never block the next turn.
+ }finally{
+   camera.remove();
+ }
 }
 async function movePlayerSpaces(steps,label){
  const p=players[currentPlayer];
@@ -1318,7 +1335,7 @@ async function movePlayerSpaces(steps,label){
    if(!reducedMotion())await wait(700);
  }
  }finally{
- hidePawnCloseup();movingPlayer=-1;renderTokens();trackMovingPiece(p.pos);
+ await hidePawnCloseup(p.pos);movingPlayer=-1;renderTokens();trackMovingPiece(p.pos);
  }
 }
 function landingNeedsPause(idx){
