@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>WDWQuest Finale Fireworks Test v0.30</title>
+<style>
+:root{--bg:#08111f;--panel:#101b30;--panel2:#14223a;--text:#f4f7fb;--muted:#a8b3c7;--border:#2b3b59;--gold:#f1c85d;--accent:#7dd3fc}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% 18%,#17274a 0,#08111f 55%,#050a12 100%);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100vh;display:grid;place-items:center;padding:20px;overflow:hidden}
+.stage{width:min(92vw,720px);text-align:center}
+.badge{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:7px 11px;color:var(--muted);font-size:13px;margin-bottom:14px}
+.castle{width:min(100%,500px);margin:auto;border:2px solid #f1c85d;border-radius:24px;padding:28px 24px;background:radial-gradient(circle at 50% 18%,rgba(255,221,123,.22),transparent 44%),linear-gradient(160deg,#30284f,#11192f);box-shadow:0 18px 50px rgba(0,0,0,.35),0 0 0 3px rgba(241,200,93,.08);position:relative;z-index:2}
+.castle-icon{font-size:76px;line-height:1}
+h1{font-size:clamp(28px,6vw,48px);margin:8px 0 8px;color:#fff0b7}
+p{color:var(--muted);margin:0 0 18px}
+button{border:0;border-radius:14px;padding:13px 18px;font-weight:900;font-size:16px;background:var(--accent);color:#082137;cursor:pointer}
+button:active{transform:translateY(1px)}
+#finaleFireworks{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;opacity:0;transition:opacity .18s ease}
+#finaleFireworks.active{opacity:1}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="badge">Finale Fireworks Test v0.30</div>
+  <div class="castle">
+    <div class="castle-icon">🏰</div>
+    <h1>Cinderella Castle Finale</h1>
+    <p>Tap the button to replay the exact fireworks effect used when a player enters the Finale.</p>
+    <button id="testBtn" type="button">🎆 Test Finale Fireworks</button>
+  </div>
+</div>
+<canvas id="finaleFireworks" aria-hidden="true"></canvas>
+<script>
+const finaleFireworksCanvas=document.getElementById('finaleFireworks');
+const finaleFireworksCtx=finaleFireworksCanvas.getContext('2d');
+let finaleFireworksParticles=[];
+let finaleFireworksRunning=false;
+let finaleFireworksFrame=0;
+let finaleFireworksBurstTimer=0;
+let finaleFireworksStopTimer=0;
+function reducedMotion(){return window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches}
+function resizeFinaleFireworks(){
+ const dpr=Math.min(window.devicePixelRatio||1,2);
+ finaleFireworksCanvas.width=Math.round(window.innerWidth*dpr);
+ finaleFireworksCanvas.height=Math.round(window.innerHeight*dpr);
+ finaleFireworksCanvas.style.width=window.innerWidth+'px';
+ finaleFireworksCanvas.style.height=window.innerHeight+'px';
+ finaleFireworksCtx.setTransform(dpr,0,0,dpr,0,0);
+}
+function burstFinaleFirework(x,y,count){
+ const colors=['#ffd166','#ff5d8f','#7bdff2','#b8f2e6','#cdb4db','#ffffff','#ffadad','#f4d35e'];
+ const total=count||54;
+ for(let i=0;i<total;i++){
+   const angle=((Math.PI*2)/total)*i+(Math.random()*.18);
+   const speed=2.6+Math.random()*5.2;
+   finaleFireworksParticles.push({x:x,y:y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,life:58+Math.random()*28,maxLife:86,size:1.8+Math.random()*2.6,color:colors[Math.floor(Math.random()*colors.length)]});
+ }
+}
+function launchFinaleFirework(){
+ burstFinaleFirework(window.innerWidth*(.1+Math.random()*.8),window.innerHeight*(.10+Math.random()*.48),44+Math.floor(Math.random()*24));
+}
+function drawFinaleFireworks(){
+ finaleFireworksCtx.clearRect(0,0,window.innerWidth,window.innerHeight);
+ for(let i=finaleFireworksParticles.length-1;i>=0;i--){
+   const p=finaleFireworksParticles[i];
+   p.x+=p.vx;p.y+=p.vy;p.vy+=.038;p.vx*=.994;p.life-=1;
+   const alpha=Math.max(0,p.life/p.maxLife);
+   finaleFireworksCtx.globalAlpha=alpha;
+   finaleFireworksCtx.shadowBlur=10;
+   finaleFireworksCtx.shadowColor=p.color;
+   finaleFireworksCtx.fillStyle=p.color;
+   finaleFireworksCtx.beginPath();
+   finaleFireworksCtx.arc(p.x,p.y,p.size,0,Math.PI*2);
+   finaleFireworksCtx.fill();
+   if(p.life<=0)finaleFireworksParticles.splice(i,1);
+ }
+ finaleFireworksCtx.globalAlpha=1;finaleFireworksCtx.shadowBlur=0;
+ if(finaleFireworksRunning||finaleFireworksParticles.length)finaleFireworksFrame=requestAnimationFrame(drawFinaleFireworks);
+ else finaleFireworksCtx.clearRect(0,0,window.innerWidth,window.innerHeight);
+}
+function stopFinaleFireworks(){
+ finaleFireworksRunning=false;
+ clearInterval(finaleFireworksBurstTimer);
+ clearTimeout(finaleFireworksStopTimer);
+ cancelAnimationFrame(finaleFireworksFrame);
+ finaleFireworksParticles=[];
+ finaleFireworksCtx.clearRect(0,0,window.innerWidth,window.innerHeight);
+ finaleFireworksCanvas.classList.remove('active');
+}
+function startFinaleFireworks(duration){
+ stopFinaleFireworks();
+ resizeFinaleFireworks();
+ if(reducedMotion()){
+   finaleFireworksCanvas.classList.add('active');
+   burstFinaleFirework(window.innerWidth*.3,window.innerHeight*.25,30);
+   burstFinaleFirework(window.innerWidth*.7,window.innerHeight*.28,30);
+   drawFinaleFireworks();
+   finaleFireworksStopTimer=setTimeout(stopFinaleFireworks,900);
+   return;
+ }
+ finaleFireworksRunning=true;
+ finaleFireworksCanvas.classList.add('active');
+ burstFinaleFirework(window.innerWidth*.18,window.innerHeight*.32,62);
+ burstFinaleFirework(window.innerWidth*.50,window.innerHeight*.18,72);
+ burstFinaleFirework(window.innerWidth*.82,window.innerHeight*.34,62);
+ finaleFireworksBurstTimer=setInterval(launchFinaleFirework,240);
+ drawFinaleFireworks();
+ finaleFireworksStopTimer=setTimeout(function(){
+   finaleFireworksRunning=false;
+   clearInterval(finaleFireworksBurstTimer);
+   setTimeout(function(){finaleFireworksCanvas.classList.remove('active')},850);
+ },duration||3300);
+}
+window.addEventListener('resize',function(){if(finaleFireworksRunning)resizeFinaleFireworks()});
+document.getElementById('testBtn').addEventListener('click',function(){startFinaleFireworks(3300)});
+setTimeout(function(){startFinaleFireworks(3300)},350);
+</script>
+</body>
+</html>
