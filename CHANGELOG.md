@@ -1,5 +1,14 @@
 # WDWQuest Changelog
 
+## v0.12.1 - Left-Side Dice Rail
+- Moved the floating dice and turn controls from a sticky top position to a fixed left-side rail.
+- Desktop uses a compact 180px control panel centered vertically on the left edge.
+- Phones use narrower 138px / 124px variants so the panel stays accessible without covering too much of the board.
+
+## v0.12.0 - Sticky Dice Controls
+- Made the Board Game turn/dice controls follow the page while scrolling.
+- Added a compact mobile version of the floating controls.
+
 ## v0.11.9 - Castle Finale Fireworks
 - Added a full-screen fireworks canvas effect when a player enters Cinderella Castle Finale.
 - Added a short dramatic pause before the Final Challenge appears.
