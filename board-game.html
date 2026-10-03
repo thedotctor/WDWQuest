@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.79</title>
+<title>WDWQuest Board Game v0.80</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -81,7 +81,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.79 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.80 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -93,6 +93,113 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <script src="assets/tokens/pawn-data-4.js"></script>
 <script src="assets/tokens/pawn-data-5.js"></script>
 <script>
+
+// Short, original game effects synthesized locally; no audio downloads or controls.
+let gameAudio=null,gameAudioBus=null,gameAudioNoise=null;
+function unlockGameAudio(){
+ try{
+   const AudioEngine=window.AudioContext||window.webkitAudioContext;
+   if(!AudioEngine)return null;
+   if(!gameAudio||gameAudio.state==='closed'){
+     gameAudio=new AudioEngine();
+     const volume=gameAudio.createGain();volume.gain.value=.32;
+     const limiter=gameAudio.createDynamicsCompressor();
+     limiter.threshold.value=-16;limiter.knee.value=18;limiter.ratio.value=5;
+     volume.connect(limiter);limiter.connect(gameAudio.destination);
+     gameAudioBus=volume;
+     gameAudioNoise=gameAudio.createBuffer(1,gameAudio.sampleRate,gameAudio.sampleRate);
+     const data=gameAudioNoise.getChannelData(0);
+     for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
+   }
+   if(gameAudio.state!=='running'){
+     const resumed=gameAudio.resume();
+     if(resumed&&resumed.catch)resumed.catch(function(){});
+   }
+   return gameAudio;
+ }catch(audioError){return null}
+}
+document.addEventListener('pointerdown',unlockGameAudio,{capture:true,passive:true});
+document.addEventListener('touchend',unlockGameAudio,{capture:true,passive:true});
+document.addEventListener('click',unlockGameAudio,{capture:true,passive:true});
+document.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')unlockGameAudio()},{capture:true});
+function playGameSound(effect){
+ try{
+   if(!gameAudio||gameAudio.state!=='running'||document.hidden)return;
+   const audio=gameAudio,bus=gameAudioBus,now=audio.currentTime+.012;
+   function tone(frequency,delay,duration,level,type,endFrequency){
+     const oscillator=audio.createOscillator(),gain=audio.createGain(),start=now+delay;
+     oscillator.type=type||'sine';
+     oscillator.frequency.setValueAtTime(frequency,start);
+     if(endFrequency)oscillator.frequency.exponentialRampToValueAtTime(endFrequency,start+duration);
+     gain.gain.setValueAtTime(0,start);
+     gain.gain.linearRampToValueAtTime(level,start+.008);
+     gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
+     oscillator.connect(gain);gain.connect(bus);
+     oscillator.onended=function(){oscillator.disconnect();gain.disconnect()};
+     oscillator.start(start);oscillator.stop(start+duration+.02);
+   }
+   function noise(delay,duration,level,frequency,kind){
+     const source=audio.createBufferSource(),filter=audio.createBiquadFilter(),gain=audio.createGain(),start=now+delay;
+     source.buffer=gameAudioNoise;source.loop=true;
+     filter.type=kind||'lowpass';filter.frequency.value=frequency||1400;
+     gain.gain.setValueAtTime(0,start);
+     gain.gain.linearRampToValueAtTime(level,start+.005);
+     gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
+     source.connect(filter);filter.connect(gain);gain.connect(bus);
+     source.onended=function(){source.disconnect();filter.disconnect();gain.disconnect()};
+     source.start(start);source.stop(start+duration+.02);
+   }
+   function melody(notes,spacing,duration,level,type,delay){
+     notes.forEach(function(note,i){tone(note,(delay||0)+i*spacing,duration,level,type)});
+   }
+   switch(effect){
+     case 'dice':
+       for(let i=0;i<10;i++){noise(i*.09,.065,.22,1500+i%3*400);tone(240+i%4*45,i*.09,.06,.08,'triangle')}
+       noise(1.02,.14,.36,800);tone(135,1.02,.15,.14,'triangle',75);break;
+     case 'move':
+       tone(520,0,.085,.12,'triangle',360);noise(0,.055,.07,900);break;
+     case 'correct':
+       melody([523.25,659.25,783.99,1046.5],.09,.24,.18,'sine');break;
+     case 'wrong':
+       tone(240,0,.25,.17,'triangle',145);tone(180,.15,.3,.13,'triangle',95);break;
+     case 'pixie':
+       melody([1046.5,1318.51,1567.98,2093,1567.98,2637.02],.095,.35,.12,'sine');break;
+     case 'snack':
+       melody([392,523.25,659.25,523.25],.13,.22,.16,'triangle');tone(1046.5,.48,.32,.1);break;
+     case 'card':
+       for(let i=0;i<5;i++)noise(i*.085,.07,.2,2600,'highpass');
+       tone(660,.42,.14,.12,'triangle',880);break;
+     case 'pin':
+       melody([783.99,1046.5,1318.51,1567.98],.13,.38,.16);
+       tone(2093,.55,.5,.09);break;
+     case 'autograph':
+       for(let i=0;i<7;i++)noise(i*.055,.045,.07,3300,'bandpass');
+       melody([659.25,783.99,1046.5,1318.51],.1,.3,.16,'sine',.42);break;
+     case 'security':
+       noise(0,.045,.2,1100);tone(95,0,.08,.16,'triangle');
+       for(let i=0;i<3;i++){tone(620,.18+i*.42,.2,.1,'sine',900);tone(900,.38+i*.42,.2,.1,'sine',620)}
+       break;
+     case 'doubles':
+       noise(0,.5,.55,950);tone(100,0,.4,.3,'triangle',40);
+       melody([523.25,783.99,1046.5],.11,.28,.15,'triangle',.15);break;
+     case 'fireworks':
+       for(let i=0;i<4;i++){
+         const delay=i*.62;
+         tone(450,delay,.22,.08,'sine',1700);
+         noise(delay+.24,.55,.28,1500);
+         tone(90,delay+.24,.32,.15,'sine',35);
+         for(let j=0;j<4;j++)noise(delay+.35+j*.06,.045,.09,4000,'highpass');
+       }
+       break;
+     case 'victory':
+       melody([523.25,659.25,783.99,1046.5,783.99,1046.5,1318.51],.21,.45,.19,'triangle',.2);
+       [523.25,659.25,783.99,1046.5].forEach(function(note){tone(note,1.85,1.2,.1,'triangle')});break;
+   }
+ }catch(audioError){
+   // Sound must never interrupt a turn, trade, reward, or animation.
+ }
+}
+
 if(window.WDW_PAWN_B64){
  const pawnBinary=atob(window.WDW_PAWN_B64);
  const pawnBytes=new Uint8Array(pawnBinary.length);
@@ -182,6 +289,7 @@ function askSnackBreak(spaceIndex){
 function gradeSnackBreak(choice,snack,btn){
  const buttons=Array.from(document.querySelectorAll('#snackAnswers .answer'));
  const ok=choice===snack.name;
+ playGameSound(ok?'correct':'wrong');
  buttons.forEach(function(b){b.disabled=true;if(b.textContent===snack.name)b.classList.add('correct')});
  if(!ok)btn.classList.add('wrong');
  const p=players[currentPlayer];
@@ -1204,6 +1312,7 @@ function stopFinaleFireworks(){
  finaleFireworksCanvas.classList.remove('active');
 }
 function startFinaleFireworks(duration){
+ playGameSound('fireworks');
  stopFinaleFireworks();
  resizeFinaleFireworks();
  if(reducedMotion()){
@@ -1396,6 +1505,7 @@ async function animateSingleDie(finalRoll,index){
  flight.remove();
 }
 async function animateDice(values){
+ playGameSound('dice');
  if(reducedMotion()){setRestingDice(values);await wait(1100);return}
  await Promise.all(values.map(function(value,index){return animateSingleDie(value,index)}));
  setRestingDice(values);
@@ -1409,6 +1519,7 @@ async function rewardDoubles(values){
  renderScores();
  addLog(players[currentPlayer].name+' rolled doubles ('+values[0]+' + '+values[1]+'). Every active player received $20.');
  setStatus('<strong>DOUBLES!</strong> Every active player receives $20.');
+ playGameSound('doubles');
  const overlay=document.createElement('div');
  overlay.className='doubles-bang'+(reducedMotion()?' reduced-motion':'');
  overlay.setAttribute('role','status');
@@ -1485,6 +1596,7 @@ async function movePlayerSpaces(steps,label){
    const before=p.pos;
    p.pos=(p.pos+direction+SPACES.length)%SPACES.length;
    notePawnArrival(p);
+   if(!reducedMotion()||step===total-1)playGameSound('move');
    if(direction>0&&before===SPACES.length-1&&p.pos===0){
      addLog(p.name+' completed a lap.');
    }
@@ -1574,6 +1686,8 @@ function showPropertyOffer(spaceIndex){
 }
 async function resolveSpace(idx,fromTransport){
  const s=SPACES[idx],p=players[currentPlayer];
+ if(s.type==='special'&&s.name==='Pixie Dust')playGameSound('pixie');
+ if(s.type==='special'&&s.name==='Snack Break')playGameSound('snack');
  if(s.type==='start'){finishTurn(p.name+' arrived at the entrance. No lap payment.');return}
  if(s.type==='property'){
    if(owners[idx]===undefined){showPropertyOffer(idx);return}
@@ -1613,6 +1727,7 @@ function drawMagicCard(){
      const first=magicDeck[0];magicDeck[0]=magicDeck[magicDeck.length-1];magicDeck[magicDeck.length-1]=first;
    }
  }
+ playGameSound('card');
  const card=MAGIC_CARDS[magicDeck.pop()];
  lastMagicCardId=card.id;lastMagicCard=card;
  renderMagicPile();
@@ -1763,6 +1878,7 @@ async function applyMagicCard(card){
    return;
  }
  if(card.effect==='security'){
+   playGameSound('security');
    await animateSecurityEscort(currentPlayer);
    p.inSecurity=true;p.skipTurns=1;notePawnArrival(p);
    movingPlayer=currentPlayer;renderAll();
@@ -1890,6 +2006,7 @@ function applySpecialSpace(spaceIndex,correct){
 function gradeQuestion(choice,q,ctx,btn){
  const buttons=Array.from(document.querySelectorAll('#qAnswers .answer'));buttons.forEach(function(b){b.disabled=true;if(b.textContent===q.a)b.classList.add('correct')});
  const ok=choice===q.a;if(!ok)btn.classList.add('wrong');
+ playGameSound(ok?'correct':'wrong');
  const result=document.getElementById('qResult'),actions=document.getElementById('qActions');
  const p=players[currentPlayer];
  if(!ok){
@@ -1913,6 +2030,7 @@ function gradeQuestion(choice,q,ctx,btn){
    return;
  }
  if(ctx.mode==='final'){
+   playGameSound('victory');
    startFinaleFireworks(4200);
    result.innerHTML='<span class="good">Correct!</span> '+esc(p.name)+' wins WDWQuest!';
    actions.innerHTML='<button class="primary" id="winClose">See Final Board</button>';
@@ -1996,6 +2114,7 @@ function collectAutograph(playerIndex){
  return {character:character,isNew:isNew};
 }
 function showAutographEncounter(playerIndex,onContinue){
+ playGameSound('autograph');
  turnLocked=true;
  const p=players[playerIndex],reward=collectAutograph(playerIndex),character=reward.character;
  renderAll();
@@ -2123,6 +2242,7 @@ function showPinPartnerChoice(){
  document.getElementById('pinChoiceSkip').addEventListener('click',finishPinTradersVisit);
 }
 async function animatePinExchange(playerIndex,partnerIndex,giveId,takeId){
+ playGameSound('pin');
  if(reducedMotion())return;
  const p=players[playerIndex],partnerName=partnerIndex===-1?'Cast Member':players[partnerIndex].name;
  modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal pin-exchange-modal"><div class="badge">✨ TRADE COMPLETE</div><h2>A Little Pin Magic!</h2><div class="pin-exchange-names"><strong>'+esc(p.name)+'</strong><strong>'+esc(partnerName)+'</strong></div><div class="pin-exchange-stage" id="pinExchangeStage"><div class="pin-exchange-piece give" id="pinExchangeGive">'+pinMarkup(pinInfo(giveId),1,false)+'</div><div class="pin-exchange-piece take" id="pinExchangeTake">'+pinMarkup(pinInfo(takeId),1,false)+'</div><div class="pin-exchange-sparkles" aria-hidden="true">✨ ✦ ✨</div></div><p id="pinExchangeCaption" aria-live="polite">Passing your pins to their new owners…</p></div></div>';
