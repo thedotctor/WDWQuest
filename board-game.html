@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.52</title>
+<title>WDWQuest Board Game v0.53</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -51,7 +51,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.52 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.53 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -198,7 +198,7 @@ const SPACES=[
   "icon": "🏛️",
   "badge": "Magic Kingdom",
   "park": "Magic Kingdom",
-  "cost": 180,
+  "cost": 90,
   "rent": 45
  },
  {
@@ -214,7 +214,7 @@ const SPACES=[
   "icon": "👻",
   "badge": "Magic Kingdom",
   "park": "Magic Kingdom",
-  "cost": 230,
+  "cost": 115,
   "rent": 60
  },
  {
@@ -230,7 +230,7 @@ const SPACES=[
   "icon": "🏴‍☠️",
   "badge": "Magic Kingdom",
   "park": "Magic Kingdom",
-  "cost": 220,
+  "cost": 110,
   "rent": 55
  },
  {
@@ -239,7 +239,7 @@ const SPACES=[
   "icon": "🛶",
   "badge": "Magic Kingdom",
   "park": "Magic Kingdom",
-  "cost": 210,
+  "cost": 105,
   "rent": 55
  },
  {
@@ -255,7 +255,7 @@ const SPACES=[
   "icon": "🎆",
   "badge": "Magic Kingdom",
   "park": "Magic Kingdom",
-  "cost": 200,
+  "cost": 100,
   "rent": 25,
   "show": true,
   "showSet": "Nighttime Spectaculars"
@@ -266,7 +266,7 @@ const SPACES=[
   "icon": "🌌",
   "badge": "Magic Kingdom",
   "park": "Magic Kingdom",
-  "cost": 280,
+  "cost": 140,
   "rent": 75
  },
  {
@@ -282,7 +282,7 @@ const SPACES=[
   "icon": "🚂",
   "badge": "Magic Kingdom",
   "park": "Magic Kingdom",
-  "cost": 250,
+  "cost": 125,
   "rent": 65
  },
  {
@@ -298,7 +298,7 @@ const SPACES=[
   "icon": "⛏️",
   "badge": "Magic Kingdom",
   "park": "Magic Kingdom",
-  "cost": 290,
+  "cost": 145,
   "rent": 80
  },
  {
@@ -307,7 +307,7 @@ const SPACES=[
   "icon": "🐸",
   "badge": "Magic Kingdom",
   "park": "Magic Kingdom",
-  "cost": 270,
+  "cost": 135,
   "rent": 70
  },
  {
@@ -316,7 +316,7 @@ const SPACES=[
   "icon": "🏍️",
   "badge": "Magic Kingdom",
   "park": "Magic Kingdom",
-  "cost": 320,
+  "cost": 160,
   "rent": 90
  },
  {
@@ -331,7 +331,7 @@ const SPACES=[
   "icon": "🌐",
   "badge": "EPCOT",
   "park": "EPCOT",
-  "cost": 220,
+  "cost": 110,
   "rent": 55
  },
  {
@@ -347,7 +347,7 @@ const SPACES=[
   "icon": "🌱",
   "badge": "EPCOT",
   "park": "EPCOT",
-  "cost": 190,
+  "cost": 95,
   "rent": 45
  },
  {
@@ -363,7 +363,7 @@ const SPACES=[
   "icon": "❄️",
   "badge": "EPCOT",
   "park": "EPCOT",
-  "cost": 260,
+  "cost": 130,
   "rent": 70
  },
  {
@@ -372,7 +372,7 @@ const SPACES=[
   "icon": "🐀",
   "badge": "EPCOT",
   "park": "EPCOT",
-  "cost": 260,
+  "cost": 130,
   "rent": 70
  },
  {
@@ -381,7 +381,7 @@ const SPACES=[
   "icon": "🏎️",
   "badge": "EPCOT",
   "park": "EPCOT",
-  "cost": 280,
+  "cost": 140,
   "rent": 75
  },
  {
@@ -390,7 +390,7 @@ const SPACES=[
   "icon": "🎇",
   "badge": "EPCOT",
   "park": "EPCOT",
-  "cost": 200,
+  "cost": 100,
   "rent": 25,
   "show": true,
   "showSet": "Nighttime Spectaculars"
@@ -408,7 +408,7 @@ const SPACES=[
   "icon": "🪂",
   "badge": "EPCOT",
   "park": "EPCOT",
-  "cost": 250,
+  "cost": 125,
   "rent": 65
  },
  {
@@ -417,7 +417,7 @@ const SPACES=[
   "icon": "🐉",
   "badge": "EPCOT",
   "park": "EPCOT",
-  "cost": 200,
+  "cost": 100,
   "rent": 50
  },
  {
@@ -433,7 +433,7 @@ const SPACES=[
   "icon": "🛰️",
   "badge": "EPCOT",
   "park": "EPCOT",
-  "cost": 240,
+  "cost": 120,
   "rent": 60
  },
  {
@@ -442,7 +442,7 @@ const SPACES=[
   "icon": "🎧",
   "badge": "EPCOT",
   "park": "EPCOT",
-  "cost": 330,
+  "cost": 165,
   "rent": 95
  },
  {
@@ -464,7 +464,7 @@ const SPACES=[
   "icon": "🏨",
   "badge": "Hollywood Studios",
   "park": "Hollywood Studios",
-  "cost": 280,
+  "cost": 140,
   "rent": 75
  },
  {
@@ -480,7 +480,7 @@ const SPACES=[
   "icon": "🚂",
   "badge": "Hollywood Studios",
   "park": "Hollywood Studios",
-  "cost": 260,
+  "cost": 130,
   "rent": 70
  },
  {
@@ -496,7 +496,7 @@ const SPACES=[
   "icon": "🐕",
   "badge": "Hollywood Studios",
   "park": "Hollywood Studios",
-  "cost": 270,
+  "cost": 135,
   "rent": 70
  },
  {
@@ -505,7 +505,7 @@ const SPACES=[
   "icon": "🎯",
   "badge": "Hollywood Studios",
   "park": "Hollywood Studios",
-  "cost": 230,
+  "cost": 115,
   "rent": 60
  },
  {
@@ -514,7 +514,7 @@ const SPACES=[
   "icon": "🚀",
   "badge": "Hollywood Studios",
   "park": "Hollywood Studios",
-  "cost": 300,
+  "cost": 150,
   "rent": 85
  },
  {
@@ -523,7 +523,7 @@ const SPACES=[
   "icon": "🐉",
   "badge": "Hollywood Studios",
   "park": "Hollywood Studios",
-  "cost": 200,
+  "cost": 100,
   "rent": 25,
   "show": true,
   "showSet": "Nighttime Spectaculars"
@@ -541,7 +541,7 @@ const SPACES=[
   "icon": "⚔️",
   "badge": "Hollywood Studios",
   "park": "Hollywood Studios",
-  "cost": 340,
+  "cost": 170,
   "rent": 100
  },
  {
@@ -550,7 +550,7 @@ const SPACES=[
   "icon": "🤖",
   "badge": "Hollywood Studios",
   "park": "Hollywood Studios",
-  "cost": 220,
+  "cost": 110,
   "rent": 55
  },
  {
@@ -566,7 +566,7 @@ const SPACES=[
   "icon": "🤠",
   "badge": "Hollywood Studios",
   "park": "Hollywood Studios",
-  "cost": 210,
+  "cost": 105,
   "rent": 50
  },
  {
@@ -582,7 +582,7 @@ const SPACES=[
   "icon": "🍽️",
   "badge": "Hollywood Studios",
   "park": "Hollywood Studios",
-  "cost": 200,
+  "cost": 100,
   "rent": 50
  },
  {
@@ -597,7 +597,7 @@ const SPACES=[
   "icon": "🦒",
   "badge": "Animal Kingdom",
   "park": "Animal Kingdom",
-  "cost": 260,
+  "cost": 130,
   "rent": 70
  },
  {
@@ -613,7 +613,7 @@ const SPACES=[
   "icon": "🏔️",
   "badge": "Animal Kingdom",
   "park": "Animal Kingdom",
-  "cost": 290,
+  "cost": 145,
   "rent": 80
  },
  {
@@ -629,7 +629,7 @@ const SPACES=[
   "icon": "🌌",
   "badge": "Animal Kingdom",
   "park": "Animal Kingdom",
-  "cost": 240,
+  "cost": 120,
   "rent": 60
  },
  {
@@ -638,7 +638,7 @@ const SPACES=[
   "icon": "🪽",
   "badge": "Animal Kingdom",
   "park": "Animal Kingdom",
-  "cost": 320,
+  "cost": 160,
   "rent": 90
  },
  {
@@ -654,7 +654,7 @@ const SPACES=[
   "icon": "🌳",
   "badge": "Animal Kingdom",
   "park": "Animal Kingdom",
-  "cost": 200,
+  "cost": 100,
   "rent": 25,
   "show": true,
   "showSet": "Nighttime Spectaculars"
@@ -665,7 +665,7 @@ const SPACES=[
   "icon": "🌊",
   "badge": "Animal Kingdom",
   "park": "Animal Kingdom",
-  "cost": 220,
+  "cost": 110,
   "rent": 55
  },
  {
@@ -681,7 +681,7 @@ const SPACES=[
   "icon": "🦁",
   "badge": "Animal Kingdom",
   "park": "Animal Kingdom",
-  "cost": 230,
+  "cost": 115,
   "rent": 60
  },
  {
@@ -690,7 +690,7 @@ const SPACES=[
   "icon": "🦜",
   "badge": "Animal Kingdom",
   "park": "Animal Kingdom",
-  "cost": 180,
+  "cost": 90,
   "rent": 45
  },
  {
@@ -706,7 +706,7 @@ const SPACES=[
   "icon": "🦍",
   "badge": "Animal Kingdom",
   "park": "Animal Kingdom",
-  "cost": 190,
+  "cost": 95,
   "rent": 45
  },
  {
@@ -715,7 +715,7 @@ const SPACES=[
   "icon": "🐠",
   "badge": "Animal Kingdom",
   "park": "Animal Kingdom",
-  "cost": 210,
+  "cost": 105,
   "rent": 50
  }
 ]
@@ -831,7 +831,7 @@ function renderGame(){
  if(!players.length){showSetup();return}
  const missingToken=players.findIndex(function(p){return !p.token});
  if(missingToken>=0){showTokenSetup(missingToken);return}
- app.innerHTML='<div class="game-layout"><section class="scoreboard" id="scoreboard"></section><section class="panel turn-panel"><div class="turn" id="turnText"></div><button class="dice" id="dice" type="button" aria-label="Roll dice"><span class="die-cube" id="dieCube" aria-hidden="true"><span class="die-face front">⚀</span><span class="die-face right">⚁</span><span class="die-face top">⚂</span><span class="die-face bottom">⚃</span><span class="die-face left">⚄</span><span class="die-face back">⚅</span></span></button><div class="status" id="status">Roll the dice to begin.</div><div class="actions"><button class="primary" id="rollBtn">Roll Dice</button><button class="secondary" id="rulesBtn">Quick Rules</button></div></section><div class="board-wrap"><div class="board" id="board"><div class="center"><h1>WDWQuest</h1><button class="castle-finale-space" id="castleFinaleBtn" type="button"><span class="castle-icon">🏰</span><strong>Cinderella Castle Finale</strong><span class="finale-status" id="castleFinaleStatus">Collect all 6 badges to unlock</span></button><div class="mini" style="margin-top:10px">64-space four-park loop • the Castle Finale lives in the center</div></div></div></div><details class="board-key"><summary>🗺️ Board Key • What Each Space Does</summary><div class="key-grid"><div class="key-item"><div class="key-icon">🏰</div><div><strong>Magic Kingdom Side</strong><p>The top side of the board. Attractions and trivia here use Magic Kingdom questions.</p></div></div><div class="key-item"><div class="key-icon">🌐</div><div><strong>EPCOT Side</strong><p>The right side of the board. Attractions and trivia here use EPCOT questions.</p></div></div><div class="key-item"><div class="key-icon">🎬</div><div><strong>Hollywood Studios Side</strong><p>The bottom side of the board. Attractions and trivia here use Hollywood Studios questions.</p></div></div><div class="key-item"><div class="key-icon">🌳</div><div><strong>Animal Kingdom Side</strong><p>The left side of the board. Attractions and trivia here use Animal Kingdom questions.</p></div></div><div class="key-item"><div class="key-icon">🚝</div><div><strong>Transportation Corners</strong><p>All four corners are transportation hubs. Land exactly on one and you may choose to roll the die again for bonus movement.</p></div></div><div class="key-item"><div class="key-icon">🏠</div><div><strong>Attractions</strong><p>If unowned, the game checks your money first. If you can afford it, choose whether to try to buy it; a correct park-trivia answer completes the purchase. If you cannot afford it, your turn ends. Land on another player\'s attraction and pay the rent shown.</p></div></div><div class="key-item"><div class="key-icon">🎆</div><div><strong>Nighttime Show Set</strong><p>The middle of each park side is a $200 show space. Rent grows with the number of shows the same player owns: <span class="key-note">1=$25 • 2=$50 • 3=$100 • 4=$200</span>.</p></div></div><div class="key-item"><div class="key-icon">❓</div><div><strong>Trivia Challenge</strong><p>Each park has 50 shuffled questions. A park question will not repeat until all 50 have been used. Correct answers earn badges or $100 if you already have that badge.</p></div></div><div class="key-item"><div class="key-icon">🏅</div><div><strong>All 6 Badges</strong><ul class="key-badges">'+BADGES.map(function(b){return '<li>'+esc(b)+'</li>'}).join('')+'</ul><p>Collect all six to unlock the Cinderella Castle Finale.</p></div></div><div class="key-item"><div class="key-icon">✨</div><div><strong>Pixie Dust</strong><p>Answer the trivia question. Correct earns <span class="key-note">$100</span>; wrong loses <span class="key-note">$100</span>.</p></div></div><div class="key-item"><div class="key-icon">🍿</div><div><strong>Snack Break</strong><p>See one of 30 real Disney food photos and choose its name from four answers. Get it right and earn <span class="key-note">$50</span>.</p></div></div><div class="key-item"><div class="key-icon">🏰</div><div><strong>Cinderella Castle Finale</strong><p>The Castle is its own space in the center of the board. Once you have all 6 badges, choose the Castle instead of rolling and answer the Final Challenge correctly to win.</p></div></div><div class="key-item"><div class="key-icon">💵</div><div><strong>Complete a Lap</strong><p>Every time you pass the first transportation corner and complete a full lap, collect <span class="key-note">$200</span>.</p></div></div></div></details><details class="log"><summary>Game Log</summary><div class="log-list" id="logList"></div></details></div>';
+ app.innerHTML='<div class="game-layout"><section class="scoreboard" id="scoreboard"></section><section class="panel turn-panel"><div class="turn" id="turnText"></div><button class="dice" id="dice" type="button" aria-label="Roll dice"><span class="die-cube" id="dieCube" aria-hidden="true"><span class="die-face front">⚀</span><span class="die-face right">⚁</span><span class="die-face top">⚂</span><span class="die-face bottom">⚃</span><span class="die-face left">⚄</span><span class="die-face back">⚅</span></span></button><div class="status" id="status">Roll the dice to begin.</div><div class="actions"><button class="primary" id="rollBtn">Roll Dice</button><button class="secondary" id="rulesBtn">Quick Rules</button></div></section><div class="board-wrap"><div class="board" id="board"><div class="center"><h1>WDWQuest</h1><button class="castle-finale-space" id="castleFinaleBtn" type="button"><span class="castle-icon">🏰</span><strong>Cinderella Castle Finale</strong><span class="finale-status" id="castleFinaleStatus">Collect all 6 badges to unlock</span></button><div class="mini" style="margin-top:10px">64-space four-park loop • the Castle Finale lives in the center</div></div></div></div><details class="board-key"><summary>🗺️ Board Key • What Each Space Does</summary><div class="key-grid"><div class="key-item"><div class="key-icon">🏰</div><div><strong>Magic Kingdom Side</strong><p>The top side of the board. Attractions and trivia here use Magic Kingdom questions.</p></div></div><div class="key-item"><div class="key-icon">🌐</div><div><strong>EPCOT Side</strong><p>The right side of the board. Attractions and trivia here use EPCOT questions.</p></div></div><div class="key-item"><div class="key-icon">🎬</div><div><strong>Hollywood Studios Side</strong><p>The bottom side of the board. Attractions and trivia here use Hollywood Studios questions.</p></div></div><div class="key-item"><div class="key-icon">🌳</div><div><strong>Animal Kingdom Side</strong><p>The left side of the board. Attractions and trivia here use Animal Kingdom questions.</p></div></div><div class="key-item"><div class="key-icon">🚝</div><div><strong>Transportation Corners</strong><p>All four corners are transportation hubs. Land exactly on one and you may choose to roll the die again for bonus movement.</p></div></div><div class="key-item"><div class="key-icon">🏠</div><div><strong>Attractions</strong><p>If unowned, the game checks your money first. If you can afford it, choose whether to try to buy it; a correct park-trivia answer completes the purchase. If you cannot afford it, your turn ends. Land on another player\'s attraction and pay the rent shown.</p></div></div><div class="key-item"><div class="key-icon">🎆</div><div><strong>Nighttime Show Set</strong><p>The middle of each park side is a $100 show space. Rent grows with the number of shows the same player owns: <span class="key-note">1=$25 • 2=$50 • 3=$100 • 4=$200</span>.</p></div></div><div class="key-item"><div class="key-icon">❓</div><div><strong>Trivia Challenge</strong><p>Each park has 50 shuffled questions. A park question will not repeat until all 50 have been used. Correct answers earn badges or $100 if you already have that badge.</p></div></div><div class="key-item"><div class="key-icon">🏅</div><div><strong>All 6 Badges</strong><ul class="key-badges">'+BADGES.map(function(b){return '<li>'+esc(b)+'</li>'}).join('')+'</ul><p>Collect all six to unlock the Cinderella Castle Finale.</p></div></div><div class="key-item"><div class="key-icon">✨</div><div><strong>Pixie Dust</strong><p>Answer the trivia question. Correct earns <span class="key-note">$100</span>; wrong loses <span class="key-note">$100</span>.</p></div></div><div class="key-item"><div class="key-icon">🍿</div><div><strong>Snack Break</strong><p>See one of 30 real Disney food photos and choose its name from four answers. Get it right and earn <span class="key-note">$50</span>.</p></div></div><div class="key-item"><div class="key-icon">🏰</div><div><strong>Cinderella Castle Finale</strong><p>The Castle is its own space in the center of the board. Once you have all 6 badges, choose the Castle instead of rolling and answer the Final Challenge correctly to win.</p></div></div><div class="key-item"><div class="key-icon">💵</div><div><strong>Complete a Lap</strong><p>Every time you pass the first transportation corner and complete a full lap, collect <span class="key-note">$200</span>.</p></div></div></div></details><details class="log"><summary>Game Log</summary><div class="log-list" id="logList"></div></details></div>';
  buildBoard();
  updateBoardSpaceLayout();
  renderAll();
@@ -1467,7 +1467,7 @@ function finishTurn(msg){
  setStatus(esc(msg)+'<br><strong>'+esc(players[currentPlayer].name)+"'s turn.</strong>");
 }
 function showRules(){
- modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><h2>Quick Rules</h2><p>The board has <strong>64 spaces</strong> (15 park spaces on each side, plus four transportation corners). Each side is themed to one park: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom.</p><p>Choose a unique token, roll the die, and move around the board. When you land on an unowned attraction, the game checks whether you can afford it. If you can, choose whether to attempt the purchase; answering the park-themed trivia correctly buys it automatically. If you cannot afford it, your turn ends. Land on another player\'s property and pay rent. The four middle-of-the-park <strong>Nighttime Show</strong> spaces cost $200 each and work as a set: rent is $25 with 1 show, $50 with 2, $100 with 3, and $200 with all 4.</p><p>All four corners are <strong>transportation hubs</strong>. If you land exactly on one, you may choose to roll again and travel that many extra spaces. Completing a full lap earns $200.</p><p>Each of the four parks has its own shuffled deck of <strong>50 questions</strong> (200 park questions total). Questions do not repeat within a park until its deck is used up.</p><p>Correct trivia earns category badges. <strong>Pixie Dust</strong> awards $100 for a correct answer and takes $100 for a wrong answer. <strong>Snack Break</strong> uses a shuffled deck of 30 real Disney food photos; identify the food from four answers to earn $50. Collect all six badges, then choose the <strong>Cinderella Castle Finale</strong> space in the center instead of rolling. Answer the Final Challenge correctly to win.</p><div class="actions"><button class="primary" id="closeRules">Got It</button></div></div></div>';
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><h2>Quick Rules</h2><p>The board has <strong>64 spaces</strong> (15 park spaces on each side, plus four transportation corners). Each side is themed to one park: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom.</p><p>Choose a unique token, roll the die, and move around the board. When you land on an unowned attraction, the game checks whether you can afford it. If you can, choose whether to attempt the purchase; answering the park-themed trivia correctly buys it automatically. If you cannot afford it, your turn ends. Land on another player\'s property and pay rent. The four middle-of-the-park <strong>Nighttime Show</strong> spaces cost $100 each and work as a set: rent is $25 with 1 show, $50 with 2, $100 with 3, and $200 with all 4.</p><p>All four corners are <strong>transportation hubs</strong>. If you land exactly on one, you may choose to roll again and travel that many extra spaces. Completing a full lap earns $200.</p><p>Each of the four parks has its own shuffled deck of <strong>50 questions</strong> (200 park questions total). Questions do not repeat within a park until its deck is used up.</p><p>Correct trivia earns category badges. <strong>Pixie Dust</strong> awards $100 for a correct answer and takes $100 for a wrong answer. <strong>Snack Break</strong> uses a shuffled deck of 30 real Disney food photos; identify the food from four answers to earn $50. Collect all six badges, then choose the <strong>Cinderella Castle Finale</strong> space in the center instead of rolling. Answer the Final Challenge correctly to win.</p><div class="actions"><button class="primary" id="closeRules">Got It</button></div></div></div>';
  document.getElementById('closeRules').addEventListener('click',closeModal);
 }
 showSetup();
