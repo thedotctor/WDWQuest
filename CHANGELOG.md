@@ -1,5 +1,11 @@
 # WDWQuest Changelog
 
+## v0.11.4 - Full-Fit Snack Photos
+- Changed Snack Break photos from cropped cover mode to full-image contain mode.
+- Keeps the compact popup size while showing the entire food photo whenever possible.
+- Reworked food-name placard masks so they reposition against the actual displayed photo rectangle, including letterboxed images.
+- Updated the dedicated Snack Break tester to use the same full-fit photo behavior.
+
 ## v0.11.3 - Compact Snack Break Popup
 - Reworked Snack Break to fit inside the popup without requiring a scroll to reach the answer choices on normal screens.
 - Removed the redundant landed-space card from inside the Snack Break popup.
