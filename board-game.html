@@ -878,6 +878,7 @@ let owners={};
 let gameOver=false;
 let turnLocked=false;
 let movingPlayer=-1;
+let pawnArrivalClock=0;
 let lastQuestion=-1;
 let questionDecks={};
 let lastQuestionsByBadge={};
@@ -967,6 +968,7 @@ function showTokenSetup(activeIndex){
  start.addEventListener('click',function(){
    if(!players.every(function(pl){return !!pl.token}))return;
    currentPlayer=0;owners={};gameOver=false;turnLocked=false;movingPlayer=-1;
+   pawnArrivalClock=0;players.forEach(function(p){p.lastPawnArrival=0});notePawnArrival(players[0]);
    questionDecks={};lastQuestionsByBadge={};lastQuestion=-1;resetMagicDeck();resetPins();
    renderGame();
    addLog('Game started with '+players.length+' player'+(players.length===1?'':'s')+'.');
@@ -1212,6 +1214,9 @@ function renderScores(){
 }
 
 function shortBadge(b){return {'Magic Kingdom':'🏰','EPCOT':'🌐','Hollywood Studios':'🎬','Animal Kingdom':'🌳','Resorts & Dining':'🏨','Disney History':'🕰️'}[b]||'🎟️'}
+function notePawnArrival(player){
+ player.lastPawnArrival=++pawnArrivalClock;
+}
 function renderTokens(){
  SPACES.forEach(function(s,i){
    const el=document.getElementById('tokens'+i);if(el)el.innerHTML='';
@@ -1221,13 +1226,16 @@ function renderTokens(){
  if(securityTokens)securityTokens.innerHTML='';
  const securitySpot=document.getElementById('securitySpot');
  if(securitySpot)securitySpot.classList.remove('current-space');
+ const visible=new Map();
  players.forEach(function(p,i){
    if(p.eliminated)return;
-   const active=players[currentPlayer];
-   const sharesActiveSpace=active&&!active.eliminated&&(p.inSecurity?!!active.inSecurity:!active.inSecurity&&p.pos===active.pos);
-   if(i!==currentPlayer&&sharesActiveSpace)return;
-   const el=document.getElementById(p.inSecurity?'securityTokens':'tokens'+p.pos);
-   if(el){const tok=tokenInfo(p.token);el.innerHTML+='<span class="token p'+i+(i===movingPlayer?' moving':'')+'" style="--token-x:'+tok.x+'%;--token-y:'+tok.y+'%;" title="'+esc(p.name)+' - '+esc(tok.name)+'"></span>';}
+   const key=p.inSecurity?'securityTokens':'tokens'+p.pos;
+   const previous=visible.get(key);
+   if(previous===undefined||(p.lastPawnArrival||0)>(players[previous].lastPawnArrival||0))visible.set(key,i);
+ });
+ visible.forEach(function(i,key){
+   const p=players[i],el=document.getElementById(key);
+   if(el){const tok=tokenInfo(p.token);el.innerHTML='<span class="token p'+i+(i===movingPlayer?' moving':'')+'" style="--token-x:'+tok.x+'%;--token-y:'+tok.y+'%;" title="'+esc(p.name)+' - '+esc(tok.name)+'"></span>';}
  });
  if(movingPlayer>=0){
    const activeSpace=document.getElementById(players[movingPlayer].inSecurity?'securitySpot':'space'+players[movingPlayer].pos);
@@ -1380,6 +1388,7 @@ async function movePlayerSpaces(steps,label){
  for(let step=0;step<total;step++){
    const before=p.pos;
    p.pos=(p.pos+direction+SPACES.length)%SPACES.length;
+   notePawnArrival(p);
    if(direction>0&&before===SPACES.length-1&&p.pos===0){
      addLog(p.name+' completed a lap.');
    }
@@ -1657,7 +1666,7 @@ async function applyMagicCard(card){
  }
  if(card.effect==='security'){
    await animateSecurityEscort(currentPlayer);
-   p.inSecurity=true;p.skipTurns=1;
+   p.inSecurity=true;p.skipTurns=1;notePawnArrival(p);
    movingPlayer=currentPlayer;renderAll();
    const spot=document.getElementById('securitySpot');
    if(spot)spot.scrollIntoView({behavior:reducedMotion()?'auto':'smooth',block:'center',inline:'center'});
@@ -1934,7 +1943,7 @@ function finishTurn(msg){
 }
 function leaveSecurity(player){
  if(!player.inSecurity)return;
- player.inSecurity=false;
+ player.inSecurity=false;notePawnArrival(player);
  addLog(player.name+' left Park Security and returned to '+SPACES[player.pos].name+'.');
  renderTokens();renderScores();
 }
