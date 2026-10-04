@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v1.11</title>
+<title>WDWQuest Board Game v1.12</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -90,13 +90,14 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 @media(max-width:760px){.park-side-label{font-size:clamp(12px,2.5vw,19px);letter-spacing:.03em}.park-label-left{left:14px}.park-label-right{right:14px}.center{padding-top:34px}}
 
 .pixie-dust-canvas{position:fixed;inset:0;width:100vw;height:100vh;z-index:1000;pointer-events:none}
+.transportation-animation{position:fixed;height:145px;z-index:1000;pointer-events:none}
 </style>
 </head>
 <body>
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v1.11 • 1–8 players</span>
+<span class="badge">Board Game Prototype v1.12 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -1799,6 +1800,92 @@ async function animatePixieDust(){
  }
 }
 
+
+async function animateTransportation(spaceIndex){
+ let canvas=null,frame=0;
+ try{
+   const space=SPACES[spaceIndex],board=document.getElementById('board');
+   if(!space||!board)return;
+   const vehicle=space.name.includes('Monorail')?'monorail':space.name.includes('Bus')?'bus':space.name.includes('Skyliner')?'skyliner':'boat';
+   canvas=document.createElement('canvas');canvas.className='transportation-animation';canvas.setAttribute('aria-hidden','true');
+   const ctx=canvas.getContext('2d');if(!ctx)return;
+   const rect=board.getBoundingClientRect(),left=Math.max(0,rect.left),right=Math.min(window.innerWidth,rect.right);
+   const width=right-left;if(width<=0)return;
+   const height=145,dpr=Math.min(window.devicePixelRatio||1,2);
+   canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
+   canvas.style.left=left+'px';canvas.style.width=width+'px';
+   canvas.style.top=Math.max(0,Math.min(rect.bottom,window.innerHeight)-height-12)+'px';
+   ctx.setTransform(dpr,0,0,dpr,0,0);document.body.appendChild(canvas);
+   const gentle=reducedMotion(),duration=gentle?650:2900,scale=Math.min(1,width/390),vehicleWidth=320*scale;
+   function box(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(x,y,w,h)}
+   function line(points,color,lineWidth){
+     ctx.beginPath();points.forEach(function(p,i){if(i)ctx.lineTo(p[0],p[1]);else ctx.moveTo(p[0],p[1])});
+     ctx.strokeStyle=color;ctx.lineWidth=lineWidth;ctx.stroke();
+   }
+   function shape(points,color){
+     ctx.beginPath();points.forEach(function(p,i){if(i)ctx.lineTo(p[0],p[1]);else ctx.moveTo(p[0],p[1])});
+     ctx.closePath();ctx.fillStyle=color;ctx.fill();
+   }
+   function circle(x,y,r,color){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill()}
+   function windows(x,y,count,w,h,gap){
+     for(let i=0;i<count;i++){box(x+i*(w+gap),y,w,h,'#17334a');box(x+3+i*(w+gap),y+2,3,h-4,'#91dcf077')}
+   }
+   function drawVehicle(time){
+     if(vehicle==='monorail'){
+       box(12,98,288,5,'#bac4cc');box(28,103,250,7,'#667587');
+       shape([[8,81],[20,43],[255,43],[289,57],[315,80],[302,96],[17,96]],'#f8fafc');
+       shape([[264,49],[287,60],[301,75],[268,75]],'#17334a');
+       windows(28,52,8,22,24,5);box(15,81,286,7,'#ef4444');
+       [79,133,187,241].forEach(function(x){line([[x,45],[x,94]],'#aab6bf',1)});
+       box(302,81,9,4,'#fff2a1');
+     }else if(vehicle==='bus'){
+       shape([[17,40],[275,40],[296,54],[301,103],[12,103],[12,50]],'#f8fafc');
+       box(14,76,286,27,'#1875bb');box(17,83,282,5,'#72c9f3');
+       windows(24,49,8,24,23,6);box(271,49,20,23,'#17334a');
+       box(240,75,23,29,'#dce7ed');line([[251,75],[251,102]],'#536578',2);
+       box(294,84,7,9,'#fff2a1');box(13,90,5,8,'#e74a43');
+       [65,254].forEach(function(x){circle(x,103,17,'#152234');circle(x,103,9,'#afbac5');circle(x,103,3,'#536578')});
+       box(112,85,94,11,'#114974');
+     }else if(vehicle==='skyliner'){
+       line([[0,20],[320,20]],'#e5edf6',3);circle(164,20,7,'#576674');
+       line([[164,24],[151,43],[151,50]],'#e2e8f0',5);
+       shape([[105,48],[192,48],[205,63],[201,109],[95,109],[91,63]],'#f4b72e');
+       box(100,57,97,35,'#17334a');box(146,57,5,52,'#f4b72e');
+       line([[102,60],[116,88]],'#a3ddef66',4);line([[162,60],[177,88]],'#a3ddef66',4);
+       box(99,94,100,11,'#e4941e');box(105,109,87,5,'#684e2a');
+     }else{
+       for(let i=0;i<8;i++){
+         const y=118+(i%2)*4;line([[i*42,y],[i*42+20,y-3],[i*42+40,y]],'#7dd3fc99',3);
+       }
+       shape([[5,91],[314,91],[288,116],[36,116]],'#e2e8f0');
+       shape([[9,97],[308,97],[285,110],[31,110]],'#2673a0');
+       box(53,56,205,34,'#fffaf0');windows(64,63,7,19,20,7);
+       box(44,50,226,7,'#e4cf91');box(70,36,165,6,'#fffaf0');
+       [79,227].forEach(function(x){box(x,40,4,14,'#e2e8f0')});
+       box(261,65,23,25,'#f5efdd');box(269,70,13,12,'#17334a');
+       line([[25,87],[291,87]],'#8ea2b3',2);circle(247,84,8,'#d55d43');circle(247,84,4,'#f5efdd');
+     }
+   }
+   const began=performance.now();
+   function draw(now){
+     const progress=Math.min(1,Math.max(0,now-began)/duration);
+     ctx.clearRect(0,0,width,height);
+     // A faint ribbon keeps the passing vehicle visible over the board artwork.
+     ctx.fillStyle='#07111f66';ctx.fillRect(0,15,width,125);
+     if(vehicle==='skyliner')line([[0,20*scale+10],[width,20*scale+10]],'#d9e4ee',2);
+     const x=gentle?(width-vehicleWidth)/2:-vehicleWidth+(width+vehicleWidth)*progress;
+     ctx.save();ctx.translate(x,10);ctx.scale(scale,scale);
+     drawVehicle(gentle?0:progress);ctx.restore();
+     if(!gentle&&progress<1)frame=requestAnimationFrame(draw);
+   }
+   draw(began);await wait(duration);
+ }catch(animationError){
+   // Travel decorations must never interrupt a turn.
+ }finally{
+   cancelAnimationFrame(frame);if(canvas)canvas.remove();
+ }
+}
+
 async function resolveSpace(idx,fromTransport){
  const s=SPACES[idx],p=players[currentPlayer];
  if(s.type==='special'&&s.name==='Pixie Dust'){
@@ -1818,6 +1905,7 @@ async function resolveSpace(idx,fromTransport){
  if(s.type==='special'&&s.name==='Snack Break'){askSnackBreak(idx);return}
  if(s.type==='special'){askQuestion(null,{mode:'special',space:idx});return}
  if(s.type==='transport'){
+   await animateTransportation(idx);
    if(fromTransport){finishTurn(p.name+' arrived at '+s.name+' after bonus travel.');return}
    showTransportChoice(idx);return
  }
