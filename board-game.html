@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v1.09</title>
+<title>WDWQuest Board Game v1.10</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -88,13 +88,30 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .park-label-left{left:20px;top:50%;transform:translate(-50%,-50%) rotate(90deg);color:#c2f3ca}
 .center{padding-top:max(4%,48px)}
 @media(max-width:760px){.park-side-label{font-size:clamp(12px,2.5vw,19px);letter-spacing:.03em}.park-label-left{left:14px}.park-label-right{right:14px}.center{padding-top:34px}}
+
+.pixie-dust-burst{position:fixed;inset:0;z-index:900;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse at 50% 65%,#fde68a18,transparent 72%)}
+.pixie-dust-halo{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 60%,#fff8b822,transparent 55%),radial-gradient(ellipse at 75% 35%,#b4f5cf18,transparent 50%);animation:pixieHalo 2.4s ease-out both}
+.pixie-dust-spark{position:absolute;left:var(--spark-left);top:var(--spark-top);width:var(--spark-size);height:var(--spark-size);background:var(--spark-color);border-radius:50%;box-shadow:0 0 8px var(--spark-color),0 0 18px #ffe77a99;opacity:0;animation:pixieSpiral 1.9s var(--spark-delay) ease-out both}
+.pixie-dust-spark.star{border-radius:0;clip-path:polygon(50% 0,61% 38%,100% 50%,61% 62%,50% 100%,39% 62%,0 50%,39% 38%);box-shadow:none;filter:drop-shadow(0 0 5px #fff3a1)}
+@keyframes pixieSpiral{
+ 0%{opacity:0;transform:translate(0,30px) scale(.2) rotate(0deg)}
+ 20%{opacity:1;transform:translate(var(--spark-drift),0) scale(1.15) rotate(60deg)}
+ 55%{opacity:.9;transform:translate(var(--spark-sway),-65px) scale(.7) rotate(150deg)}
+ 72%{opacity:1}
+ 100%{opacity:0;transform:translate(var(--spark-drift),-150px) scale(.1) rotate(250deg)}
+}
+@keyframes pixieHalo{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+.pixie-dust-burst.reduced-motion .pixie-dust-halo{animation:none;opacity:.8}
+.pixie-dust-burst.reduced-motion .pixie-dust-spark{animation:none;opacity:.65;transform:none}
+@media(prefers-reduced-motion:reduce){.pixie-dust-spark,.pixie-dust-halo{animation:none}}
+
 </style>
 </head>
 <body>
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v1.09 • 1–8 players</span>
+<span class="badge">Board Game Prototype v1.10 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -1750,9 +1767,46 @@ function showPropertyOffer(spaceIndex){
    finishTurn(p.name+' passed on '+s.name+'.');
  });
 }
+
+async function animatePixieDust(){
+ let burst=null;
+ try{
+   burst=document.createElement('div');burst.className='pixie-dust-burst';burst.setAttribute('aria-hidden','true');
+   const halo=document.createElement('div');halo.className='pixie-dust-halo';burst.appendChild(halo);
+   const gentle=reducedMotion();
+   if(gentle)burst.classList.add('reduced-motion');
+   // Scatter across the entire screen, with a gentle rising swirl over the board.
+   const count=gentle?35:120;
+   for(let i=0;i<count;i++){
+     const spark=document.createElement('span');
+     spark.className='pixie-dust-spark'+(i%3===0?' star':'');
+     const styles={
+       '--spark-size':(i%3===0?12+Math.random()*15:3+Math.random()*5)+'px',
+       '--spark-color':['#fff8cb','#fde68a','#facc15','#b4f5cf'][i%4],
+       '--spark-left':(Math.random()*100)+'%',
+       '--spark-top':(Math.random()*110)+'%',
+       '--spark-delay':(Math.random()*.5)+'s',
+       '--spark-drift':(Math.random()*120-60)+'px',
+       '--spark-sway':(Math.random()*160-80)+'px'
+     };
+     Object.keys(styles).forEach(function(key){spark.style.setProperty(key,styles[key])});
+     burst.appendChild(spark);
+   }
+   document.body.appendChild(burst);
+   await wait(gentle?600:2450);
+ }catch(animationError){
+   // Pixie dust is decorative; its failure must never block the question.
+ }finally{
+   if(burst)burst.remove();
+ }
+}
+
 async function resolveSpace(idx,fromTransport){
  const s=SPACES[idx],p=players[currentPlayer];
- if(s.type==='special'&&s.name==='Pixie Dust')playGameSound('pixie');
+ if(s.type==='special'&&s.name==='Pixie Dust'){
+   playGameSound('pixie');
+   await animatePixieDust();
+ }
  if(s.type==='special'&&s.name==='Snack Break')playGameSound('snack');
  if(s.type==='start'){finishTurn(p.name+' arrived at the entrance. No lap payment.');return}
  if(s.type==='property'){
