@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v1.13</title>
+<title>WDWQuest Board Game v1.14</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -97,7 +97,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v1.13 • 1–8 players</span>
+<span class="badge">Board Game Prototype v1.14 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -143,6 +143,86 @@ document.addEventListener('pointerdown',unlockGameAudio,{capture:true,passive:tr
 document.addEventListener('touchend',unlockGameAudio,{capture:true,passive:true});
 document.addEventListener('click',unlockGameAudio,{capture:true,passive:true});
 document.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')unlockGameAudio()},{capture:true});
+
+function playTransportationSound(vehicle,durationMs){
+ try{
+   if(!gameAudio||gameAudio.state!=='running'||document.hidden)return;
+   const audio=gameAudio,start=audio.currentTime+.012,duration=durationMs/1000;
+   const pass=audio.createGain();pass.connect(gameAudioBus);
+   let pan=null;
+   if(audio.createStereoPanner){
+     pan=audio.createStereoPanner();pan.pan.setValueAtTime(-.85,start);
+     pan.pan.linearRampToValueAtTime(.85,start+duration);
+     pan.connect(pass);
+   }
+   const destination=pan||pass;
+   // Approach, pass nearby, then recede with the vehicle's screen position.
+   pass.gain.setValueAtTime(.0001,start);
+   pass.gain.linearRampToValueAtTime(.45,start+duration*.18);
+   pass.gain.linearRampToValueAtTime(.85,start+duration*.5);
+   pass.gain.linearRampToValueAtTime(.35,start+duration*.78);
+   pass.gain.exponentialRampToValueAtTime(.0001,start+duration*.98);
+   let pending=0;
+   function voice(kind,frequency,level,cutoff,offset,length,endFrequency){
+     const delay=(offset||0)*duration,span=(length||1)*duration,t=start+delay;
+     const source=kind==='noise'?audio.createBufferSource():audio.createOscillator();
+     const filter=audio.createBiquadFilter(),gain=audio.createGain();
+     filter.type=kind==='noise'?'bandpass':'lowpass';filter.Q.value=kind==='noise'?.5:.7;
+     filter.frequency.value=cutoff;gain.gain.setValueAtTime(.0001,t);
+     gain.gain.linearRampToValueAtTime(level,t+span*.08);
+     gain.gain.setValueAtTime(level,t+span*.7);
+     gain.gain.exponentialRampToValueAtTime(.0001,t+span*.98);
+     if(kind==='noise'){source.buffer=gameAudioNoise;source.loop=true;}
+     else{
+       source.type=kind;source.frequency.setValueAtTime(frequency,t);
+       source.frequency.linearRampToValueAtTime(frequency*1.08,t+span*.45);
+       source.frequency.exponentialRampToValueAtTime(endFrequency||frequency*.76,t+span*.97);
+     }
+     source.connect(filter);filter.connect(gain);gain.connect(destination);pending++;
+     source.onended=function(){
+       source.disconnect();filter.disconnect();gain.disconnect();
+       if(--pending===0){if(pan)pan.disconnect();pass.disconnect()}
+     };
+     if(kind==='noise')source.start(t,Math.random());else source.start(t);
+     source.stop(t+span);
+   }
+   switch(vehicle){
+     case 'monorail':
+       voice('sine',110,.28,900);
+       voice('triangle',220,.11,1100);
+       voice('sine',660,.045,1500,0,1,440);
+       voice('noise',0,.19,1600);break;
+     case 'bus':
+       voice('sawtooth',68,.22,430);
+       voice('triangle',136,.12,750);
+       voice('noise',0,.19,380);
+       voice('noise',0,.09,2100);
+       for(let i=0;i<8;i++)voice('sine',85,.05,220,.12+i*.09,.07,62);
+       break;
+     case 'skyliner':
+       voice('noise',0,.13,1800);
+       voice('sine',175,.055,600);
+       // Each of the three passing gondolas adds its own soft pulley whirr.
+       for(let i=0;i<3;i++){
+         voice('triangle',330,.09,850,.10+i*.24,.22,250);
+         voice('noise',0,.065,2800,.10+i*.24,.18);
+       }
+       break;
+     case 'boat':
+       voice('triangle',52,.24,260);
+       voice('sine',104,.10,450);
+       voice('noise',0,.24,650);
+       voice('noise',0,.10,2200);
+       for(let i=0;i<5;i++)voice('noise',0,.11,1100,.08+i*.16,.14);
+       voice('sine',196,.075,600,.34,.24,185);
+       voice('sine',261.63,.035,650,.34,.24,247);
+       break;
+   }
+ }catch(audioError){
+   // Vehicle audio must never interrupt its animation or the travel prompt.
+ }
+}
+
 function playGameSound(effect){
  try{
    if(!gameAudio||gameAudio.state!=='running'||document.hidden)return;
@@ -1884,7 +1964,7 @@ async function animateTransportation(spaceIndex){
      drawVehicle(gentle?0:progress);ctx.restore();
      if(!gentle&&progress<1)frame=requestAnimationFrame(draw);
    }
-   draw(began);await wait(duration);
+   draw(began);playTransportationSound(vehicle,duration);await wait(duration);
  }catch(animationError){
    // Travel decorations must never interrupt a turn.
  }finally{
