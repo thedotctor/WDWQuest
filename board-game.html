@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.89</title>
+<title>WDWQuest Board Game v0.90</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -66,6 +66,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .stats-buttons{display:grid;gap:6px;margin-top:8px}.stats-buttons button{padding:7px 9px;font-size:12px;min-height:36px}.board-photo-credit{font-size:10px;color:var(--muted);text-align:right}.board-photo-credit a{color:var(--accent)}
 .pin-kiosk{width:154px;min-height:133px;padding:14px 10px;border:2px solid #e6be63;border-radius:14px;background:linear-gradient(145deg,#3f3852,#182738);color:#fff2c9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}.pin-kiosk>span{font-size:32px}.pin-kiosk strong{font-size:17px}.pin-kiosk small{font-size:10px}.pin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;margin:14px 0}.pin-card{border:2px solid var(--pin-color);border-radius:14px;padding:12px 8px;text-align:center;background:#19283f;color:var(--text);min-width:0}.pin-card.missing{opacity:.4}.pin-art{display:grid;place-items:center;width:65px;height:65px;margin:0 auto 8px;border-radius:50%;font-size:35px;background:linear-gradient(145deg,#fff7da,#d6c08a);border:4px solid var(--pin-color);box-shadow:0 4px 7px #0005}.pin-card strong{font-size:12px;display:block}.pin-card small{font-size:10px;display:block;margin-top:4px}.starting-pin-choice{cursor:pointer;min-height:156px}.starting-pin-choice.selected{outline:3px solid var(--accent);outline-offset:2px;background:#17304a}.starting-pin-choice.claimed{opacity:.5;cursor:default}.starting-pin-choice:focus-visible{outline:3px solid var(--accent);outline-offset:2px}.starting-pin-choice:not(:disabled):hover{background:#243954}
 .pin-buy-icon{padding:0;cursor:pointer}.pin-buy-icon:not(:disabled):hover{transform:scale(1.08)}.pin-buy-icon:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.pin-buy-icon:disabled{opacity:.5;cursor:default}
+.pin-trade-choice{cursor:pointer;width:100%;font:inherit}.pin-trade-choice.selected{outline:3px solid var(--accent);outline-offset:2px;background:#17304a}.pin-trade-choice:focus-visible{outline:3px solid var(--accent);outline-offset:2px}.pin-trade-choice:not(:disabled):hover{background:#243954}.pin-trade-choice:disabled{opacity:.5;cursor:default}
 .pin-controls{display:grid;gap:10px;margin:14px 0}.pin-controls select{width:100%;min-height:44px;background:var(--panel2);color:var(--text);padding:10px;border:1px solid var(--border);border-radius:9px}
 @media(max-width:760px){.magic-pile{width:119px;min-height:126px;padding:8.4px}.magic-pile strong{font-size:15.4px}.magic-pile-icon{font-size:22.4px}.center-games{gap:14px}.center{padding-top:5%}.center-games .castle-finale-space{width:min(100%,300px);min-height:160px}}
 
@@ -83,7 +84,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.89 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.90 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -2443,26 +2444,36 @@ function showPinTrading(){
  if(partnerIndex!==-1&&(!players[partnerIndex]||players[partnerIndex].eliminated||partnerIndex===playerIndex)){showPinPartnerChoice();return}
  const available=partnerIndex===-1?availableCastPins():(players[partnerIndex].pins||[]);
  const partnerName=partnerIndex===-1?'Cast Member':players[partnerIndex].name;
- const display=[...new Set(available)].map(function(id){return pinMarkup(pinInfo(id),available.filter(function(value){return value===id}).length,false)}).join('');
+ const trading=p.pinTradesThisTurn===0;
+ function choiceMarkup(id,quantity,side){
+   const markup=pinMarkup(pinInfo(id),quantity,false);
+   if(!trading)return markup;
+   return markup.replace('<div class="pin-card ', '<button type="button" data-pin-'+side+'="'+id+'" aria-label="'+(side==='give'?'Offer ':'Request ')+esc(pinInfo(id).name)+'" aria-pressed="false" '+(side==='take'?'disabled ':'')+'class="pin-trade-choice pin-card ').replace(/<\/div>$/, '</button>');
+ }
+ const display=[...new Set(available)].map(function(id){return choiceMarkup(id,available.filter(function(value){return value===id}).length,'take')}).join('');
  const ownPins=p.pins||[];
- const ownDisplay=[...new Set(ownPins)].map(function(id){return pinMarkup(pinInfo(id),ownPins.filter(function(value){return value===id}).length,false)}).join('');
- modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">📌 PIN TRADERS</div><h2>Trade with '+esc(partnerName)+'</h2><p>'+esc(p.name)+' • '+new Set(p.pins||[]).size+' designs collected</p><p class="muted">One optional one-for-one trade. No money changes hands. Player offers require acceptance.</p><div class="pin-stashes"><section aria-label="Your pin stash"><h3>Your Stash — '+esc(p.name)+'</h3>'+(ownPins.length?'<div class="pin-grid">'+ownDisplay+'</div>':'<p>You have no pins to trade yet.</p>')+'</section><section aria-label="Trading partner pin stash"><h3>'+(partnerIndex===-1?'🧑‍💼 Cast Member’s Available Pins':esc(partnerName)+' — All Owned Pins')+'</h3>'+(available.length?'<div class="pin-grid">'+display+'</div>':(partnerIndex===-1?'<p>No unowned pins are available from this Cast Member.</p>':'<p>This player has no pins to trade yet.</p>'))+'</section></div>'+(p.pinTradesThisTurn>0?'<p class="gold">Trade complete! You have used your trade for this turn.</p>':'<div class="pin-controls"><label>Your offer<select id="pinGive"></select></label><label>Pin you want<select id="pinTake"></select></label></div><p id="pinTradeMessage" class="muted"></p>')+'<div class="actions">'+(p.pinTradesThisTurn>0?'':'<button class="primary" id="pinOffer">Trade / Make Offer</button><button class="secondary" id="pinChooseAgain">Choose Someone Else</button>')+'<button class="secondary" id="pinTradeClose">Finish Visit</button></div></div></div>';
+ const ownDisplay=[...new Set(ownPins)].map(function(id){return choiceMarkup(id,ownPins.filter(function(value){return value===id}).length,'give')}).join('');
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">📌 PIN TRADERS</div><h2>Trade with '+esc(partnerName)+'</h2><p>'+esc(p.name)+' • '+new Set(p.pins||[]).size+' designs collected</p><p class="muted">One optional one-for-one trade. No money changes hands. Player offers require acceptance.</p><div class="pin-stashes"><section aria-label="Your pin stash"><h3>Your Stash — '+esc(p.name)+'</h3>'+(ownPins.length?'<div class="pin-grid">'+ownDisplay+'</div>':'<p>You have no pins to trade yet.</p>')+'</section><section aria-label="Trading partner pin stash"><h3>'+(partnerIndex===-1?'🧑‍💼 Cast Member’s Available Pins':esc(partnerName)+' — All Owned Pins')+'</h3>'+(available.length?'<div class="pin-grid">'+display+'</div>':(partnerIndex===-1?'<p>No unowned pins are available from this Cast Member.</p>':'<p>This player has no pins to trade yet.</p>'))+'</section></div>'+(p.pinTradesThisTurn>0?'<p class="gold">Trade complete! You have used your trade for this turn.</p>':'<p id="pinTradeMessage" class="muted" aria-live="polite">First tap a pin in your stash, then tap the pin you want from the other stash.</p>')+'<div class="actions">'+(p.pinTradesThisTurn>0?'':'<button class="primary" id="pinOffer">Trade / Make Offer</button><button class="secondary" id="pinChooseAgain">Choose Someone Else</button>')+'<button class="secondary" id="pinTradeClose">Finish Visit</button></div></div></div>';
  document.getElementById('pinTradeClose').addEventListener('click',finishPinTradersVisit);
  if(p.pinTradesThisTurn>0)return;
  document.getElementById('pinChooseAgain').addEventListener('click',showPinPartnerChoice);
- function options(ids){return [...new Set(ids)].map(function(id){const pin=pinInfo(id),quantity=ids.filter(function(value){return value===id}).length;return '<option value="'+id+'">'+esc(pin.name)+' ('+quantity+')</option>'}).join('')}
- const give=document.getElementById('pinGive'),take=document.getElementById('pinTake'),offer=document.getElementById('pinOffer');
- give.innerHTML=options(p.pins||[]);
- function update(){
-   const pins=partnerIndex===-1?availableCastPins():(players[partnerIndex].pins||[]);
-   take.innerHTML=options(pins.filter(function(id){return id!==give.value}));
-   offer.disabled=!give.value||!take.value;
-   document.getElementById('pinTradeMessage').textContent=offer.disabled?'No different pin is available for this offer. Choose another pin or trading partner.':'';
+ let giveId=null,takeId=null;
+ const offer=document.getElementById('pinOffer');
+ const giveButtons=modalRoot.querySelectorAll('[data-pin-give]'),takeButtons=modalRoot.querySelectorAll('[data-pin-take]');
+ function updateSelection(){
+   giveButtons.forEach(function(button){const selected=button.dataset.pinGive===giveId;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected))});
+   takeButtons.forEach(function(button){
+     button.disabled=!giveId||button.dataset.pinTake===giveId;
+     const selected=button.dataset.pinTake===takeId;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected));
+   });
+   offer.disabled=!giveId||!takeId;
+   document.getElementById('pinTradeMessage').textContent=!giveId?'First tap a pin in your stash.':!takeId?'Now tap the pin you want from '+partnerName+'’s stash.':'Your offer: '+pinInfo(giveId).name+' → '+pinInfo(takeId).name+'. Tap Trade / Make Offer to continue.';
  }
- give.addEventListener('change',update);update();
+ giveButtons.forEach(function(button){button.addEventListener('click',function(){giveId=button.dataset.pinGive;takeId=null;updateSelection()})});
+ takeButtons.forEach(function(button){button.addEventListener('click',function(){if(button.disabled)return;takeId=button.dataset.pinTake;updateSelection()})});
+ updateSelection();
  offer.addEventListener('click',async function(){
    if(offer.disabled||!canTradePins(playerIndex))return;
-   const giveId=give.value,takeId=take.value;
    if(partnerIndex===-1){
      offer.disabled=true;
      if(executePinTrade(playerIndex,-1,giveId,takeId)){
