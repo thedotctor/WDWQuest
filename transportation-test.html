@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v1.15</title>
+<title>WDWQuest Board Game v1.16</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -97,12 +97,13 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v1.15 • 1–8 players</span>
+<span class="badge">Board Game Prototype v1.16 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
 <div id="modalRoot"></div>
 <canvas id="finaleFireworks" aria-hidden="true"></canvas>
+<script src="assets/audio/transportation-recordings-v1.js"></script>
 <script src="assets/tokens/pawn-data-1.js"></script>
 <script src="assets/tokens/pawn-data-2.js"></script>
 <script src="assets/tokens/pawn-data-3.js"></script>
@@ -144,103 +145,47 @@ document.addEventListener('touchend',unlockGameAudio,{capture:true,passive:true}
 document.addEventListener('click',unlockGameAudio,{capture:true,passive:true});
 document.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')unlockGameAudio()},{capture:true});
 
-function playTransportationSound(vehicle,durationMs){
- try{
-   if(!gameAudio||gameAudio.state!=='running'||document.hidden)return;
-   const audio=gameAudio,start=audio.currentTime+.012,duration=durationMs/1000;
-   const pass=audio.createGain();pass.connect(gameAudioBus);
-   let pan=null;
-   if(audio.createStereoPanner){
-     pan=audio.createStereoPanner();pan.pan.setValueAtTime(-.85,start);
-     pan.pan.linearRampToValueAtTime(.85,start+duration);
-     pan.connect(pass);
-   }
-   const destination=pan||pass;
-   // Approach, pass nearby, then recede with the vehicle's screen position.
-   pass.gain.setValueAtTime(.0001,start);
-   pass.gain.linearRampToValueAtTime(.45,start+duration*.18);
-   pass.gain.linearRampToValueAtTime(.85,start+duration*.5);
-   pass.gain.linearRampToValueAtTime(.35,start+duration*.78);
-   pass.gain.exponentialRampToValueAtTime(.0001,start+duration*.98);
-   let pending=0;
-   function voice(kind,frequency,level,cutoff,offset,length,endFrequency,options){
-     options=options||{};
-     const delay=(offset||0)*duration,span=(length||1)*duration,t=start+delay;
-     const source=kind==='noise'?audio.createBufferSource():audio.createOscillator();
-     const filter=audio.createBiquadFilter(),gain=audio.createGain();
-     filter.type=options.filter||(kind==='noise'?'bandpass':'lowpass');filter.Q.value=options.q||(kind==='noise'?.5:.7);
-     filter.frequency.value=cutoff;gain.gain.setValueAtTime(.0001,t);
-     if(options.pulse){
-       // Audible diesel beats and water surges rather than the same steady hum.
-       const steps=Math.max(24,Math.ceil(span*options.pulse*6));
-       for(let i=1;i<=steps;i++){
-         const position=i/steps,seconds=position*span;
-         const envelope=Math.min(1,position/.08,(1-position)/.18);
-         const pulse=(1-(options.depth||.8))+(options.depth||.8)*(.5+.5*Math.cos(seconds*options.pulse*Math.PI*2));
-         gain.gain.linearRampToValueAtTime(Math.max(.0001,level*envelope*pulse),t+seconds);
-       }
-     }else{
-       gain.gain.linearRampToValueAtTime(level,t+span*.08);
-       gain.gain.setValueAtTime(level,t+span*.7);
-       gain.gain.exponentialRampToValueAtTime(.0001,t+span*.98);
-     }
-     if(kind==='noise'){source.buffer=gameAudioNoise;source.loop=true;}
-     else{
-       source.type=kind;source.frequency.setValueAtTime(frequency,t);
-       source.frequency.linearRampToValueAtTime(frequency*1.08,t+span*.45);
-       source.frequency.exponentialRampToValueAtTime(endFrequency||frequency*.76,t+span*.97);
-     }
-     source.connect(filter);filter.connect(gain);gain.connect(destination);pending++;
-     source.onended=function(){
-       source.disconnect();filter.disconnect();gain.disconnect();
-       if(--pending===0){if(pan)pan.disconnect();pass.disconnect()}
-     };
-     if(kind==='noise')source.start(t,Math.random());else source.start(t);
-     source.stop(t+span);
-   }
-   switch(vehicle){
-     case 'monorail':
-       // Smooth, bright electric motor sweep; very little engine-like bass.
-       voice('sine',480,.24,2000,0,1,315);
-       voice('sine',960,.09,2600,0,1,630);
-       voice('triangle',240,.055,1100,0,1,160);
-       voice('noise',0,.035,3200,0,1,0,{filter:'highpass'});
-       break;
-     case 'bus':
-       // A rough diesel rumble with rapid, strongly pulsing cylinder beats.
-       voice('sawtooth',62,.34,1050,0,1,82,{pulse:18,depth:.87});
-       voice('triangle',124,.12,700,0,1,164,{pulse:9,depth:.8});
-       voice('noise',0,.13,320,0,1,0,{filter:'lowpass',pulse:18,depth:.8});
-       voice('noise',0,.10,2800,.74,.15,0,{filter:'highpass'});
-       break;
-     case 'skyliner':
-       // Light cable wind and three distinct pairs of metallic pulley clicks.
-       voice('noise',0,.075,4800,0,1,0,{filter:'highpass'});
-       for(let i=0;i<3;i++){
-         const at=.12+i*.25;
-         voice('noise',0,.20,2700,at,.045,0,{q:3});
-         voice('triangle',1450,.13,3800,at,.055,1150);
-         voice('sine',2900,.045,5000,at,.04,2300);
-         voice('noise',0,.14,2200,at+.065,.035,0,{q:2});
-         voice('sine',880,.055,1800,at+.035,.15,660);
-       }
-       break;
-     case 'boat':
-       // Water dominates, with a quiet engine and a recognizable two-tone horn.
-       voice('triangle',55,.065,230);
-       voice('noise',0,.26,850,0,1,0,{pulse:2.2,depth:.85});
-       for(let i=0;i<5;i++){
-         voice('noise',0,.23,1900,.06+i*.17,.15,0,{filter:'lowpass'});
-         voice('noise',0,.09,4200,.10+i*.17,.07,0,{filter:'highpass'});
-       }
-       voice('triangle',220,.26,1500,.28,.30,207.65);
-       voice('sine',277.18,.17,1600,.28,.30,261.63);
-       voice('sine',440,.065,1800,.28,.30,415.3);
-       break;
-   }
- }catch(audioError){
-   // Vehicle audio must never interrupt its animation or the travel prompt.
+const transportationBuffers={};
+function prepareTransportationRecording(vehicle){
+ const audio=unlockGameAudio();
+ if(!audio)return Promise.resolve(null);
+ const encoded=window.WDW_TRANSPORT_RECORDINGS&&window.WDW_TRANSPORT_RECORDINGS[vehicle];
+ if(!encoded)return Promise.resolve(null);
+ if(!transportationBuffers[vehicle]){
+   const raw=atob(encoded),bytes=new Uint8Array(raw.length);
+   for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+   transportationBuffers[vehicle]=audio.decodeAudioData(bytes.buffer).catch(function(error){
+     delete transportationBuffers[vehicle];console.warn('Transportation recording could not load:',vehicle,error);return null;
+   });
  }
+ return transportationBuffers[vehicle];
+}
+// Decode recordings during the initial interaction, ready for later landings.
+document.addEventListener('pointerdown',function(){
+ ['monorail','bus','skyliner','boat'].forEach(prepareTransportationRecording);
+},{once:true,passive:true});
+function playTransportationSound(vehicle,durationMs){
+ const audio=gameAudio;
+ if(!audio||audio.state!=='running'||document.hidden)return;
+ return prepareTransportationRecording(vehicle).then(function(buffer){
+   if(!buffer||audio.state!=='running'||document.hidden)return;
+   const duration=Math.min(durationMs/1000,buffer.duration),start=audio.currentTime+.01;
+   const source=audio.createBufferSource(),gain=audio.createGain();
+   source.buffer=buffer;
+   let pan=null;
+   source.connect(gain);
+   if(audio.createStereoPanner){
+     pan=audio.createStereoPanner();gain.connect(pan);pan.connect(gameAudioBus);
+     pan.pan.setValueAtTime(-.75,start);pan.pan.linearRampToValueAtTime(.75,start+duration);
+   }else gain.connect(gameAudioBus);
+   // Keep original pitch and speed. Match approach and fade to the animation.
+   gain.gain.setValueAtTime(.0001,start);
+   gain.gain.linearRampToValueAtTime(2,start+Math.min(.16,duration*.2));
+   gain.gain.setValueAtTime(2,start+duration*.75);
+   gain.gain.linearRampToValueAtTime(.0001,start+duration);
+   source.onended=function(){source.disconnect();gain.disconnect();if(pan)pan.disconnect()};
+   source.start(start);source.stop(start+duration);
+ }).catch(function(error){console.warn('Transportation playback failed:',vehicle,error)});
 }
 
 function playGameSound(effect){
@@ -1869,6 +1814,7 @@ async function animatePixieDust(){
      return {x:Math.random()*w,y:Math.random()*h,size:i%3===0?6+Math.random()*8:2+Math.random()*3,
        phase:Math.random()*Math.PI*2,speed:25+Math.random()*40,color:['#fff9d5','#fde68a','#facc15','#b4f5cf'][i%4],star:i%3===0};
    });
+   await prepareTransportationRecording(vehicle);
    const began=performance.now();
    function draw(now){
      const elapsed=Math.max(0,now-began)/1000,progress=Math.min(1,elapsed/(duration/1000));
