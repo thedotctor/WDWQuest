@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.94</title>
+<title>WDWQuest Board Game v0.95</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -77,6 +77,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .property-trade-choice{width:100%;font:inherit;color:var(--text);text-align:left;cursor:pointer}.property-trade-choice.selected{outline:3px solid var(--accent);outline-offset:2px;background:#17304a}.property-trade-choice:focus-visible{outline:3px solid var(--accent);outline-offset:2px}.property-trade-choice:not(:disabled):hover{background:#243954}.property-trade-choice:disabled{opacity:.5;cursor:default}
 .pin-stashes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.pin-stashes>section{min-width:0;border:1px solid var(--border);border-radius:12px;padding:10px;background:#0b1527}.pin-stashes h3{margin:0;font-size:15px}.pin-stashes .pin-grid{grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:8px;margin:10px 0 0}.pin-stashes .pin-art{width:48px;height:48px;font-size:26px}.pin-stashes .pin-card{padding:9px 5px}@media(max-width:480px){.pin-stashes{grid-template-columns:1fr}}
 .pin-exchange-modal{text-align:center}.pin-exchange-names{display:flex;justify-content:space-between;gap:16px;margin:20px 10px 0}.pin-exchange-names strong{max-width:45%;overflow-wrap:anywhere}.pin-exchange-stage{height:270px;position:relative;overflow:hidden}.pin-exchange-piece{position:absolute;top:65px;width:105px;z-index:2}.pin-exchange-piece.give{left:10px}.pin-exchange-piece.take{right:10px}.pin-exchange-piece .pin-card{margin:0;min-height:145px}.pin-exchange-sparkles{position:absolute;inset:105px 0 auto;color:var(--gold);font-size:28px;letter-spacing:14px;opacity:.7;pointer-events:none}.pin-exchange-piece .pin-art{box-shadow:0 0 16px #fde68a66,0 4px 7px #0005}
+.property-exchange-modal .pin-exchange-piece{width:140px}.property-exchange-modal .property-trade-card{flex-direction:column;min-height:155px;justify-content:center;text-align:center;padding:10px}.property-exchange-modal .property-trade-card>span{font-size:38px}.property-exchange-modal .property-trade-card strong{font-size:14px}.property-exchange-modal .property-trade-card small{font-size:11px}
 .dice-pair{display:flex;flex-direction:column;align-items:center;gap:18px}.turn-panel .dice{min-height:0}.turn-panel{max-height:calc(100vh - 20px);overflow-y:auto}@media(max-width:760px){.dice-pair{gap:12px}}
 .doubles-bang{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse,#23314de6,#07111fee);isolation:isolate}.doubles-burst{position:absolute;width:min(95vw,900px);height:min(90vh,700px);background:linear-gradient(135deg,#fde047,#fb923c,#ef4444);clip-path:polygon(50% 0,57% 24%,74% 6%,73% 31%,100% 23%,81% 45%,100% 57%,75% 62%,88% 89%,63% 76%,53% 100%,44% 77%,20% 95%,26% 67%,0 71%,20% 50%,0 29%,29% 31%,20% 5%,43% 25%);animation:doublesBurst .65s cubic-bezier(.16,1,.3,1) both;opacity:.95}.doubles-bang-content{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;max-width:90vw;animation:doublesBang .7s cubic-bezier(.16,1,.3,1) both}.doubles-bang-content strong{font-size:clamp(65px,18vw,210px);font-weight:1000;font-style:italic;line-height:1;color:#fff;text-shadow:5px 5px 0 #17223d,-2px -2px 0 #17223d;transform:rotate(-7deg)}.doubles-bang-content span{font-size:clamp(24px,5vw,44px);font-weight:950;color:#17223d}.doubles-bang-content b{background:#17223d;color:#fff6b2;border-radius:12px;padding:12px 18px;font-size:clamp(16px,3vw,28px)}@keyframes doublesBurst{from{transform:scale(.15) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(0deg);opacity:.95}}@keyframes doublesBang{from{transform:scale(.25);opacity:0}to{transform:scale(1);opacity:1}}.doubles-bang.reduced-motion .doubles-burst,.doubles-bang.reduced-motion .doubles-bang-content{animation:none}@media(prefers-reduced-motion:reduce){.doubles-burst,.doubles-bang-content{animation:none}}
 </style>
@@ -85,7 +86,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.94 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.95 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -2255,16 +2256,45 @@ function showPropertyTradeSelection(session){
    showPropertyTradeOffer(session,giveIndex,takeIndex);
  });
 }
+async function animatePropertyExchange(playerIndex,partnerIndex,giveIndex,takeIndex){
+ playGameSound('pin');
+ if(reducedMotion())return;
+ const p=players[playerIndex],partnerName=players[partnerIndex].name;
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal pin-exchange-modal property-exchange-modal"><div class="badge">✨ TRADE COMPLETE</div><h2>A Little Property Magic!</h2><div class="pin-exchange-names"><strong>'+esc(p.name)+'</strong><strong>'+esc(partnerName)+'</strong></div><div class="pin-exchange-stage" id="propertyExchangeStage"><div class="pin-exchange-piece give" id="propertyExchangeGive">'+propertyTradeCard(giveIndex)+'</div><div class="pin-exchange-piece take" id="propertyExchangeTake">'+propertyTradeCard(takeIndex)+'</div><div class="pin-exchange-sparkles" aria-hidden="true">✨ ✦ ✨</div></div><p id="propertyExchangeCaption" aria-live="polite">Passing your properties to their new owners…</p></div></div>';
+ try{
+   const stage=document.getElementById('propertyExchangeStage'),give=document.getElementById('propertyExchangeGive'),take=document.getElementById('propertyExchangeTake');
+   if(!stage||!give||!take||!give.animate||!take.animate)return;
+   const distance=Math.max(0,stage.clientWidth-give.offsetWidth-20);
+   await wait(200);
+   const outgoing=give.animate([
+     {transform:'translate(0,0) rotate(0deg)',offset:0},
+     {transform:'translate('+(distance*.5)+'px,-45px) rotate(12deg)',offset:.5},
+     {transform:'translate('+distance+'px,0) rotate(0deg)',offset:1}
+   ],{duration:1500,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
+   const incoming=take.animate([
+     {transform:'translate(0,0) rotate(0deg)',offset:0},
+     {transform:'translate('+(-distance*.5)+'px,45px) rotate(-12deg)',offset:.5},
+     {transform:'translate('+(-distance)+'px,0) rotate(0deg)',offset:1}
+   ],{duration:1500,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
+   await Promise.all([outgoing.finished,incoming.finished]);
+   const caption=document.getElementById('propertyExchangeCaption');
+   if(caption)caption.textContent=p.name+' received '+SPACES[takeIndex].name+' • '+partnerName+' received '+SPACES[giveIndex].name;
+   await wait(650);
+ }catch(animationError){
+   // The completed trade stays valid even if the visual animation is interrupted.
+ }
+}
 function showPropertyTradeOffer(session,giveIndex,takeIndex){
  if(!validPropertyTradeTurn(session))return;
  const p=players[session.playerIndex],partner=players[session.partnerIndex];
  modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">🏘️ PROPERTY TRADE OFFER</div><h2>'+esc(partner.name)+', do you accept this trade?</h2><p>'+esc(p.name)+' offers <strong>'+esc(SPACES[giveIndex].name)+'</strong> for your <strong>'+esc(SPACES[takeIndex].name)+'</strong>.</p><div class="property-trade-list">'+propertyTradeCard(giveIndex)+propertyTradeCard(takeIndex)+'</div><p>One property each. No money changes hands.</p><div class="actions"><button class="primary" id="propertyAccept">Accept Trade</button><button class="secondary" id="propertyDecline">Decline Trade</button></div></div></div>';
  let answered=false;
- function settle(accept){
+ async function settle(accept){
    if(answered||!validPropertyTradeTurn(session))return;
    answered=true;
    const traded=accept&&executePropertyTrade(session,giveIndex,takeIndex);
    if(!accept)addLog(partner.name+' declined '+p.name+'’s property trade.');
+   if(traded){await animatePropertyExchange(session.playerIndex,session.partnerIndex,giveIndex,takeIndex);if(propertyTradeTurn!==session||session.settled)return;}
    modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">🏘️ PROPERTY TRADE</div><h2>'+(traded?'Trade Complete!':accept?'Trade Unavailable':'Trade Declined')+'</h2><p>'+(traded?esc(p.name)+' now owns '+esc(SPACES[takeIndex].name)+'. '+esc(partner.name)+' now owns '+esc(SPACES[giveIndex].name)+'.':accept?'Ownership changed, so the offer could not be completed.':'Both players keep their properties.')+'</p><div class="actions"><button class="primary" id="propertyTradeNext">Next Player</button></div></div></div>';
    document.getElementById('propertyTradeNext').addEventListener('click',function(){completePropertyTradeTurn(session)});
  }
