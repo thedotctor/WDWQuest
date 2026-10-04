@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v0.87</title>
+<title>WDWQuest Board Game v0.88</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -82,7 +82,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.87 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.88 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -2313,6 +2313,8 @@ function availableCastPins(){
 function offerDoublesPinPurchase(playerIndex){
  return new Promise(function(resolve){
    const p=players[playerIndex],available=unownedPins();
+   const ownPins=p.pins||[];
+   const ownDisplay=[...new Set(ownPins)].map(function(id){return pinMarkup(pinInfo(id),ownPins.filter(function(value){return value===id}).length,false)}).join('');
    let settled=false;
    function complete(pinId){
      if(settled)return;
@@ -2326,7 +2328,7 @@ function offerDoublesPinPurchase(playerIndex){
      }else{settled=true;addLog(p.name+' skipped the doubles pin purchase.')}
      closeModal();resolve();
    }
-   modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">🎲 DOUBLES PIN SHOP</div><h2>'+esc(p.name)+', choose a pin!</h2><p>Buy one pin for <strong>$'+PIN_PURCHASE_PRICE+'</strong> before moving. These pins are not owned by any player.</p><p>Your bank: <strong>$'+p.cash.toLocaleString()+'</strong></p>'+(available.length?'<div class="pin-grid">'+available.map(function(pin){return '<div>'+pinMarkup(pin,0,false)+'<button class="primary" data-buy-pin="'+pin.id+'" '+(p.cash<PIN_PURCHASE_PRICE?'disabled':'')+'>Buy for $'+PIN_PURCHASE_PRICE+'</button></div>'}).join('')+'</div>':'<p>All pins are currently owned. No pins are available to buy.</p>')+(available.length&&p.cash<PIN_PURCHASE_PRICE?'<p class="muted">You need $'+PIN_PURCHASE_PRICE+' to buy a pin. You can still continue your turn.</p>':'')+'<div class="actions"><button class="secondary" id="doublesPinSkip">Skip / Continue Moving</button></div></div></div>';
+   modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">🎲 DOUBLES PIN SHOP</div><h2>'+esc(p.name)+', choose a pin!</h2><p>Buy one pin for <strong>$'+PIN_PURCHASE_PRICE+'</strong> before moving. These pins are not owned by any player.</p><p>Your bank: <strong>$'+p.cash.toLocaleString()+'</strong></p><div class="pin-stashes"><section aria-label="Your current owned pins"><h3>Your Stash — '+esc(p.name)+'</h3>'+(ownPins.length?'<div class="pin-grid">'+ownDisplay+'</div>':'<p>You have no pins yet.</p>')+'</section><section aria-label="Unowned pins available to buy"><h3>Available to Buy — $'+PIN_PURCHASE_PRICE+' Each</h3>'+(available.length?'<div class="pin-grid">'+available.map(function(pin){return '<div>'+pinMarkup(pin,0,false)+'<button class="primary" data-buy-pin="'+pin.id+'" '+(p.cash<PIN_PURCHASE_PRICE?'disabled':'')+'>Buy for $'+PIN_PURCHASE_PRICE+'</button></div>'}).join('')+'</div>':'<p>All pins are currently owned. No pins are available to buy.</p>')+'</section></div>'+(available.length&&p.cash<PIN_PURCHASE_PRICE?'<p class="muted">You need $'+PIN_PURCHASE_PRICE+' to buy a pin. You can still continue your turn.</p>':'')+'<div class="actions"><button class="secondary" id="doublesPinSkip">Skip / Continue Moving</button></div></div></div>';
    modalRoot.querySelectorAll('[data-buy-pin]').forEach(function(button){button.addEventListener('click',function(){complete(button.dataset.buyPin)})});
    document.getElementById('doublesPinSkip').addEventListener('click',function(){complete(null)});
  });
