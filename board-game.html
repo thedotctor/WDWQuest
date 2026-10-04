@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v1.12</title>
+<title>WDWQuest Board Game v1.13</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -97,7 +97,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v1.12 • 1–8 players</span>
+<span class="badge">Board Game Prototype v1.13 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -1816,7 +1816,8 @@ async function animateTransportation(spaceIndex){
    canvas.style.left=left+'px';canvas.style.width=width+'px';
    canvas.style.top=Math.max(0,Math.min(rect.bottom,window.innerHeight)-height-12)+'px';
    ctx.setTransform(dpr,0,0,dpr,0,0);document.body.appendChild(canvas);
-   const gentle=reducedMotion(),duration=gentle?650:2900,scale=Math.min(1,width/390),vehicleWidth=320*scale;
+   const gentle=reducedMotion(),duration=gentle?650:2900;
+   const groupWidth=vehicle==='skyliner'?430:320,scale=Math.min(1,width/(groupWidth+70)),vehicleWidth=groupWidth*scale;
    function box(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(x,y,w,h)}
    function line(points,color,lineWidth){
      ctx.beginPath();points.forEach(function(p,i){if(i)ctx.lineTo(p[0],p[1]);else ctx.moveTo(p[0],p[1])});
@@ -1847,12 +1848,17 @@ async function animateTransportation(spaceIndex){
        [65,254].forEach(function(x){circle(x,103,17,'#152234');circle(x,103,9,'#afbac5');circle(x,103,3,'#536578')});
        box(112,85,94,11,'#114974');
      }else if(vehicle==='skyliner'){
-       line([[0,20],[320,20]],'#e5edf6',3);circle(164,20,7,'#576674');
-       line([[164,24],[151,43],[151,50]],'#e2e8f0',5);
-       shape([[105,48],[192,48],[205,63],[201,109],[95,109],[91,63]],'#f4b72e');
-       box(100,57,97,35,'#17334a');box(146,57,5,52,'#f4b72e');
-       line([[102,60],[116,88]],'#a3ddef66',4);line([[162,60],[177,88]],'#a3ddef66',4);
-       box(99,94,100,11,'#e4941e');box(105,109,87,5,'#684e2a');
+       line([[0,20],[430,20]],'#e5edf6',3);
+       [['#ef5350','#bf3431'],['#f4b72e','#e4941e'],['#29b6d8','#12809e']].forEach(function(colors,i){
+         ctx.save();ctx.translate(-80+i*145,0);
+         circle(164,20,7,'#576674');
+         line([[164,24],[151,43],[151,50]],'#e2e8f0',5);
+         shape([[105,48],[192,48],[205,63],[201,109],[95,109],[91,63]],colors[0]);
+         box(100,57,97,35,'#17334a');box(146,57,5,52,colors[0]);
+         line([[102,60],[116,88]],'#a3ddef66',4);line([[162,60],[177,88]],'#a3ddef66',4);
+         box(99,94,100,11,colors[1]);box(105,109,87,5,'#405165');
+         ctx.restore();
+       });
      }else{
        for(let i=0;i<8;i++){
          const y=118+(i%2)*4;line([[i*42,y],[i*42+20,y-3],[i*42+40,y]],'#7dd3fc99',3);
