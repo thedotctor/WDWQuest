@@ -74,6 +74,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .current-player-center{width:min(200%,360px);margin:12px auto 0;text-align:left;flex-shrink:0;zoom:.5}.current-player-center .player-card{background:rgba(17,28,49,.95);box-shadow:0 8px 20px #0005}.current-player-center .stats-buttons{grid-template-columns:1fr 1fr}.center{padding-top:4%}@media(max-width:760px){.current-player-center{width:min(200%,280px);margin-top:8px}.current-player-center .player-card{padding:8px}.current-player-center .cash{font-size:17px}.current-player-center .mini{font-size:10px}.center{padding-top:2%}.center-games{margin-top:10px;gap:10px}}
 .pawn-closeup{position:fixed;inset:0;z-index:140;overflow:hidden;background:#07111f;pointer-events:none}.pawn-closeup-stage{position:absolute;left:0;top:0;transform-origin:0 0;transition:transform .5s ease-in-out;will-change:transform}.pawn-closeup .board{box-shadow:none}.pawn-closeup .space.current-space{z-index:2;overflow:visible}.pawn-closeup .token.moving{z-index:3}@media(prefers-reduced-motion:reduce){.pawn-closeup{display:none}.pawn-closeup-stage{transition:none}}
 .property-trade-list{display:grid;gap:8px}.property-trade-card{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:10px;padding:10px;background:#0b1527}.property-trade-card>span{font-size:28px}.property-trade-card strong{display:block}.property-trade-card small{display:block;color:var(--muted);margin-top:4px}
+.property-trade-choice{width:100%;font:inherit;color:var(--text);text-align:left;cursor:pointer}.property-trade-choice.selected{outline:3px solid var(--accent);outline-offset:2px;background:#17304a}.property-trade-choice:focus-visible{outline:3px solid var(--accent);outline-offset:2px}.property-trade-choice:not(:disabled):hover{background:#243954}.property-trade-choice:disabled{opacity:.5;cursor:default}
 .pin-stashes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.pin-stashes>section{min-width:0;border:1px solid var(--border);border-radius:12px;padding:10px;background:#0b1527}.pin-stashes h3{margin:0;font-size:15px}.pin-stashes .pin-grid{grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:8px;margin:10px 0 0}.pin-stashes .pin-art{width:48px;height:48px;font-size:26px}.pin-stashes .pin-card{padding:9px 5px}@media(max-width:480px){.pin-stashes{grid-template-columns:1fr}}
 .pin-exchange-modal{text-align:center}.pin-exchange-names{display:flex;justify-content:space-between;gap:16px;margin:20px 10px 0}.pin-exchange-names strong{max-width:45%;overflow-wrap:anywhere}.pin-exchange-stage{height:270px;position:relative;overflow:hidden}.pin-exchange-piece{position:absolute;top:65px;width:105px;z-index:2}.pin-exchange-piece.give{left:10px}.pin-exchange-piece.take{right:10px}.pin-exchange-piece .pin-card{margin:0;min-height:145px}.pin-exchange-sparkles{position:absolute;inset:105px 0 auto;color:var(--gold);font-size:28px;letter-spacing:14px;opacity:.7;pointer-events:none}.pin-exchange-piece .pin-art{box-shadow:0 0 16px #fde68a66,0 4px 7px #0005}
 .dice-pair{display:flex;flex-direction:column;align-items:center;gap:18px}.turn-panel .dice{min-height:0}.turn-panel{max-height:calc(100vh - 20px);overflow-y:auto}@media(max-width:760px){.dice-pair{gap:12px}}
@@ -84,7 +85,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v0.91 • 1–8 players</span>
+<span class="badge">Board Game Prototype v0.92 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -2227,17 +2228,30 @@ function showPropertyTradeSelection(session){
  if(!validPropertyTradeTurn(session))return;
  const partnerIndex=session.partnerIndex;
  if(!propertyTradePartners(session.playerIndex).includes(partnerIndex)){showPropertyTradePartners(session);return}
+ function choiceMarkup(index,side){
+   return propertyTradeCard(index).replace('<div class="property-trade-card">','<button type="button" class="property-trade-card property-trade-choice" data-property-'+side+'="'+index+'" aria-label="'+(side==='give'?'Offer ':'Request ')+esc(SPACES[index].name)+'" aria-pressed="false" '+(side==='take'?'disabled':'')+'>').replace(/<\/div>$/, '</button>');
+ }
  const mine=ownedPropertyIndices(session.playerIndex),theirs=ownedPropertyIndices(partnerIndex);
- modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">🏘️ PROPERTY TRADE</div><h2>Trade with '+esc(players[partnerIndex].name)+'</h2><p>Choose exactly one property from each player. No money changes hands.</p><div class="pin-stashes"><section aria-label="Your properties"><h3>'+esc(players[session.playerIndex].name)+' — Your Properties</h3><div class="property-trade-list">'+mine.map(propertyTradeCard).join('')+'</div></section><section aria-label="Other player properties"><h3>'+esc(players[partnerIndex].name)+' — Their Properties</h3><div class="property-trade-list">'+theirs.map(propertyTradeCard).join('')+'</div></section></div><div class="pin-controls"><label>Property you offer<select id="propertyGive"><option value="">Choose your property</option>'+mine.map(propertyTradeOption).join('')+'</select></label><label>Property you want<select id="propertyTake"><option value="">Choose their property</option>'+theirs.map(propertyTradeOption).join('')+'</select></label></div><div class="actions"><button class="primary" id="propertyMakeOffer" disabled>Make Offer</button><button class="secondary" id="propertyChooseAgain">Choose Someone Else</button><button class="secondary" id="propertyTradeSkip">Skip Trading / Next Player</button></div></div></div>';
- function propertyTradeOption(i){return '<option value="'+i+'">'+esc(SPACES[i].name)+' — '+esc(SPACES[i].park)+'</option>'}
- const give=document.getElementById('propertyGive'),take=document.getElementById('propertyTake'),offer=document.getElementById('propertyMakeOffer');
- function update(){offer.disabled=give.value===''||take.value===''}
- give.addEventListener('change',update);take.addEventListener('change',update);
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">🏘️ PROPERTY TRADE</div><h2>Trade with '+esc(players[partnerIndex].name)+'</h2><p>Choose exactly one property from each player. No money changes hands.</p><div class="pin-stashes"><section aria-label="Your properties"><h3>'+esc(players[session.playerIndex].name)+' — Your Properties</h3><div class="property-trade-list">'+mine.map(function(index){return choiceMarkup(index,'give')}).join('')+'</div></section><section aria-label="Other player properties"><h3>'+esc(players[partnerIndex].name)+' — Their Properties</h3><div class="property-trade-list">'+theirs.map(function(index){return choiceMarkup(index,'take')}).join('')+'</div></section></div><p id="propertySelectionMessage" class="muted" aria-live="polite">First tap a property in your stash, then one in the other player’s stash.</p><div class="actions"><button class="primary" id="propertyMakeOffer" disabled>Make Offer</button><button class="secondary" id="propertyChooseAgain">Choose Someone Else</button><button class="secondary" id="propertyTradeSkip">Skip Trading / Next Player</button></div></div></div>';
+ let giveIndex=null,takeIndex=null;
+ const offer=document.getElementById('propertyMakeOffer');
+ const giveButtons=modalRoot.querySelectorAll('[data-property-give]'),takeButtons=modalRoot.querySelectorAll('[data-property-take]');
+ function updateSelection(){
+   giveButtons.forEach(function(button){const selected=Number(button.dataset.propertyGive)===giveIndex;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected))});
+   takeButtons.forEach(function(button){
+     button.disabled=giveIndex===null;
+     const selected=Number(button.dataset.propertyTake)===takeIndex;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected));
+   });
+   offer.disabled=giveIndex===null||takeIndex===null;
+   document.getElementById('propertySelectionMessage').textContent=giveIndex===null?'First tap one of your properties.':takeIndex===null?'Now tap the property you want from '+players[partnerIndex].name+'’s stash.':'Your offer: '+SPACES[giveIndex].name+' → '+SPACES[takeIndex].name+'. Tap Make Offer to continue.';
+ }
+ giveButtons.forEach(function(button){button.addEventListener('click',function(){if(!validPropertyTradeTurn(session))return;giveIndex=Number(button.dataset.propertyGive);takeIndex=null;updateSelection()})});
+ takeButtons.forEach(function(button){button.addEventListener('click',function(){if(button.disabled||!validPropertyTradeTurn(session))return;takeIndex=Number(button.dataset.propertyTake);updateSelection()})});
+ updateSelection();
  document.getElementById('propertyChooseAgain').addEventListener('click',function(){showPropertyTradePartners(session)});
  document.getElementById('propertyTradeSkip').addEventListener('click',function(){completePropertyTradeTurn(session)});
  offer.addEventListener('click',function(){
    if(this.disabled||!validPropertyTradeTurn(session))return;
-   const giveIndex=Number(give.value),takeIndex=Number(take.value);
    if(owners[giveIndex]!==session.playerIndex||owners[takeIndex]!==partnerIndex)return;
    showPropertyTradeOffer(session,giveIndex,takeIndex);
  });
