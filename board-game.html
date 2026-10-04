@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v1.08</title>
+<title>WDWQuest Board Game v1.09</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -94,7 +94,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v1.08 • 1–8 players</span>
+<span class="badge">Board Game Prototype v1.09 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -107,20 +107,25 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <script src="assets/tokens/pawn-data-5.js"></script>
 <script>
 
-// Short, original game effects synthesized locally; no audio downloads or controls.
-let gameAudio=null,gameAudioBus=null,gameAudioNoise=null;
+
+// Original layered game effects, played automatically after the first interaction.
+let gameAudio=null,gameAudioBus=null,gameAudioNoise=null,gameAudioRoom=null;
 function unlockGameAudio(){
  try{
    const AudioEngine=window.AudioContext||window.webkitAudioContext;
    if(!AudioEngine)return null;
    if(!gameAudio||gameAudio.state==='closed'){
      gameAudio=new AudioEngine();
-     const volume=gameAudio.createGain();volume.gain.value=.32;
+     const volume=gameAudio.createGain();volume.gain.value=.30;
      const limiter=gameAudio.createDynamicsCompressor();
-     limiter.threshold.value=-16;limiter.knee.value=18;limiter.ratio.value=5;
-     volume.connect(limiter);limiter.connect(gameAudio.destination);
-     gameAudioBus=volume;
-     gameAudioNoise=gameAudio.createBuffer(1,gameAudio.sampleRate,gameAudio.sampleRate);
+     limiter.threshold.value=-18;limiter.knee.value=16;limiter.ratio.value=6;
+     limiter.attack.value=.003;limiter.release.value=.18;
+     volume.connect(limiter);limiter.connect(gameAudio.destination);gameAudioBus=volume;
+     // A quiet, short room reflection gives chimes body without washing out taps.
+     const room=gameAudio.createDelay(.5),damping=gameAudio.createBiquadFilter(),wet=gameAudio.createGain();
+     room.delayTime.value=.105;damping.type='lowpass';damping.frequency.value=3400;wet.gain.value=.13;
+     room.connect(damping);damping.connect(wet);wet.connect(volume);gameAudioRoom=room;
+     gameAudioNoise=gameAudio.createBuffer(1,gameAudio.sampleRate*2,gameAudio.sampleRate);
      const data=gameAudioNoise.getChannelData(0);
      for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
    }
@@ -139,77 +144,106 @@ function playGameSound(effect){
  try{
    if(!gameAudio||gameAudio.state!=='running'||document.hidden)return;
    const audio=gameAudio,bus=gameAudioBus,now=audio.currentTime+.012;
-   function tone(frequency,delay,duration,level,type,endFrequency){
+   function tone(frequency,delay,duration,level,type,endFrequency,room){
      const oscillator=audio.createOscillator(),gain=audio.createGain(),start=now+delay;
-     oscillator.type=type||'sine';
-     oscillator.frequency.setValueAtTime(frequency,start);
+     oscillator.type=type||'sine';oscillator.frequency.setValueAtTime(frequency,start);
      if(endFrequency)oscillator.frequency.exponentialRampToValueAtTime(endFrequency,start+duration);
-     gain.gain.setValueAtTime(0,start);
-     gain.gain.linearRampToValueAtTime(level,start+.008);
+     gain.gain.setValueAtTime(.0001,start);
+     gain.gain.exponentialRampToValueAtTime(Math.max(.0002,level),start+Math.min(.012,duration*.2));
      gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
      oscillator.connect(gain);gain.connect(bus);
+     if(room)gain.connect(gameAudioRoom);
      oscillator.onended=function(){oscillator.disconnect();gain.disconnect()};
-     oscillator.start(start);oscillator.stop(start+duration+.02);
+     oscillator.start(start);oscillator.stop(start+duration+.025);
    }
-   function noise(delay,duration,level,frequency,kind){
+   function noise(delay,duration,level,frequency,kind,endFrequency){
      const source=audio.createBufferSource(),filter=audio.createBiquadFilter(),gain=audio.createGain(),start=now+delay;
      source.buffer=gameAudioNoise;source.loop=true;
-     filter.type=kind||'lowpass';filter.frequency.value=frequency||1400;
-     gain.gain.setValueAtTime(0,start);
-     gain.gain.linearRampToValueAtTime(level,start+.005);
+     filter.type=kind||'lowpass';filter.Q.value=.7;filter.frequency.setValueAtTime(frequency||1400,start);
+     if(endFrequency)filter.frequency.exponentialRampToValueAtTime(endFrequency,start+duration);
+     gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(level,start+.005);
      gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
      source.connect(filter);filter.connect(gain);gain.connect(bus);
      source.onended=function(){source.disconnect();filter.disconnect();gain.disconnect()};
-     source.start(start);source.stop(start+duration+.02);
+     source.start(start,Math.random());source.stop(start+duration+.025);
    }
-   function melody(notes,spacing,duration,level,type,delay){
-     notes.forEach(function(note,i){tone(note,(delay||0)+i*spacing,duration,level,type)});
+   function bell(note,delay,duration,level){
+     tone(note,delay,duration,level,'sine',null,true);
+     tone(note*2.01,delay,duration*.5,level*.28,'sine',null,true);
+     tone(note*3.97,delay,duration*.24,level*.10,'sine',null,true);
+   }
+   function mallet(note,delay,level){
+     tone(note,delay,.19,level,'sine');
+     tone(note*2.76,delay,.07,level*.24,'sine');
+     noise(delay,.018,level*.16,1800,'bandpass');
+   }
+   function melody(notes,spacing,duration,level,delay){
+     notes.forEach(function(note,i){bell(note,(delay||0)+i*spacing,duration,level)});
    }
    switch(effect){
      case 'dice':
-       for(let i=0;i<10;i++){noise(i*.09,.065,.22,1500+i%3*400);tone(240+i%4*45,i*.09,.06,.08,'triangle')}
-       noise(1.02,.14,.36,800);tone(135,1.02,.15,.14,'triangle',75);break;
+       for(let i=0;i<14;i++){
+         const delay=i*.055+i*i*.0015;
+         noise(delay,.025+i*.001,.14,1400+Math.random()*1800,'bandpass');
+         mallet(350+Math.random()*330,delay,.10);
+       }
+       noise(1.02,.10,.22,850,'lowpass');mallet(185,1.02,.18);mallet(260,1.065,.12);break;
      case 'move':
-       tone(520,0,.085,.12,'triangle',360);noise(0,.055,.07,900);break;
+       mallet(410+Math.random()*35,0,.13);tone(145,0,.055,.06,'sine',100);break;
      case 'correct':
-       melody([523.25,659.25,783.99,1046.5],.09,.24,.18,'sine');break;
+       melody([659.25,783.99,1046.5],.105,.55,.18);
+       bell(1318.51,.34,.72,.12);tone(261.63,.2,.45,.07,'triangle',null,true);break;
      case 'wrong':
-       tone(240,0,.25,.17,'triangle',145);tone(180,.15,.3,.13,'triangle',95);break;
+       tone(311.13,0,.28,.13,'triangle',233.08);tone(233.08,.18,.40,.12,'triangle',155.56);
+       tone(155.56,.18,.38,.07,'sine');break;
      case 'pixie':
-       melody([1046.5,1318.51,1567.98,2093,1567.98,2637.02],.095,.35,.12,'sine');break;
+       melody([1318.51,1567.98,2093,2637.02,3135.96,2093,2637.02],.075,.65,.095);
+       noise(0,.55,.045,5500,'highpass',1200);bell(1046.5,.16,.85,.11);break;
      case 'snack':
-       melody([392,523.25,659.25,523.25],.13,.22,.16,'triangle');tone(1046.5,.48,.32,.1);break;
+       noise(0,.09,.095,2400,'bandpass');noise(.10,.055,.055,3300,'highpass');
+       [523.25,659.25,783.99,1046.5].forEach(function(note,i){mallet(note,.16+i*.115,.17)});
+       bell(1318.51,.65,.5,.085);break;
      case 'card':
-       for(let i=0;i<5;i++)noise(i*.085,.07,.2,2600,'highpass');
-       tone(660,.42,.14,.12,'triangle',880);break;
+       noise(0,.15,.17,1200,'bandpass',4500);noise(.16,.13,.13,3800,'highpass',1200);
+       noise(.34,.04,.16,1600,'bandpass');bell(880,.40,.45,.10);bell(1174.66,.48,.55,.09);break;
      case 'pin':
-       melody([783.99,1046.5,1318.51,1567.98],.13,.38,.16);
-       tone(2093,.55,.5,.09);break;
+       mallet(1650,0,.10);mallet(2200,.08,.08);
+       melody([783.99,1046.5,1318.51,1567.98],.12,.60,.14,.16);
+       bell(2093,.70,.85,.085);break;
      case 'autograph':
-       for(let i=0;i<7;i++)noise(i*.055,.045,.07,3300,'bandpass');
-       melody([659.25,783.99,1046.5,1318.51],.1,.3,.16,'sine',.42);break;
+       for(let i=0;i<8;i++)noise(i*.06,.035,.045,2200+i%3*900,'bandpass');
+       noise(.49,.08,.08,1200,'bandpass',3800);
+       melody([659.25,987.77,1318.51],.13,.65,.14,.56);bell(1567.98,.98,.75,.09);break;
      case 'security':
-       noise(0,.045,.2,1100);tone(95,0,.08,.16,'triangle');
-       for(let i=0;i<3;i++){tone(620,.18+i*.42,.2,.1,'sine',900);tone(900,.38+i*.42,.2,.1,'sine',620)}
-       break;
+       noise(0,.035,.13,900,'bandpass');tone(110,0,.09,.12,'sine',65);
+       for(let i=0;i<2;i++){
+         tone(587.33,.16+i*.48,.27,.095,'sine',783.99);
+         tone(783.99,.40+i*.48,.22,.075,'sine',587.33);
+       }
+       mallet(220,1.18,.10);break;
      case 'doubles':
-       noise(0,.5,.55,950);tone(100,0,.4,.3,'triangle',40);
-       melody([523.25,783.99,1046.5],.11,.28,.15,'triangle',.15);break;
+       // A bright invitation to the pin shop, rather than an explosive bang.
+       melody([523.25,659.25,783.99,1046.5],.085,.48,.13);
+       bell(1318.51,.36,.75,.13);bell(1567.98,.43,.75,.08);break;
      case 'fireworks':
        for(let i=0;i<4;i++){
-         const delay=i*.62;
-         tone(450,delay,.22,.08,'sine',1700);
-         noise(delay+.24,.55,.28,1500);
-         tone(90,delay+.24,.32,.15,'sine',35);
-         for(let j=0;j<4;j++)noise(delay+.35+j*.06,.045,.09,4000,'highpass');
+         const delay=i*.64;
+         noise(delay,.28,.075,650,'bandpass',4200);
+         tone(340,delay,.25,.045,'sine',1500);
+         noise(delay+.28,.65,.28,2400,'lowpass',250);
+         tone(75,delay+.28,.48,.18,'sine',30);
+         for(let j=0;j<7;j++)noise(delay+.37+j*.045,.045,.065,4500,'highpass');
        }
        break;
      case 'victory':
-       melody([523.25,659.25,783.99,1046.5,783.99,1046.5,1318.51],.21,.45,.19,'triangle',.2);
-       [523.25,659.25,783.99,1046.5].forEach(function(note){tone(note,1.85,1.2,.1,'triangle')});break;
+       [523.25,659.25,783.99].forEach(function(note){bell(note,0,.85,.075)});
+       melody([523.25,659.25,783.99,1046.5,987.77,1046.5,1318.51],.19,.65,.16,.18);
+       [261.63,329.63,392,523.25].forEach(function(note){tone(note,1.75,1.35,.055,'triangle',null,true)});
+       [1046.5,1318.51,1567.98].forEach(function(note,i){bell(note,1.75+i*.075,1.30,.10)});
+       break;
    }
  }catch(audioError){
-   // Sound must never interrupt a turn, trade, reward, or animation.
+   // Audio failure must never interrupt gameplay.
  }
 }
 
