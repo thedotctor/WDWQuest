@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v1.10</title>
+<title>WDWQuest Board Game v1.11</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -89,29 +89,14 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 .center{padding-top:max(4%,48px)}
 @media(max-width:760px){.park-side-label{font-size:clamp(12px,2.5vw,19px);letter-spacing:.03em}.park-label-left{left:14px}.park-label-right{right:14px}.center{padding-top:34px}}
 
-.pixie-dust-burst{position:fixed;inset:0;z-index:900;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse at 50% 65%,#fde68a18,transparent 72%)}
-.pixie-dust-halo{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 60%,#fff8b822,transparent 55%),radial-gradient(ellipse at 75% 35%,#b4f5cf18,transparent 50%);animation:pixieHalo 2.4s ease-out both}
-.pixie-dust-spark{position:absolute;left:var(--spark-left);top:var(--spark-top);width:var(--spark-size);height:var(--spark-size);background:var(--spark-color);border-radius:50%;box-shadow:0 0 8px var(--spark-color),0 0 18px #ffe77a99;opacity:0;animation:pixieSpiral 1.9s var(--spark-delay) ease-out both}
-.pixie-dust-spark.star{border-radius:0;clip-path:polygon(50% 0,61% 38%,100% 50%,61% 62%,50% 100%,39% 62%,0 50%,39% 38%);box-shadow:none;filter:drop-shadow(0 0 5px #fff3a1)}
-@keyframes pixieSpiral{
- 0%{opacity:0;transform:translate(0,30px) scale(.2) rotate(0deg)}
- 20%{opacity:1;transform:translate(var(--spark-drift),0) scale(1.15) rotate(60deg)}
- 55%{opacity:.9;transform:translate(var(--spark-sway),-65px) scale(.7) rotate(150deg)}
- 72%{opacity:1}
- 100%{opacity:0;transform:translate(var(--spark-drift),-150px) scale(.1) rotate(250deg)}
-}
-@keyframes pixieHalo{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
-.pixie-dust-burst.reduced-motion .pixie-dust-halo{animation:none;opacity:.8}
-.pixie-dust-burst.reduced-motion .pixie-dust-spark{animation:none;opacity:.65;transform:none}
-@media(prefers-reduced-motion:reduce){.pixie-dust-spark,.pixie-dust-halo{animation:none}}
-
+.pixie-dust-canvas{position:fixed;inset:0;width:100vw;height:100vh;z-index:1000;pointer-events:none}
 </style>
 </head>
 <body>
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v1.10 • 1–8 players</span>
+<span class="badge">Board Game Prototype v1.11 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -1768,36 +1753,49 @@ function showPropertyOffer(spaceIndex){
  });
 }
 
+
 async function animatePixieDust(){
- let burst=null;
+ let canvas=null,frame=0;
  try{
-   burst=document.createElement('div');burst.className='pixie-dust-burst';burst.setAttribute('aria-hidden','true');
-   const halo=document.createElement('div');halo.className='pixie-dust-halo';burst.appendChild(halo);
-   const gentle=reducedMotion();
-   if(gentle)burst.classList.add('reduced-motion');
-   // Scatter across the entire screen, with a gentle rising swirl over the board.
-   const count=gentle?35:120;
-   for(let i=0;i<count;i++){
-     const spark=document.createElement('span');
-     spark.className='pixie-dust-spark'+(i%3===0?' star':'');
-     const styles={
-       '--spark-size':(i%3===0?12+Math.random()*15:3+Math.random()*5)+'px',
-       '--spark-color':['#fff8cb','#fde68a','#facc15','#b4f5cf'][i%4],
-       '--spark-left':(Math.random()*100)+'%',
-       '--spark-top':(Math.random()*110)+'%',
-       '--spark-delay':(Math.random()*.5)+'s',
-       '--spark-drift':(Math.random()*120-60)+'px',
-       '--spark-sway':(Math.random()*160-80)+'px'
-     };
-     Object.keys(styles).forEach(function(key){spark.style.setProperty(key,styles[key])});
-     burst.appendChild(spark);
+   canvas=document.createElement('canvas');
+   canvas.className='pixie-dust-canvas';canvas.setAttribute('aria-hidden','true');
+   const ctx=canvas.getContext('2d');if(!ctx)return;
+   const w=window.innerWidth,h=window.innerHeight,dpr=Math.min(window.devicePixelRatio||1,2);
+   canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+   ctx.setTransform(dpr,0,0,dpr,0,0);document.body.appendChild(canvas);
+   const gentle=reducedMotion(),duration=gentle?750:3200;
+   const particles=Array.from({length:gentle?45:160},function(_,i){
+     return {x:Math.random()*w,y:Math.random()*h,size:i%3===0?6+Math.random()*8:2+Math.random()*3,
+       phase:Math.random()*Math.PI*2,speed:25+Math.random()*40,color:['#fff9d5','#fde68a','#facc15','#b4f5cf'][i%4],star:i%3===0};
+   });
+   const began=performance.now();
+   function draw(now){
+     const elapsed=Math.max(0,now-began)/1000,progress=Math.min(1,elapsed/(duration/1000));
+     ctx.clearRect(0,0,w,h);
+     const fade=gentle?1:Math.min(1,(1-progress)*4);
+     particles.forEach(function(p){
+       const x=p.x+(gentle?0:Math.sin(elapsed*2+p.phase)*32);
+       const y=gentle?p.y:(p.y-elapsed*p.speed+h+100)%(h+100)-30;
+       const twinkle=gentle?.7:.5+.5*Math.pow(Math.sin(elapsed*5+p.phase),2);
+       ctx.save();ctx.translate(x,y);ctx.globalAlpha=twinkle*fade;ctx.fillStyle=p.color;
+       ctx.shadowColor=p.color;ctx.shadowBlur=p.star?16:10;
+       ctx.beginPath();
+       if(p.star){
+         ctx.rotate(gentle?0:elapsed*.7+p.phase);
+         for(let j=0;j<8;j++){const a=j*Math.PI/4,r=j%2?p.size*.23:p.size;if(j===0)ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r);else ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r)}
+         ctx.closePath();
+       }else ctx.arc(0,0,p.size,0,Math.PI*2);
+       ctx.fill();ctx.restore();
+     });
+     if(!gentle&&progress<1)frame=requestAnimationFrame(draw);
    }
-   document.body.appendChild(burst);
-   await wait(gentle?600:2450);
+   draw(began);
+   await wait(duration);
  }catch(animationError){
-   // Pixie dust is decorative; its failure must never block the question.
+   // Decoration must never block the Pixie Dust question.
  }finally{
-   if(burst)burst.remove();
+   cancelAnimationFrame(frame);
+   if(canvas)canvas.remove();
  }
 }
 
@@ -2651,7 +2649,6 @@ function showRules(){
  modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><h2>Quick Rules</h2><p><strong>End-of-Turn Property Trading:</strong> After finishing a turn, choose whether to trade before passing to the next player. Pick another active player, offer exactly one property, and request exactly one of theirs. The other player accepts or declines. One offer per turn; no money changes hands. Ownership, rent, and Castle Finale progress update after an accepted trade. You can skip trading.</p><p><strong>Pin Traders:</strong> Each player chooses one starting pin after choosing a playing piece. All 20 designs are available, and each starting pin must be different. There are 20 designs in four park sets, and two Magic &amp; Mischief cards add a mystery pin. Land on one of eight Pin Traders spaces (two per park) for one optional one-for-one swap with a Cast Member holding up to five random pins not owned by any player or another active player. Player trades require that player to accept. Trades cost no money. Choose Finish Visit to end your turn, whether you trade or skip. Duplicate pins can be traded. All five pins from the park where you own every property are required for the Castle Finale.</p><p><strong>Autograph Book:</strong> Correct answers (except the winning Final Challenge) have a 25% chance of a surprise character autograph with confetti. Every player is guaranteed a visit by their third correct answer since their last autograph. Three Magic &amp; Mischief cards guarantee an autograph. Collect all 50; each new visit chooses a missing character first. After completing your book, repeat character visits are still possible. Open your book from your player card. Autographs are optional.</p><p>The board has <strong>80 spaces</strong> (19 park spaces on each side, plus four transportation corners). Each side is themed to one park: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom.</p><p>Choose a unique token, roll both dice, and move the combined total (2–12 spaces) around the board. Rolling doubles opens a popup asking whether the rolling player wants to buy one pin not owned by any player for $100, or skip, including on transportation bonus rolls. No doubles cash payout is given. Doubles do not give an extra turn. When you land on an unowned attraction, the game checks whether you can afford it. If you can, choose whether to attempt the purchase; answering the park-themed trivia correctly buys it automatically. If you cannot afford it, your turn ends. Land on another player\'s property to see a rent popup. Choose to pay the rent or use a Magic Rent Pass (the bank pays the owner). If you cannot afford rent and choose &ldquo;I spent all my money at Disney!&rdquo;, your remaining money goes to the owner and you lose the game. Your turns are skipped, your pawn is removed, and your properties return to the bank. Remaining players continue toward the Castle Finale. The four middle-of-the-park <strong>Nighttime Show</strong> spaces cost $200 each and work as a set: rent is $25 with 1 show, $50 with 2, $100 with 3, and $200 with all 4.</p><p>All four corners are <strong>transportation hubs</strong>. If you land exactly on one, you may choose to roll again and travel that many extra spaces. Completing a lap does not pay money.</p><p><strong>Magic &amp; Mischief:</strong> Land on either card space on a park side to draw from the shared pile of 45 cards. Apply its reward, cost, movement, or special perk. Card travel plays the destination normally; laps do not pay money. You may choose to use a Magic Rent Pass in the rent popup; the bank pays the owner. Five Security cards move your pawn to the center Security spot and skip your next turn. Resume from the space you left when you next roll; no lap bonus is paid for being sent to Security. Cards do not repeat until the deck is used up.</p><p>Each of the four parks has its own shuffled deck of <strong>50 expert-level questions</strong> (200 park questions total). Resorts &amp; Dining and Disney History questions are also expert-level. Questions do not repeat within a park until its deck is used up.</p><p>Correct answers on Trivia and Pixie Dust spaces earn category badges. Attraction and nighttime show purchase questions do not award badges. <strong>Pixie Dust</strong> awards $10 for a correct answer. Wrong answers lose no money. <strong>Snack Break</strong> uses a shuffled deck of 30 real Disney food photos; identify the food from four answers to earn $50. To win, collect all six badges, own <strong>all 10 properties in one park, including its Nighttime Show</strong>, and collect <strong>all five pins from that same park</strong>. Then choose the <strong>Cinderella Castle Finale</strong> space in the center instead of rolling and answer the Final Challenge correctly. If you miss the Final Challenge, complete another full lap of the 80-space board before trying again. Backward movement reduces your lap progress; Security trips do not count. Your cash balance and autographs are not win requirements.</p><div class="actions"><button class="primary" id="closeRules">Got It</button></div></div></div>';
  document.getElementById('closeRules').addEventListener('click',closeModal);
 }
-
 players=[{name:'Player 1',cash:1000,pos:6,badges:[],props:[],autographs:[],token:TOKEN_OPTIONS[0].id,startingPin:PIN_DESIGNS[0].id,pins:[PIN_DESIGNS[0].id],pinTradesThisTurn:0,skipTurns:0,inSecurity:false,rentPasses:0,eliminated:false}];
 currentPlayer=0;owners={};gameOver=false;turnLocked=true;notePawnArrival(players[0]);resetMagicDeck();renderGame();
 app.insertAdjacentHTML('afterbegin','<section class="panel"><h1>Pixie Dust animation check</h1><button class="primary" id="checkPixie">Check Pixie Dust Landing</button></section>');
