@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v1.14</title>
+<title>WDWQuest Board Game v1.15</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -97,7 +97,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v1.14 • 1–8 players</span>
+<span class="badge">Board Game Prototype v1.15 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -163,15 +163,27 @@ function playTransportationSound(vehicle,durationMs){
    pass.gain.linearRampToValueAtTime(.35,start+duration*.78);
    pass.gain.exponentialRampToValueAtTime(.0001,start+duration*.98);
    let pending=0;
-   function voice(kind,frequency,level,cutoff,offset,length,endFrequency){
+   function voice(kind,frequency,level,cutoff,offset,length,endFrequency,options){
+     options=options||{};
      const delay=(offset||0)*duration,span=(length||1)*duration,t=start+delay;
      const source=kind==='noise'?audio.createBufferSource():audio.createOscillator();
      const filter=audio.createBiquadFilter(),gain=audio.createGain();
-     filter.type=kind==='noise'?'bandpass':'lowpass';filter.Q.value=kind==='noise'?.5:.7;
+     filter.type=options.filter||(kind==='noise'?'bandpass':'lowpass');filter.Q.value=options.q||(kind==='noise'?.5:.7);
      filter.frequency.value=cutoff;gain.gain.setValueAtTime(.0001,t);
-     gain.gain.linearRampToValueAtTime(level,t+span*.08);
-     gain.gain.setValueAtTime(level,t+span*.7);
-     gain.gain.exponentialRampToValueAtTime(.0001,t+span*.98);
+     if(options.pulse){
+       // Audible diesel beats and water surges rather than the same steady hum.
+       const steps=Math.max(24,Math.ceil(span*options.pulse*6));
+       for(let i=1;i<=steps;i++){
+         const position=i/steps,seconds=position*span;
+         const envelope=Math.min(1,position/.08,(1-position)/.18);
+         const pulse=(1-(options.depth||.8))+(options.depth||.8)*(.5+.5*Math.cos(seconds*options.pulse*Math.PI*2));
+         gain.gain.linearRampToValueAtTime(Math.max(.0001,level*envelope*pulse),t+seconds);
+       }
+     }else{
+       gain.gain.linearRampToValueAtTime(level,t+span*.08);
+       gain.gain.setValueAtTime(level,t+span*.7);
+       gain.gain.exponentialRampToValueAtTime(.0001,t+span*.98);
+     }
      if(kind==='noise'){source.buffer=gameAudioNoise;source.loop=true;}
      else{
        source.type=kind;source.frequency.setValueAtTime(frequency,t);
@@ -188,34 +200,42 @@ function playTransportationSound(vehicle,durationMs){
    }
    switch(vehicle){
      case 'monorail':
-       voice('sine',110,.28,900);
-       voice('triangle',220,.11,1100);
-       voice('sine',660,.045,1500,0,1,440);
-       voice('noise',0,.19,1600);break;
+       // Smooth, bright electric motor sweep; very little engine-like bass.
+       voice('sine',480,.24,2000,0,1,315);
+       voice('sine',960,.09,2600,0,1,630);
+       voice('triangle',240,.055,1100,0,1,160);
+       voice('noise',0,.035,3200,0,1,0,{filter:'highpass'});
+       break;
      case 'bus':
-       voice('sawtooth',68,.22,430);
-       voice('triangle',136,.12,750);
-       voice('noise',0,.19,380);
-       voice('noise',0,.09,2100);
-       for(let i=0;i<8;i++)voice('sine',85,.05,220,.12+i*.09,.07,62);
+       // A rough diesel rumble with rapid, strongly pulsing cylinder beats.
+       voice('sawtooth',62,.34,1050,0,1,82,{pulse:18,depth:.87});
+       voice('triangle',124,.12,700,0,1,164,{pulse:9,depth:.8});
+       voice('noise',0,.13,320,0,1,0,{filter:'lowpass',pulse:18,depth:.8});
+       voice('noise',0,.10,2800,.74,.15,0,{filter:'highpass'});
        break;
      case 'skyliner':
-       voice('noise',0,.13,1800);
-       voice('sine',175,.055,600);
-       // Each of the three passing gondolas adds its own soft pulley whirr.
+       // Light cable wind and three distinct pairs of metallic pulley clicks.
+       voice('noise',0,.075,4800,0,1,0,{filter:'highpass'});
        for(let i=0;i<3;i++){
-         voice('triangle',330,.09,850,.10+i*.24,.22,250);
-         voice('noise',0,.065,2800,.10+i*.24,.18);
+         const at=.12+i*.25;
+         voice('noise',0,.20,2700,at,.045,0,{q:3});
+         voice('triangle',1450,.13,3800,at,.055,1150);
+         voice('sine',2900,.045,5000,at,.04,2300);
+         voice('noise',0,.14,2200,at+.065,.035,0,{q:2});
+         voice('sine',880,.055,1800,at+.035,.15,660);
        }
        break;
      case 'boat':
-       voice('triangle',52,.24,260);
-       voice('sine',104,.10,450);
-       voice('noise',0,.24,650);
-       voice('noise',0,.10,2200);
-       for(let i=0;i<5;i++)voice('noise',0,.11,1100,.08+i*.16,.14);
-       voice('sine',196,.075,600,.34,.24,185);
-       voice('sine',261.63,.035,650,.34,.24,247);
+       // Water dominates, with a quiet engine and a recognizable two-tone horn.
+       voice('triangle',55,.065,230);
+       voice('noise',0,.26,850,0,1,0,{pulse:2.2,depth:.85});
+       for(let i=0;i<5;i++){
+         voice('noise',0,.23,1900,.06+i*.17,.15,0,{filter:'lowpass'});
+         voice('noise',0,.09,4200,.10+i*.17,.07,0,{filter:'highpass'});
+       }
+       voice('triangle',220,.26,1500,.28,.30,207.65);
+       voice('sine',277.18,.17,1600,.28,.30,261.63);
+       voice('sine',440,.065,1800,.28,.30,415.3);
        break;
    }
  }catch(audioError){
