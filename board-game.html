@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v1.18</title>
+<title>WDWQuest Board Game v1.19</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -97,7 +97,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v1.18 • 1–8 players</span>
+<span class="badge">Board Game Prototype v1.19 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -1999,19 +1999,37 @@ function renderMagicPile(){
  if(count)count.textContent=magicDeck.length+' of 45 cards remaining';
  if(pile)pile.disabled=turnLocked||gameOver;
 }
+async function animateRentExchange(payerName,ownerName,amount,payerBefore,payerAfter,ownerBefore,ownerAfter){
+ const money=function(value){return '$'+value.toLocaleString()};
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal pin-exchange-modal"><div class="badge">💵 RENT PAYMENT</div><h2>Passing the Disney Dollars!</h2><div class="pin-exchange-names"><strong>'+esc(payerName)+'<br><small>'+(payerBefore===null?'Bank pays the rent':money(payerBefore)+' → '+money(payerAfter))+'</small></strong><strong>'+esc(ownerName)+'<br><small>'+money(ownerBefore)+' → '+money(ownerAfter)+'</small></strong></div><div class="pin-exchange-stage" id="rentExchangeStage"><div class="pin-exchange-piece give" id="rentExchangeMoney" style="padding:18px 8px;border:2px solid var(--gold);border-radius:14px;background:#166744;color:#fff5bc;box-sizing:border-box"><span style="font-size:36px" aria-hidden="true">💵</span><br><strong>'+money(amount)+'</strong></div><div class="pin-exchange-sparkles" aria-hidden="true">✨ ✦ ✨</div></div><p id="rentExchangeCaption" aria-live="polite">'+esc(payerName)+' is paying '+esc(ownerName)+' '+money(amount)+'…</p></div></div>';
+ try{
+   const stage=document.getElementById('rentExchangeStage'),cash=document.getElementById('rentExchangeMoney');
+   if(!reducedMotion()&&amount>0&&stage&&cash&&cash.animate){
+     const distance=Math.max(0,stage.clientWidth-cash.offsetWidth-20);
+     await wait(200);
+     await cash.animate([{transform:'translate(0,0) rotate(0deg)'},{transform:'translate('+(distance*.5)+'px,-45px) rotate(12deg)'},{transform:'translate('+distance+'px,0) rotate(0deg)'}],{duration:1500,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'}).finished;
+   }
+   const caption=document.getElementById('rentExchangeCaption');
+   if(caption)caption.textContent=ownerName+' received '+money(amount)+' from '+payerName+'.';
+   await wait(reducedMotion()?900:650);
+ }catch(animationError){
+   // Rent is settled exactly once even if the visual exchange is interrupted.
+ }
+}
 function showRentPayment(spaceIndex){
  const visitorIndex=currentPlayer,p=players[visitorIndex],ownerIndex=owners[spaceIndex],owner=players[ownerIndex],s=SPACES[spaceIndex],rent=rentForSpace(spaceIndex);
  turnLocked=true;renderAll();
  const canPay=p.cash>=rent,hasPass=p.rentPasses>0;
  modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">💵 RENT DUE</div>'+landedSpotMarkup(spaceIndex,null)+'<h2>'+esc(p.name)+', rent is due!</h2><p>This property belongs to <strong>'+esc(owner.name)+'</strong>. You owe <strong>$'+rent+'</strong> in rent.</p><p>Your bank: <strong>$'+p.cash.toLocaleString()+'</strong> • Magic Rent Passes: '+(p.rentPasses||0)+'</p><div class="actions"><button class="primary" id="rentPay" '+(canPay?'':'disabled')+'>Pay $'+rent+'</button><button class="secondary '+(hasPass?'rent-pass-ready':'')+'" id="rentPass">Use Magic Rent Pass</button><button class="secondary" id="rentBroke" '+(canPay?'disabled':'')+'>I spent all my money at Disney!</button></div><p class="muted">A Magic Rent Pass lets the bank pay the owner instead. If you cannot afford rent and choose the last option, you hand over your remaining money and are eliminated from this game. Your properties return to the bank.</p></div></div></div>';
  let settled=false;
- function settle(method){
+ async function settle(method){
    if(settled||gameOver||currentPlayer!==visitorIndex||p.eliminated)return;
    if(method==='pay'&&p.cash<rent)return;
    if(method==='pass'&&!(p.rentPasses>0))return;
    if(method==='broke'&&p.cash>=rent)return;
    settled=true;
-   let message;
+   const payerBefore=p.cash,ownerBefore=owner.cash;
+   let message,amount=rent;
    if(method==='pass'){
      p.rentPasses--;owner.cash+=rent;
      message=p.name+' used a Magic Rent Pass at '+s.name+'. The bank paid '+owner.name+' $'+rent+'.';
@@ -2019,12 +2037,14 @@ function showRentPayment(spaceIndex){
      p.cash-=rent;owner.cash+=rent;
      message=p.name+' paid '+owner.name+' $'+rent+' rent at '+s.name+'.';
    }else{
-     const remaining=Math.max(0,p.cash);owner.cash+=remaining;p.cash=0;
+     const remaining=Math.max(0,p.cash);amount=remaining;owner.cash+=remaining;p.cash=0;
      p.eliminated=true;p.inSecurity=false;p.skipTurns=0;p.rentPasses=0;
      Object.keys(owners).forEach(function(index){if(owners[index]===visitorIndex)delete owners[index]});
      p.props=[];
      message=p.name+' spent all their money at Disney! Paid their remaining $'+remaining+' to '+owner.name+' and lost the game. Their properties returned to the bank.';
    }
+   renderAll();
+   await animateRentExchange(method==='pass'?'Disney Bank':p.name,owner.name,amount,method==='pass'?null:payerBefore,p.cash,ownerBefore,owner.cash);
    closeModal();finishTurn(message);
  }
  document.getElementById('rentPay').addEventListener('click',function(){settle('pay')});
