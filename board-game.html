@@ -2992,6 +2992,13 @@ const pz=r.z+(r.side===0?.79:r.side===2?-.79:0),px=r.x+(r.side===1?-.79:r.side==
 const label=plaque(world,s.name,px,.306,pz,r.side%2?1.65:r.w*.9,r.side%2?r.d*.91:.4,'#384c68',r.side%2?Math.PI/2:0);
 const flag=cyl(world,r.x,.307,r.z,.095,.07,gold);flag.visible=false;ownerFlags.push(flag);
 });
+// Interior park names face outward toward their playing spaces.
+[
+ ['MAGIC KINGDOM',0,-8.65,Math.PI],
+ ['EPCOT',8.65,0,Math.PI/2],
+ ['HOLLYWOOD STUDIOS',0,8.65,0],
+ ['ANIMAL KINGDOM',-8.65,0,-Math.PI/2]
+].forEach(([name,x,z,rotation])=>plaque(world,name,x,.245,z,8.8,.9,'#384c68',rotation));
 const centerTargets=[];
 for(const [id,text,x,z,mat] of [['pinKiosk','PIN TRADERS',-5.2,-3.3,gold],['magicPile','MAGIC & MISCHIEF',5.2,-3.3,material('#9582bb',.3)],['securitySpot','PARK SECURITY',5.2,4.2,blue]]){const m=box(world,x,.25,z,2.3,.12,1.6,mat,.04);m.userData.control=id;centerTargets.push(m);plaque(world,text,x,.395,z,2.1,.8,'#f2e7cc');}
 const castleTarget=box(world,0,.24,0,3.2,.02,2.6,material('#d8cbb0',.15,.3),.005);castleTarget.userData.control='castleFinaleBtn';centerTargets.push(castleTarget);
