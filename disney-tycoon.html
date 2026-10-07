@@ -85,6 +85,22 @@ html{color-scheme:dark}body{margin:0;background:#07111f;padding:18px;font-family
 #quest-tycoon .qt-lot:nth-child(odd){background:#3b613f}
 #quest-tycoon .qt-lot.path,#quest-tycoon .qt-lot.path:nth-child(odd){background:#dbc698}
 @media(max-width:650px){#quest-tycoon .qt-entrance{margin-top:-12px}}
+</style><style>
+#quest-tycoon .qt-body{grid-template-columns:290px minmax(0,1fr)}
+#quest-tycoon .qt-tools{display:flex;flex-direction:column;gap:12px}
+#quest-tycoon .qt-build-categories{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#quest-tycoon .qt-build-categories button{font-size:12px;padding:8px}
+#quest-tycoon .qt-build-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(6,minmax(95px,auto));gap:7px}
+#quest-tycoon .qt-build-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:9px 7px;min-width:0;overflow-wrap:anywhere}
+#quest-tycoon .qt-build-tile[aria-pressed=true],#quest-tycoon .qt-build-categories button[aria-pressed=true]{background:var(--qt-accent);color:var(--qt-ink);border-color:transparent}
+#quest-tycoon .qt-build-tile small{color:inherit;font-size:12px}
+#quest-tycoon .qt-build-icon{font-size:23px}
+#quest-tycoon .qt-build-name{font-size:13px;line-height:1.3}
+#quest-tycoon .qt-unused-slot{border:1px dashed var(--qt-line);border-radius:9px;opacity:.4}
+#quest-tycoon .qt-build-pages{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#quest-tycoon .qt-build-pages span{font-size:12px;color:var(--qt-muted)}
+@media(max-width:850px){#quest-tycoon .qt-body{grid-template-columns:240px minmax(0,1fr)}}
+@media(max-width:650px){#quest-tycoon .qt-body{grid-template-columns:1fr}#quest-tycoon .qt-build-grid{grid-template-rows:repeat(6,minmax(82px,auto))}#quest-tycoon .qt-build-name{font-size:14px}}
 </style></head><body>
 <div id="quest-tycoon">
 <style>
@@ -136,12 +152,19 @@ Object.assign(types.path,{category:'scenery'});
 types['mk-castle']={name:'Cinderella Castle',draw:'castle',category:'rides',icon:'🏰',price:1500,guests:180,upkeep:70};
 const categoryNames={rides:'Rides & attractions',food:'Food & drinks',characters:'Characters',scenery:'Paths & scenery'};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let buildPage=0;
 function catalogMarkup(){
-const options=Object.entries(types).filter(([k,t])=>t.category===buildCategory);
-return '<label for="qt-category">Build category</label><select id="qt-category">'+Object.entries(categoryNames).map(([k,n])=>'<option value="'+k+'" '+(k===buildCategory?'selected':'')+'>'+n+'</option>').join('')+'</select><label for="qt-venue">'+options.length+' choices</label><select id="qt-venue">'+options.map(([k,t])=>'<option value="'+k+'" '+(k===tool?'selected':'')+'>'+esc(t.name)+' · &#36;'+t.price.toLocaleString()+'</option>').join('')+'</select>'+(inventory.length?'<button id="qt-storage">Place stored building ('+inventory.length+')</button>':'')+'<small>Select a location, then tap a green lot beside a path.</small>';
+const options=Object.entries(types).filter(([k,t])=>t.category===buildCategory),pages=Math.ceil(options.length/12);
+buildPage=Math.max(0,Math.min(buildPage,pages-1));
+const tiles=options.slice(buildPage*12,buildPage*12+12).map(([k,t])=>'<button class="qt-build-tile cursor-interaction" data-tool="'+k+'" aria-pressed="'+(k===tool)+'" aria-label="'+esc(t.name)+' · &#36;'+t.price.toLocaleString()+'"><span class="qt-build-icon" aria-hidden="true">'+t.icon+'</span><span class="qt-build-name">'+esc(t.name)+'</span><small>&#36;'+t.price.toLocaleString()+'</small></button>');
+while(tiles.length<12)tiles.push('<div class="qt-unused-slot" aria-hidden="true"></div>');
+return '<div class="qt-build-categories" aria-label="Building categories">'+Object.entries(categoryNames).map(([k,n])=>'<button class="cursor-interaction" data-category="'+k+'" aria-pressed="'+(k===buildCategory)+'">'+n+'</button>').join('')+'</div><div class="qt-build-grid" aria-label="'+categoryNames[buildCategory]+'">'+tiles.join('')+'</div><div class="qt-build-pages"><button class="cursor-interaction" data-page="-1" aria-label="Previous buildings" '+(buildPage===0?'disabled':'')+'>←</button><span>Page '+(buildPage+1)+' of '+pages+'</span><button class="cursor-interaction" data-page="1" aria-label="Next buildings" '+(buildPage===pages-1?'disabled':'')+'>→</button></div>'+(inventory.length?'<button id="qt-storage">Place stored building ('+inventory.length+')</button>':'')+'<small>Select a building, then tap a green lot beside a path.</small>';
 }
-root.addEventListener('change',e=>{if(e.target.id==='qt-category'){placingStored=false;buildCategory=e.target.value;tool=Object.keys(types).find(k=>types[k].category===buildCategory);selected=null;draw()}else if(e.target.id==='qt-venue'){placingStored=false;tool=e.target.value;selected=null;draw()}});
-
+root.addEventListener('click',e=>{
+const category=e.target.closest('[data-category]'),page=e.target.closest('[data-page]');
+if(category){placingStored=false;buildCategory=category.dataset.category;buildPage=0;tool=Object.keys(types).find(k=>types[k].category===buildCategory);selected=null;draw();}
+else if(page&&!page.disabled){buildPage+=Number(page.dataset.page);draw();}
+});
 const GRID=9,ENTRANCE=76;
 let inventory=[];
 const DAY_DURATION_MS=10*60*1000;
