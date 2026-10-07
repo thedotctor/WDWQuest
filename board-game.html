@@ -2992,13 +2992,23 @@ const pz=r.z+(r.side===0?.79:r.side===2?-.79:0),px=r.x+(r.side===1?-.79:r.side==
 const label=plaque(world,s.name,px,.306,pz,r.side%2?1.65:r.w*.9,r.side%2?r.d*.91:.4,'#384c68',r.side%2?Math.PI/2:0);
 const flag=cyl(world,r.x,.307,r.z,.095,.07,gold);flag.visible=false;ownerFlags.push(flag);
 });
-// Interior park names face outward toward their playing spaces.
+// Raised, high-contrast interior nameplates face each park's playing spaces.
+function parkNameplate(name,x,z,rotation,w){
+ const c=document.createElement('canvas');c.width=1024;c.height=192;
+ const ct=c.getContext('2d');ct.fillStyle='#233a59';ct.fillRect(0,0,1024,192);
+ ct.strokeStyle='#d8b963';ct.lineWidth=8;ct.strokeRect(5,5,1014,182);
+ ct.fillStyle='#fff5d8';ct.textAlign='center';ct.textBaseline='middle';
+ ct.font='800 96px system-ui';ct.fillText(name,512,100,956);
+ const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
+ const m=mesh(world,new THREE.PlaneGeometry(w,1.25),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}),x,.42,z,false);
+ m.rotation.set(-Math.PI/2,0,rotation);
+}
 [
- ['MAGIC KINGDOM',0,-8.65,Math.PI],
- ['EPCOT',8.65,0,Math.PI/2],
- ['HOLLYWOOD STUDIOS',0,8.65,0],
- ['ANIMAL KINGDOM',-8.65,0,-Math.PI/2]
-].forEach(([name,x,z,rotation])=>plaque(world,name,x,.245,z,8.8,.9,'#384c68',rotation));
+ ['MAGIC KINGDOM',0,-8.5,Math.PI,10.5],
+ ['EPCOT',8.5,0,Math.PI/2,5.3],
+ ['HOLLYWOOD STUDIOS',0,8.5,0,11.5],
+ ['ANIMAL KINGDOM',-8.5,0,-Math.PI/2,10.5]
+].forEach(([name,x,z,rotation,w])=>parkNameplate(name,x,z,rotation,w));
 const centerTargets=[];
 for(const [id,text,x,z,mat] of [['pinKiosk','PIN TRADERS',-5.2,-3.3,gold],['magicPile','MAGIC & MISCHIEF',5.2,-3.3,material('#9582bb',.3)],['securitySpot','PARK SECURITY',5.2,4.2,blue]]){const m=box(world,x,.25,z,2.3,.12,1.6,mat,.04);m.userData.control=id;centerTargets.push(m);plaque(world,text,x,.395,z,2.1,.8,'#f2e7cc');}
 const castleTarget=box(world,0,.24,0,3.2,.02,2.6,material('#d8cbb0',.15,.3),.005);castleTarget.userData.control='castleFinaleBtn';centerTargets.push(castleTarget);
@@ -3030,7 +3040,14 @@ const oldRenderGame=renderGame;renderGame=function(){if(activeView){activeView.d
 for(const name of ['renderTokens','renderOwners','renderAll']){const original=window[name];window[name]=function(...args){const result=original.apply(this,args);if(activeView)activeView.sync();return result;};}
 const oldCloseup=showPawnCloseup;showPawnCloseup=function(...args){if(activeView&&!activeView.flat())return;return oldCloseup.apply(this,args)};
 const oldTrack=trackMovingPiece;trackMovingPiece=function(...args){if(activeView&&!activeView.flat())return;return oldTrack.apply(this,args)};
-const oldDice=animateDice;animateDice=async function(values){if(activeView)activeView.dice(values);return oldDice(values)};
+const oldDice=animateDice;animateDice=async function(values){
+ if(!activeView||activeView.flat())return oldDice(values);
+ playGameSound('dice');
+ activeView.dice(values);
+ await wait(reducedMotion()?1100:1150);
+ setRestingDice(values);
+ setStatus('Rolled <strong>'+values[0]+' + '+values[1]+' = '+(values[0]+values[1])+'</strong>. Get ready to move…');
+};
 })();
 
 </script>
