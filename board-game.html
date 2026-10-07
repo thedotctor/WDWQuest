@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
-<title>WDWQuest Board Game v1.20</title>
+<title>WDWQuest Board Game v1.21</title>
 <style>
 :root{--bg:#07111f;--panel:#111c31;--panel2:#17243d;--text:#f7f8fc;--muted:#aeb9cf;--border:#2b3b5a;--accent:#7dd3fc;--good:#86efac;--bad:#fca5a5;--gold:#fde68a}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
@@ -97,7 +97,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <div class="shell">
 <div class="top">
 <a href="arcade.html">← Back to WDWQuest Arcade</a>
-<span class="badge">Board Game Prototype v1.20 • 1–8 players</span>
+<span class="badge">Board Game Prototype v1.21 • 1–8 players</span>
 </div>
 <div id="app"></div>
 </div>
@@ -359,8 +359,8 @@ function snackChoices(snack){
  return shuffle([snack.name].concat(names));
 }
 function askSnackBreak(spaceIndex){
- const snack=pickSnackBreak();
- modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal snack-modal"><div class="badge">🍿 SNACK BREAK • CORRECT +$50</div><div class="snack-kicker">Mystery Disney Food • 30 Photo Deck</div><div class="snack-picture" id="snackPicture"><img id="snackPhoto" data-snack-file="'+esc(snack.file)+'" alt="Mystery Disney food photo">'+snackNameMask(snack)+'</div><div class="snack-credit">Photo: <a href="'+commonsSnackSource(snack.file)+'" target="_blank" rel="noopener">'+esc(snack.credit)+'</a> • <a href="'+snack.licenseUrl+'" target="_blank" rel="noopener">'+esc(snack.license)+'</a></div><div class="snack-question">What food is this?</div><div class="snack-reward">Correct answer earns $50 Disney Dollars</div><div class="answers" id="snackAnswers"></div><div class="result" id="snackResult"></div><div class="actions" id="snackActions"></div></div></div>';
+ const snack=pickSnackBreak(),snackReward=50+(ownsPower(players[currentPlayer],'food-dole')?10:0);
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal snack-modal"><div class="badge">🍿 SNACK BREAK • CORRECT +$'+snackReward+'</div><div class="snack-kicker">Mystery Disney Food • 30 Photo Deck</div><div class="snack-picture" id="snackPicture"><img id="snackPhoto" data-snack-file="'+esc(snack.file)+'" alt="Mystery Disney food photo">'+snackNameMask(snack)+'</div><div class="snack-credit">Photo: <a href="'+commonsSnackSource(snack.file)+'" target="_blank" rel="noopener">'+esc(snack.credit)+'</a> • <a href="'+snack.licenseUrl+'" target="_blank" rel="noopener">'+esc(snack.license)+'</a></div><div class="snack-question">What food is this?</div><div class="snack-reward">Correct answer earns $'+snackReward+' Disney Dollars</div><div class="answers" id="snackAnswers"></div><div class="result" id="snackResult"></div><div class="actions" id="snackActions"></div></div></div>';
  const photo=document.getElementById('snackPhoto');
  let triedFallback=false;
  photo.onload=function(){positionSnackNameMask(snack,photo)};
@@ -382,7 +382,15 @@ function askSnackBreak(spaceIndex){
    answers.appendChild(b);
  });
 }
-function gradeSnackBreak(choice,snack,btn){
+async function gradeSnackBreak(choice,snack,btn,bypassRetry){
+ if(btn.disabled&&!bypassRetry)return;
+ const player=players[currentPlayer];
+ if(choice!==snack.name&&!bypassRetry&&powerReady(player,'food-pretzel')){
+   document.querySelectorAll('#snackAnswers .answer').forEach(function(b){b.disabled=true});
+   const use=await choosePinAbility(player,'food-pretzel','You missed this Snack Break. Use your pin for a fresh Snack Break question?',[{label:'Use Ability',value:true},{label:'Skip',value:false}]);
+   if(use){usePower('food-pretzel');askSnackBreak(player.pos);return}
+   return gradeSnackBreak(choice,snack,btn,true);
+ }
  const buttons=Array.from(document.querySelectorAll('#snackAnswers .answer'));
  const ok=choice===snack.name;
  playGameSound(ok?'correct':'wrong');
@@ -392,16 +400,17 @@ function gradeSnackBreak(choice,snack,btn){
  const result=document.getElementById('snackResult');
  const actions=document.getElementById('snackActions');
  if(ok){
-   p.cash+=50;
+   const reward=50+(ownsPower(p,'food-dole')?10:0);
+   p.cash+=reward;
    renderScores();
-   result.innerHTML='<span class="good">Correct!</span> That is '+esc(snack.name)+'. You earned <strong>$50</strong>!';
+   result.innerHTML='<span class="good">Correct!</span> That is '+esc(snack.name)+'. You earned <strong>$'+reward+'</strong>!';
  }else{
    result.innerHTML='<span class="bad">Not quite.</span> That was <strong>'+esc(snack.name)+'</strong>.';
  }
  actions.innerHTML='<button class="primary" id="snackContinue">Continue</button>';
  document.getElementById('snackContinue').addEventListener('click',function(){
    closeModal();
-   const msg=ok?p.name+' identified '+snack.name+' and earned $50.':p.name+' missed the Snack Break. The answer was '+snack.name+'.';
+   const msg=ok?p.name+' identified '+snack.name+' and earned $'+(50+(ownsPower(p,'food-dole')?10:0))+'.':p.name+' missed the Snack Break. The answer was '+snack.name+'.';
    if(ok)finishCorrectAnswer(msg);else finishTurn(msg);
  });
 }
@@ -442,6 +451,8 @@ const PIN_DESIGNS=[
  {id:'ak-lion',name:'Lion Pride',park:'Animal Kingdom',icon:'🦁',color:'#88daa2'},
  {id:'ak-butterfly',name:'Pandora Flight',park:'Animal Kingdom',icon:'🦋',color:'#88daa2'}
 ];
+PIN_DESIGNS.push(...[{"id":"food-dole","name":"Dole Whip","park":"Food","icon":"🍍","power":"Correct Snack Break: +$10.","optional":true,"color":"#ffd166"},{"id":"food-pretzel","name":"Mickey Pretzel","park":"Food","icon":"🥨","power":"Retry one missed Snack Break per round.","cooldown":"round","optional":true,"color":"#ffd166"},{"id":"food-churro","name":"Churro","park":"Food","icon":"🌀","power":"Correct Pixie Dust: +$5.","optional":true,"color":"#ffd166"},{"id":"food-popcorn","name":"Popcorn Bucket","park":"Food","icon":"🍿","power":"Earn $50 for each new badge.","optional":true,"color":"#ffd166"},{"id":"food-icecream","name":"Mickey Ice Cream Bar","park":"Food","icon":"🍦","power":"Retry one missed trivia question per round; excludes the Finale.","cooldown":"round","optional":true,"color":"#ffd166"},{"id":"resort-contemporary","name":"Contemporary","park":"Resorts","icon":"🚝","power":"Once per game, adjust a dice total by +1 or −1.","cooldown":"game","optional":true,"color":"#90c4ff"},{"id":"resort-polynesian","name":"Polynesian","park":"Resorts","icon":"🌺","power":"Optionally add 2 spaces to a transportation bonus roll.","optional":true,"color":"#90c4ff"},{"id":"resort-wilderness","name":"Wilderness Lodge","park":"Resorts","icon":"🪵","power":"Avoid one trip to Park Security per game.","cooldown":"game","optional":true,"color":"#90c4ff"},{"id":"resort-animal","name":"Animal Kingdom Lodge","park":"Resorts","icon":"🦒","power":"Pay $10 less rent, minimum $0. The owner receives less.","optional":true,"color":"#90c4ff"},{"id":"resort-grand","name":"Grand Floridian","park":"Resorts","icon":"👑","power":"Receive an extra $10 from the bank when rent is paid to you.","optional":true,"color":"#90c4ff"}]);
+let pinRound=1,pinPowerUses={};
 let castMemberPins=[];
 let pinTradeVisit=null;
 
@@ -1194,7 +1205,7 @@ function showStartingPinSetup(activeIndex){
  const missingToken=players.findIndex(function(p){return !p.token});
  if(missingToken>=0){showTokenSetup(missingToken);return}
  activeIndex=Math.max(0,Math.min(players.length-1,Number(activeIndex)||0));
- app.innerHTML='<section class="panel"><div class="badge">REQUIRED STEP 3 OF 3 • 20 PINS</div><h1>Choose Your Starting Pin</h1><p class="muted">Each player starts with one pin. Choose from all 20 designs below. A pin picked by another player is reserved for them.</p><div class="token-players" id="startingPinPlayers"></div><h2 id="startingPinHeading"></h2><div class="pin-grid starting-pin-grid" id="startingPinChoices"></div><div class="actions"><button class="primary" id="startingPinStart">Start Board Game</button><button class="secondary" id="startingPinBack">Back to Playing Pieces</button></div><div class="muted" id="startingPinMsg" aria-live="polite" style="margin-top:10px"></div></section>';
+ app.innerHTML='<section class="panel"><div class="badge">REQUIRED STEP 3 OF 3 • 30 PINS</div><h1>Choose Your Starting Pin</h1><p class="muted">Each player starts with one pin. Choose from all 30 designs below. A pin picked by another player is reserved for them.</p><div class="token-players" id="startingPinPlayers"></div><h2 id="startingPinHeading"></h2><div class="pin-grid starting-pin-grid" id="startingPinChoices"></div><div class="actions"><button class="primary" id="startingPinStart">Start Board Game</button><button class="secondary" id="startingPinBack">Back to Playing Pieces</button></div><div class="muted" id="startingPinMsg" aria-live="polite" style="margin-top:10px"></div></section>';
  const playerBar=document.getElementById('startingPinPlayers');
  const choices=document.getElementById('startingPinChoices');
  const heading=document.getElementById('startingPinHeading');
@@ -1210,7 +1221,7 @@ function showStartingPinSetup(activeIndex){
    choices.innerHTML=PIN_DESIGNS.map(function(pin){
      const ownerIndex=players.findIndex(function(p){return p.startingPin===pin.id});
      const mine=ownerIndex===activeIndex,claimed=ownerIndex>=0&&!mine;
-     return '<button type="button" class="pin-card starting-pin-choice '+(mine?'selected ':'')+(claimed?'claimed':'')+'" style="--pin-color:'+pin.color+'" data-starting-pin-id="'+pin.id+'" aria-pressed="'+mine+'" '+(claimed?'disabled':'')+'><span class="pin-art" aria-hidden="true">'+pin.icon+'</span><strong>'+esc(pin.name)+'</strong><small>'+esc(pin.park)+'</small><small>'+(claimed?'Picked by '+esc(players[ownerIndex].name):mine?'Your starting pin':'Available')+'</small></button>';
+     return '<button type="button" class="pin-card starting-pin-choice '+(mine?'selected ':'')+(claimed?'claimed':'')+'" style="--pin-color:'+pin.color+'" data-starting-pin-id="'+pin.id+'" aria-pressed="'+mine+'" '+(claimed?'disabled':'')+'><span class="pin-art" aria-hidden="true">'+pin.icon+'</span><strong>'+esc(pin.name)+'</strong><small>'+esc(pin.park)+'</small><small>'+esc(pin.power||'Park collection pin')+'</small><small>'+(claimed?'Picked by '+esc(players[ownerIndex].name):mine?'Your starting pin':'Available')+'</small></button>';
    }).join('');
    const complete=startingPinsComplete(),missing=players.filter(function(p){return !pinInfo(p.startingPin)}).length;
    start.disabled=!complete;
@@ -1252,7 +1263,7 @@ function renderGame(){
  const missingToken=players.findIndex(function(p){return !p.token});
  if(missingToken>=0){showTokenSetup(missingToken);return}
  if(!startingPinsComplete()){showStartingPinSetup(0);return}
- app.innerHTML='<div class="game-layout"><section class="panel turn-panel"><div class="turn" id="turnText"></div><button class="dice" id="dice" type="button" aria-label="Roll dice"><span class="dice-pair"><span class="die-cube" id="dieCube" aria-hidden="true"><span class="die-face front">⚀</span><span class="die-face right">⚁</span><span class="die-face top">⚂</span><span class="die-face bottom">⚃</span><span class="die-face left">⚄</span><span class="die-face back">⚅</span></span><span class="die-cube" id="dieCube2" aria-hidden="true"><span class="die-face front">⚀</span><span class="die-face right">⚁</span><span class="die-face top">⚂</span><span class="die-face bottom">⚃</span><span class="die-face left">⚄</span><span class="die-face back">⚅</span></span></span></button><div class="status" id="status">Roll the dice to begin.</div><div class="actions"><button class="primary" id="rollBtn">Roll Dice</button><button class="secondary" id="rulesBtn">Quick Rules</button></div></section><div class="board-wrap"><div class="board" id="board"><div class="center"><div class="park-side-label park-label-top">Magic Kingdom</div><div class="park-side-label park-label-right">EPCOT</div><div class="park-side-label park-label-bottom">Hollywood Studios</div><div class="park-side-label park-label-left">Animal Kingdom</div><h1>WDWQuest</h1><section class="current-player-center" id="currentPlayerCenter" aria-label="Current player stats" aria-live="polite"></section><div class="center-games"><button class="pin-kiosk" id="pinKiosk" type="button"><span aria-hidden="true">📌</span><strong>Pin Traders</strong><small>Land on a Pin Traders space to trade</small></button><button class="castle-finale-space" id="castleFinaleBtn" type="button"><span class="castle-icon">🏰</span><strong>Cinderella Castle Finale</strong><span class="finale-status" id="castleFinaleStatus">6 badges + every property and pin in the same park</span></button><button class="magic-pile" id="magicPile" type="button" aria-label="About the Magic and Mischief card pile"><span class="magic-pile-icon">🃏</span><strong>Magic &amp;<br>Mischief</strong><span id="magicPileCount">45 cards remaining</span><small>Land on a card space to draw</small></button><section class="security-spot" id="securitySpot" aria-labelledby="securityTitle"><span class="security-icon" aria-hidden="true">🛡️</span><strong id="securityTitle">Park Security</strong><span class="security-caption">Sent here? Miss your next turn.</span><div class="security-tokens" id="securityTokens"></div><small>Return to your previous space afterward.</small></section></div><div class="mini" style="margin-top:10px">80-space four-park loop • the Castle Finale lives in the center</div></div></div></div><details class="board-key"><summary>🗺️ Board Key • What Each Space Does</summary><div class="key-grid"><div class="key-item"><div class="key-icon">🚝</div><div><strong>Transportation Corners</strong><p>All aboard for a little extra adventure! Land exactly on a transportation corner and choose whether to roll both dice again. Your pawn travels their combined total and plays the space it reaches. Prefer to stay put? Skip the bonus ride.</p></div></div><div class="key-item"><div class="key-icon">🏠</div><div><strong>Attractions</strong><p>Bring a favorite park attraction into your vacation collection! If it is unowned and you can afford it, choose to answer its park question. A correct answer buys the attraction; a wrong answer ends your turn without a purchase. Visiting another player\'s attraction? Pay its rent or use a Magic Rent Pass. If you cannot pay and choose “I spent all my money at Disney!”, your remaining money goes to the owner, your properties return to the bank, and your adventure ends.</p></div></div><div class="key-item"><div class="key-icon">🏘️</div><div><strong>Property Trading</strong><p>Swap a little park magic with another player! If you own a property, your turn ends with the option to trade. Choose another player who owns properties, tap one of yours, then tap the property you want from theirs. Select Make Offer and let them accept or decline. One property each, one offer per turn, and no money changes hands. Accepted trades swap ownership with a magical exchange animation. Declined offers leave both collections as they were. Prefer to keep your favorites? Skip trading and pass to the next player.</p></div></div><div class="key-item"><div class="key-icon">🎆</div><div><strong>Nighttime Show Set</strong><p>Let your collection sparkle! Each park has a nighttime show that costs $200. Answer its park question correctly to buy it; purchase questions do not award badges. More shows bring bigger rent when another player visits: <span class="key-note">1 show = $25 • 2 = $50 • 3 = $100 • 4 = $200</span>. Your park\'s show also counts toward completing that park for the Castle Finale.</p></div></div><div class="key-item"><div class="key-icon">❓</div><div><strong>Trivia Challenge</strong><p>Time to show off your park knowledge! Land on a Trivia space and answer its park-themed question. Get it right to add that park’s badge to your collection and move one step closer to your magical Castle Finale!</p></div></div><div class="key-item"><div class="key-icon">🏅</div><div><strong>All 6 Badges</strong><ul class="key-badges">'+BADGES.map(function(b){return '<li>'+esc(b)+'</li>'}).join('')+'</ul><p>Build a badge collection worthy of a magical adventure! Earn the four park badges on Trivia or Pixie Dust spaces. Resorts &amp; Dining and Disney History badges come from Pixie Dust questions.</p></div></div><div class="key-item"><div class="key-icon">📌</div><div><strong>Pin Traders</strong><p>A little pin swapping can make your day! Choose one unique starting pin after choosing your pawn. Visit one of eight Pin Traders spaces to trade with a Cast Member or another active player. Tap a pin in your stash, then the pin you want from theirs, and make your offer. Cast Members have up to five random pins no player owns; other players can accept or decline. One accepted swap per turn, with no money exchanged. Rolling doubles offers a chance to buy one unowned pin for $100. Two Magic &amp; Mischief cards also bring mystery pins. There are 20 designs—five per park!</p></div></div><div class="key-item"><div class="key-icon">📖</div><div><strong>Character Autographs</strong><p>Keep that autograph book ready—a familiar face might stop by! Correct trivia and Snack Break answers can bring a surprise character visit, and some Magic &amp; Mischief cards invite a meet and greet too. Celebrate with confetti as your new autograph is added to your book. Collect signatures from your favorite friends and enjoy familiar faces returning once your book is complete.</p></div></div><div class="key-item"><div class="key-icon">🛡️</div><div><strong>Park Security</strong><p>Whoops—a quick stop for a ticket or bag check! Five Magic &amp; Mischief cards send your pawn to Park Security in the center. Miss your next turn, then return to the space you left when you next roll. The trip does not count as travel around the board.</p></div></div><div class="key-item"><div class="key-icon">🃏</div><div><strong>Magic &amp; Mischief</strong><p>A dash of magic, a pinch of mischief! Land on either card space on a park side and draw a surprise from the Magic &amp; Mischief deck. You might gain Disney Dollars, receive a mystery pin, or take an unexpected trip to Security! Cards do not repeat until the deck runs out. If a card moves you, play your destination normally.</p></div></div><div class="key-item"><div class="key-icon">✨</div><div><strong>Pixie Dust</strong><p>A sprinkle of pixie dust and a chance to shine! Answer a question from any of the six badge categories. A correct answer earns <span class="key-note">$10</span> and that category\'s badge if you still need it. A wrong answer costs no money. This is also your chance to collect the Resorts &amp; Dining and Disney History badges!</p></div></div><div class="key-item"><div class="key-icon">🍿</div><div><strong>Snack Break</strong><p>Time for a tasty little challenge! Take a peek at a Disney food photo and choose the name of the treat. Guess correctly to collect <span class="key-note">$50</span> for your next park adventure!</p></div></div><div class="key-item"><div class="key-icon">🏰</div><div><strong>Cinderella Castle Finale</strong><p>Your grand finale awaits at Cinderella Castle! Collect all six badges, own all 10 properties in one park—including its nighttime show—and collect all five pins from that same park. Then choose the Castle in the center instead of rolling. Answer the Final Challenge correctly to win! Miss it? Take another full lap before returning for a fresh chance at your magical finish. Money and autographs are not required.</p></div></div></div></details><p class="board-photo-credit">Background photo: <a href="https://commons.wikimedia.org/wiki/File:Disney_World_-_Entrance_sign_-_by_inkiboo.jpg" target="_blank" rel="noopener">Gerard McGovern / Wikimedia Commons</a> • <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener">CC BY-SA 2.0</a> • Displayed with a tint.</p><details class="log player-stats-panel"><summary>👥 Player Stats</summary><div class="all-player-stats" id="allPlayerStats"></div></details><details class="log"><summary>Game Log</summary><div class="log-list" id="logList"></div></details></div>';
+ app.innerHTML='<div class="game-layout"><section class="panel turn-panel"><div class="turn" id="turnText"></div><button class="dice" id="dice" type="button" aria-label="Roll dice"><span class="dice-pair"><span class="die-cube" id="dieCube" aria-hidden="true"><span class="die-face front">⚀</span><span class="die-face right">⚁</span><span class="die-face top">⚂</span><span class="die-face bottom">⚃</span><span class="die-face left">⚄</span><span class="die-face back">⚅</span></span><span class="die-cube" id="dieCube2" aria-hidden="true"><span class="die-face front">⚀</span><span class="die-face right">⚁</span><span class="die-face top">⚂</span><span class="die-face bottom">⚃</span><span class="die-face left">⚄</span><span class="die-face back">⚅</span></span></span></button><div class="status" id="status">Roll the dice to begin.</div><div class="actions"><button class="primary" id="rollBtn">Roll Dice</button><button class="secondary" id="rulesBtn">Quick Rules</button></div></section><div class="board-wrap"><div class="board" id="board"><div class="center"><div class="park-side-label park-label-top">Magic Kingdom</div><div class="park-side-label park-label-right">EPCOT</div><div class="park-side-label park-label-bottom">Hollywood Studios</div><div class="park-side-label park-label-left">Animal Kingdom</div><h1>WDWQuest</h1><section class="current-player-center" id="currentPlayerCenter" aria-label="Current player stats" aria-live="polite"></section><div class="center-games"><button class="pin-kiosk" id="pinKiosk" type="button"><span aria-hidden="true">📌</span><strong>Pin Traders</strong><small>Land on a Pin Traders space to trade</small></button><button class="castle-finale-space" id="castleFinaleBtn" type="button"><span class="castle-icon">🏰</span><strong>Cinderella Castle Finale</strong><span class="finale-status" id="castleFinaleStatus">6 badges + every property and pin in the same park</span></button><button class="magic-pile" id="magicPile" type="button" aria-label="About the Magic and Mischief card pile"><span class="magic-pile-icon">🃏</span><strong>Magic &amp;<br>Mischief</strong><span id="magicPileCount">45 cards remaining</span><small>Land on a card space to draw</small></button><section class="security-spot" id="securitySpot" aria-labelledby="securityTitle"><span class="security-icon" aria-hidden="true">🛡️</span><strong id="securityTitle">Park Security</strong><span class="security-caption">Sent here? Miss your next turn.</span><div class="security-tokens" id="securityTokens"></div><small>Return to your previous space afterward.</small></section></div><div class="mini" style="margin-top:10px">80-space four-park loop • the Castle Finale lives in the center</div></div></div></div><details class="board-key"><summary>🗺️ Board Key • What Each Space Does</summary><div class="key-grid"><div class="key-item"><div class="key-icon">🚝</div><div><strong>Transportation Corners</strong><p>All aboard for a little extra adventure! Land exactly on a transportation corner and choose whether to roll both dice again. Your pawn travels their combined total and plays the space it reaches. Prefer to stay put? Skip the bonus ride.</p></div></div><div class="key-item"><div class="key-icon">🏠</div><div><strong>Attractions</strong><p>Bring a favorite park attraction into your vacation collection! If it is unowned and you can afford it, choose to answer its park question. A correct answer buys the attraction; a wrong answer ends your turn without a purchase. Visiting another player\'s attraction? Pay its rent or use a Magic Rent Pass. If you cannot pay and choose “I spent all my money at Disney!”, your remaining money goes to the owner, your properties return to the bank, and your adventure ends.</p></div></div><div class="key-item"><div class="key-icon">🏘️</div><div><strong>Property Trading</strong><p>Swap a little park magic with another player! If you own a property, your turn ends with the option to trade. Choose another player who owns properties, tap one of yours, then tap the property you want from theirs. Select Make Offer and let them accept or decline. One property each, one offer per turn, and no money changes hands. Accepted trades swap ownership with a magical exchange animation. Declined offers leave both collections as they were. Prefer to keep your favorites? Skip trading and pass to the next player.</p></div></div><div class="key-item"><div class="key-icon">🎆</div><div><strong>Nighttime Show Set</strong><p>Let your collection sparkle! Each park has a nighttime show that costs $200. Answer its park question correctly to buy it; purchase questions do not award badges. More shows bring bigger rent when another player visits: <span class="key-note">1 show = $25 • 2 = $50 • 3 = $100 • 4 = $200</span>. Your park\'s show also counts toward completing that park for the Castle Finale.</p></div></div><div class="key-item"><div class="key-icon">❓</div><div><strong>Trivia Challenge</strong><p>Time to show off your park knowledge! Land on a Trivia space and answer its park-themed question. Get it right to add that park’s badge to your collection and move one step closer to your magical Castle Finale!</p></div></div><div class="key-item"><div class="key-icon">🏅</div><div><strong>All 6 Badges</strong><ul class="key-badges">'+BADGES.map(function(b){return '<li>'+esc(b)+'</li>'}).join('')+'</ul><p>Build a badge collection worthy of a magical adventure! Earn the four park badges on Trivia or Pixie Dust spaces. Resorts &amp; Dining and Disney History badges come from Pixie Dust questions.</p></div></div><div class="key-item"><div class="key-icon">📌</div><div><strong>Pin Traders</strong><p>A little pin swapping can make your day! Choose one unique starting pin after choosing your pawn. Visit one of eight Pin Traders spaces to trade with a Cast Member or another active player. Tap a pin in your stash, then the pin you want from theirs, and make your offer. Cast Members have up to five random pins no player owns; other players can accept or decline. One accepted swap per turn, with no money exchanged. Rolling doubles offers a chance to buy one unowned pin for $100. Two Magic &amp; Mischief cards also bring mystery pins. There are 30 designs: five per park, plus five Food and five Resort power pins.</p></div></div><div class="key-item"><div class="key-icon">📖</div><div><strong>Character Autographs</strong><p>Keep that autograph book ready—a familiar face might stop by! Correct trivia and Snack Break answers can bring a surprise character visit, and some Magic &amp; Mischief cards invite a meet and greet too. Celebrate with confetti as your new autograph is added to your book. Collect signatures from your favorite friends and enjoy familiar faces returning once your book is complete.</p></div></div><div class="key-item"><div class="key-icon">🛡️</div><div><strong>Park Security</strong><p>Whoops—a quick stop for a ticket or bag check! Five Magic &amp; Mischief cards send your pawn to Park Security in the center. Miss your next turn, then return to the space you left when you next roll. The trip does not count as travel around the board.</p></div></div><div class="key-item"><div class="key-icon">🃏</div><div><strong>Magic &amp; Mischief</strong><p>A dash of magic, a pinch of mischief! Land on either card space on a park side and draw a surprise from the Magic &amp; Mischief deck. You might gain Disney Dollars, receive a mystery pin, or take an unexpected trip to Security! Cards do not repeat until the deck runs out. If a card moves you, play your destination normally.</p></div></div><div class="key-item"><div class="key-icon">✨</div><div><strong>Pixie Dust</strong><p>A sprinkle of pixie dust and a chance to shine! Answer a question from any of the six badge categories. A correct answer earns <span class="key-note">$10</span> and that category\'s badge if you still need it. A wrong answer costs no money. This is also your chance to collect the Resorts &amp; Dining and Disney History badges!</p></div></div><div class="key-item"><div class="key-icon">🍿</div><div><strong>Snack Break</strong><p>Time for a tasty little challenge! Take a peek at a Disney food photo and choose the name of the treat. Guess correctly to collect <span class="key-note">$50</span> for your next park adventure!</p></div></div><div class="key-item"><div class="key-icon">🏰</div><div><strong>Cinderella Castle Finale</strong><p>Your grand finale awaits at Cinderella Castle! Collect all six badges, own all 10 properties in one park—including its nighttime show—and collect all five pins from that same park. Then choose the Castle in the center instead of rolling. Answer the Final Challenge correctly to win! Miss it? Take another full lap before returning for a fresh chance at your magical finish. Money and autographs are not required.</p></div></div></div></details><p class="board-photo-credit">Background photo: <a href="https://commons.wikimedia.org/wiki/File:Disney_World_-_Entrance_sign_-_by_inkiboo.jpg" target="_blank" rel="noopener">Gerard McGovern / Wikimedia Commons</a> • <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener">CC BY-SA 2.0</a> • Displayed with a tint.</p><details class="log player-stats-panel"><summary>👥 Player Stats</summary><div class="all-player-stats" id="allPlayerStats"></div></details><details class="log"><summary>Game Log</summary><div class="log-list" id="logList"></div></details></div>';
  buildBoard();
  updateBoardSpaceLayout();
  renderAll();
@@ -1439,7 +1450,7 @@ function finaleProgress(playerIndex){
  const p=players[playerIndex];
  if(!p)return {missingBadges:BADGES.slice(),parks:[],qualifyingPark:null,bestPark:null,ready:false};
  const missingBadges=BADGES.filter(function(badge){return !(p.badges||[]).includes(badge)});
- const parks=[...new Set(PIN_DESIGNS.map(function(pin){return pin.park}))].map(function(park){
+ const parks=[...new Set(PIN_DESIGNS.filter(function(pin){return !pin.optional}).map(function(pin){return pin.park}))].map(function(park){
    const propertyIndices=[];
    SPACES.forEach(function(space,i){if(space.type==='property'&&space.park===park)propertyIndices.push(i)});
    const pins=PIN_DESIGNS.filter(function(pin){return pin.park===park});
@@ -1739,12 +1750,13 @@ async function rollDice(){
  if(turnLocked||gameOver||players[currentPlayer].eliminated||players[currentPlayer].skipTurns>0)return;
  leaveSecurity(players[currentPlayer]);
  turnLocked=true;renderAll();
- const diceValues=rollTwoDice(),roll=diceValues[0]+diceValues[1];
+ const diceValues=rollTwoDice();let roll=diceValues[0]+diceValues[1];
  const p=players[currentPlayer];
  setStatus(esc(p.name)+' is rolling…');
  await animateDice(diceValues);
    await rewardDoubles(diceValues);
- setStatus(esc(p.name)+' rolled <strong>'+diceValues[0]+' + '+diceValues[1]+' = '+roll+'</strong>. Moving '+roll+' spaces…');
+ roll=await adjustedPinRoll(p,roll,false);
+ setStatus(esc(p.name)+' rolled <strong>'+diceValues[0]+' + '+diceValues[1]+' → '+roll+'</strong>. Moving '+roll+' spaces…');
  await movePlayerSpaces(roll,'moves');
  const newPos=p.pos;
  renderScores();
@@ -1762,11 +1774,12 @@ function showTransportChoice(spaceIndex){
    const stayBtn=document.getElementById('transportStay');
    rollBtn.disabled=true;stayBtn.disabled=true;
    closeModal();
-   const diceValues=rollTwoDice(),bonus=diceValues[0]+diceValues[1];
+   const diceValues=rollTwoDice();let bonus=diceValues[0]+diceValues[1];
    setStatus(esc(p.name)+' takes a transportation bonus roll…');
    await animateDice(diceValues);
    await rewardDoubles(diceValues);
-   setStatus(esc(p.name)+' rolled <strong>'+diceValues[0]+' + '+diceValues[1]+' = '+bonus+'</strong> for bonus travel.');
+   bonus=await adjustedPinRoll(p,bonus,true);
+   setStatus(esc(p.name)+' rolled <strong>'+diceValues[0]+' + '+diceValues[1]+' → '+bonus+'</strong> for bonus travel.');
    await movePlayerSpaces(bonus,'travels from '+s.name);
    const destination=p.pos;
    renderScores();
@@ -1999,7 +2012,7 @@ function renderMagicPile(){
  if(count)count.textContent=magicDeck.length+' of 45 cards remaining';
  if(pile)pile.disabled=turnLocked||gameOver;
 }
-async function animateRentExchange(payerName,ownerName,amount,payerBefore,payerAfter,ownerBefore,ownerAfter){
+async function animateRentExchange(payerName,ownerName,amount,payerBefore,payerAfter,ownerBefore,ownerAfter,bankBonus){
  const money=function(value){return '$'+value.toLocaleString()};
  modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal pin-exchange-modal"><div class="badge">💵 RENT PAYMENT</div><h2>Passing the Disney Dollars!</h2><div class="pin-exchange-names"><strong>'+esc(payerName)+'<br><small>'+(payerBefore===null?'Bank pays the rent':money(payerBefore)+' → '+money(payerAfter))+'</small></strong><strong>'+esc(ownerName)+'<br><small>'+money(ownerBefore)+' → '+money(ownerAfter)+'</small></strong></div><div class="pin-exchange-stage" id="rentExchangeStage"><div class="pin-exchange-piece give" id="rentExchangeMoney" style="padding:18px 8px;border:2px solid var(--gold);border-radius:14px;background:#166744;color:#fff5bc;box-sizing:border-box"><span style="font-size:36px" aria-hidden="true">💵</span><br><strong>'+money(amount)+'</strong></div><div class="pin-exchange-sparkles" aria-hidden="true">✨ ✦ ✨</div></div><p id="rentExchangeCaption" aria-live="polite">'+esc(payerName)+' is paying '+esc(ownerName)+' '+money(amount)+'…</p></div></div>';
  try{
@@ -2010,17 +2023,17 @@ async function animateRentExchange(payerName,ownerName,amount,payerBefore,payerA
      await cash.animate([{transform:'translate(0,0) rotate(0deg)'},{transform:'translate('+(distance*.5)+'px,-45px) rotate(12deg)'},{transform:'translate('+distance+'px,0) rotate(0deg)'}],{duration:1500,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'}).finished;
    }
    const caption=document.getElementById('rentExchangeCaption');
-   if(caption)caption.textContent=ownerName+' received '+money(amount)+' from '+payerName+'.';
+   if(caption)caption.textContent=ownerName+' received '+money(amount)+' from '+payerName+'.'+(bankBonus?' Grand Floridian: +$10 from the bank.':'');
    await wait(reducedMotion()?900:650);
  }catch(animationError){
    // Rent is settled exactly once even if the visual exchange is interrupted.
  }
 }
 function showRentPayment(spaceIndex){
- const visitorIndex=currentPlayer,p=players[visitorIndex],ownerIndex=owners[spaceIndex],owner=players[ownerIndex],s=SPACES[spaceIndex],rent=rentForSpace(spaceIndex);
+ const visitorIndex=currentPlayer,p=players[visitorIndex],ownerIndex=owners[spaceIndex],owner=players[ownerIndex],s=SPACES[spaceIndex],baseRent=rentForSpace(spaceIndex),rent=Math.max(0,baseRent-(ownsPower(p,'resort-animal')?10:0));
  turnLocked=true;renderAll();
  const canPay=p.cash>=rent,hasPass=p.rentPasses>0;
- modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">💵 RENT DUE</div>'+landedSpotMarkup(spaceIndex,null)+'<h2>'+esc(p.name)+', rent is due!</h2><p>This property belongs to <strong>'+esc(owner.name)+'</strong>. You owe <strong>$'+rent+'</strong> in rent.</p><p>Your bank: <strong>$'+p.cash.toLocaleString()+'</strong> • Magic Rent Passes: '+(p.rentPasses||0)+'</p><div class="actions"><button class="primary" id="rentPay" '+(canPay?'':'disabled')+'>Pay $'+rent+'</button><button class="secondary '+(hasPass?'rent-pass-ready':'')+'" id="rentPass">Use Magic Rent Pass</button><button class="secondary" id="rentBroke" '+(canPay?'disabled':'')+'>I spent all my money at Disney!</button></div><p class="muted">A Magic Rent Pass lets the bank pay the owner instead. If you cannot afford rent and choose the last option, you hand over your remaining money and are eliminated from this game. Your properties return to the bank.</p></div></div></div>';
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">💵 RENT DUE</div>'+landedSpotMarkup(spaceIndex,null)+'<h2>'+esc(p.name)+', rent is due!</h2><p>This property belongs to <strong>'+esc(owner.name)+'</strong>. You owe <strong>$'+rent+'</strong> in rent.'+(rent<baseRent?' Animal Kingdom Lodge discount: $'+baseRent+' → $'+rent+'.':'')+'</p><p>Your bank: <strong>$'+p.cash.toLocaleString()+'</strong> • Magic Rent Passes: '+(p.rentPasses||0)+'</p><div class="actions"><button class="primary" id="rentPay" '+(canPay?'':'disabled')+'>Pay $'+rent+'</button><button class="secondary '+(hasPass?'rent-pass-ready':'')+'" id="rentPass">Use Magic Rent Pass</button><button class="secondary" id="rentBroke" '+(canPay?'disabled':'')+'>I spent all my money at Disney!</button></div><p class="muted">A Magic Rent Pass lets the bank pay the owner instead. If you cannot afford rent and choose the last option, you hand over your remaining money and are eliminated from this game. Your properties return to the bank.</p></div></div></div>';
  let settled=false;
  async function settle(method){
    if(settled||gameOver||currentPlayer!==visitorIndex||p.eliminated)return;
@@ -2043,8 +2056,9 @@ function showRentPayment(spaceIndex){
      p.props=[];
      message=p.name+' spent all their money at Disney! Paid their remaining $'+remaining+' to '+owner.name+' and lost the game. Their properties returned to the bank.';
    }
+   if(amount>0&&ownsPower(owner,'resort-grand')){owner.cash+=10;message+=' Grand Floridian bonus: the bank paid '+owner.name+' an extra $10.';}
    renderAll();
-   await animateRentExchange(method==='pass'?'Disney Bank':p.name,owner.name,amount,method==='pass'?null:payerBefore,p.cash,ownerBefore,owner.cash);
+   await animateRentExchange(method==='pass'?'Disney Bank':p.name,owner.name,amount,method==='pass'?null:payerBefore,p.cash,ownerBefore,owner.cash,amount>0&&ownsPower(owner,'resort-grand'));
    closeModal();finishTurn(message);
  }
  document.getElementById('rentPay').addEventListener('click',function(){settle('pay')});
@@ -2158,6 +2172,10 @@ async function applyMagicCard(card){
    return;
  }
  if(card.effect==='security'){
+   if(powerReady(p,'resort-wilderness')){
+     const avoid=await choosePinAbility(p,'resort-wilderness','Use this once-per-game power to avoid Park Security?',[{label:'Use Ability',value:true},{label:'Go to Security',value:false}]);
+     if(avoid){usePower('resort-wilderness');finishTurn(p.name+' used Wilderness Lodge to avoid Park Security.');return}
+   }
    playGameSound('security');
    await animateSecurityEscort(currentPlayer);
    p.inSecurity=true;p.skipTurns=1;notePawnArrival(p);
@@ -2274,7 +2292,7 @@ function askQuestion(badge,ctx){
 function applySpecialSpace(spaceIndex,correct){
  const s=SPACES[spaceIndex],p=players[currentPlayer];
  if(!s||s.type!=='special'||s.name==='Snack Break')return '';
- const amount=s.name==='Pixie Dust'?(correct?10:0):Math.abs(s.amount||100);
+ const amount=s.name==='Pixie Dust'?(correct?10+(ownsPower(p,'food-churro')?5:0):0):Math.abs(s.amount||100);
  if(correct){
    p.cash+=amount;
    renderScores();
@@ -2284,7 +2302,15 @@ function applySpecialSpace(spaceIndex,correct){
  renderScores();
  return p.name+' answered incorrectly at '+s.name+(amount?' and lost $'+amount+'.':'. No money lost.');
 }
-function gradeQuestion(choice,q,ctx,btn){
+async function gradeQuestion(choice,q,ctx,btn,bypassRetry){
+ if(btn.disabled&&!bypassRetry)return;
+ const player=players[currentPlayer];
+ if(choice!==q.a&&ctx.mode!=='final'&&!bypassRetry&&powerReady(player,'food-icecream')){
+   document.querySelectorAll('#qAnswers .answer').forEach(function(b){b.disabled=true});
+   const use=await choosePinAbility(player,'food-icecream','You missed this trivia question. Use your pin for a fresh question in the same category?',[{label:'Use Ability',value:true},{label:'Skip',value:false}]);
+   if(use){usePower('food-icecream');askQuestion(q.badge,ctx);return}
+   return gradeQuestion(choice,q,ctx,btn,true);
+ }
  if(ctx.mode==='final'&&!finaleProgress(currentPlayer).ready){closeModal();finishTurn(players[currentPlayer].name+' no longer meets the Castle Finale requirements.');return}
  const buttons=Array.from(document.querySelectorAll('#qAnswers .answer'));buttons.forEach(function(b){b.disabled=true;if(b.textContent===q.a)b.classList.add('correct')});
  const ok=choice===q.a;if(!ok)btn.classList.add('wrong');
@@ -2326,13 +2352,13 @@ function gradeQuestion(choice,q,ctx,btn){
  }
  let badgeMsg='';
  if(ctx.mode==='badge'||ctx.mode==='special'){
-   if(p.badges.indexOf(q.badge)<0){p.badges.push(q.badge);badgeMsg=' You earned the '+q.badge+' badge!';}
+   if(p.badges.indexOf(q.badge)<0){p.badges.push(q.badge);badgeMsg=' You earned the '+q.badge+' badge!';if(ownsPower(p,'food-popcorn')){p.cash+=50;badgeMsg+=' Popcorn Bucket bonus: +$50!';}}
    else{badgeMsg=' You already have the '+q.badge+' badge.';}
  }
  renderScores();
  if(ctx.mode==='special'){
    const special=SPACES[ctx.space];
-   result.innerHTML='<span class="good">Correct!</span>'+esc(badgeMsg)+'<br>'+esc(special.name+' gives you $'+(special.name==='Pixie Dust'?10:Math.abs(special.amount||100))+'.');
+   result.innerHTML='<span class="good">Correct!</span>'+esc(badgeMsg)+'<br>'+esc(special.name+' gives you $'+(special.name==='Pixie Dust'?10+(ownsPower(p,'food-churro')?5:0):Math.abs(special.amount||100))+'.');
    actions.innerHTML='<button class="primary" id="qContinue">Continue</button>';
    document.getElementById('qContinue').addEventListener('click',function(){
      const msg=applySpecialSpace(ctx.space,true);
@@ -2568,6 +2594,7 @@ function advanceTurn(msg){
  }
  for(let checked=0;checked<players.length*2+1;checked++){
    currentPlayer=(currentPlayer+1)%players.length;
+   if(currentPlayer===0)pinRound++;
    const next=players[currentPlayer];
    if(next.eliminated)continue;
    if(next.skipTurns>0){
@@ -2589,9 +2616,45 @@ function leaveSecurity(player){
  addLog(player.name+' left Park Security and returned to '+SPACES[player.pos].name+'.');
  renderTokens();renderScores();
 }
+function ownsPower(player,id){return !!player&&(player.pins||[]).includes(id)}
+function powerReady(player,id){
+ const pin=pinInfo(id);
+ return ownsPower(player,id)&&(!pin.cooldown||pinPowerUses[id]!== (pin.cooldown==='round'?pinRound:'used'));
+}
+function usePower(id){const pin=pinInfo(id);pinPowerUses[id]=pin.cooldown==='round'?pinRound:'used'}
+function powerStatus(pin){
+ if(!pin.power)return '';
+ if(!pin.cooldown)return pin.power;
+ return pin.power+' '+(pinPowerUses[pin.id]===(pin.cooldown==='round'?pinRound:'used')?(pin.cooldown==='round'?'Used this round.':'Used this game.'):'Ready to use.');
+}
+function choosePinAbility(player,id,prompt,choices){
+ const saved=Array.from(modalRoot.childNodes),playerIndex=currentPlayer;
+ return new Promise(function(resolve){
+   modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">✨ PIN ABILITY • ROUND '+pinRound+'</div><h2>'+esc(pinInfo(id).name)+'</h2><p>'+esc(player.name)+', '+esc(prompt)+'</p><div class="actions">'+choices.map(function(c,i){return '<button class="'+(i?'secondary':'primary')+'" data-pin-ability="'+i+'">'+esc(c.label)+'</button>'}).join('')+'</div></div></div>';
+   let answered=false;
+   document.querySelectorAll('[data-pin-ability]').forEach(function(button){button.addEventListener('click',function(){
+     if(answered)return;answered=true;
+     const choice=choices[Number(button.dataset.pinAbility)].value;
+     modalRoot.replaceChildren(...saved);
+     resolve(!gameOver&&currentPlayer===playerIndex&&ownsPower(player,id)?choice:null);
+   })});
+ });
+}
+async function adjustedPinRoll(player,roll,transport){
+ if(powerReady(player,'resort-contemporary')){
+   const adjustment=await choosePinAbility(player,'resort-contemporary','Adjust this dice total of '+roll+'? This power can be used once per game.',[{label:'+1 space',value:1},{label:'−1 space',value:-1},{label:'Keep '+roll,value:0}]);
+   if(adjustment){usePower('resort-contemporary');roll=Math.max(1,roll+adjustment)}
+ }
+ if(transport&&ownsPower(player,'resort-polynesian')){
+   const add=await choosePinAbility(player,'resort-polynesian','Add 2 spaces to this transportation bonus roll of '+roll+'?',[{label:'Add 2 spaces',value:2},{label:'Keep '+roll,value:0}]);
+   if(add)roll+=add;
+ }
+ return roll;
+}
+
 function pinInfo(id){return PIN_DESIGNS.find(function(pin){return pin.id===id})}
 function pinMarkup(pin,quantity,missing){
- return '<div class="pin-card '+(missing?'missing':'')+'" style="--pin-color:'+pin.color+'"><div class="pin-art" aria-hidden="true">'+pin.icon+'</div><strong>'+esc(pin.name)+'</strong><small>'+esc(pin.park)+'</small><small>'+(missing?'Not collected':'Owned: '+quantity)+'</small></div>';
+ return '<div class="pin-card '+(missing?'missing':'')+'" style="--pin-color:'+pin.color+'"><div class="pin-art" aria-hidden="true">'+pin.icon+'</div><strong>'+esc(pin.name)+'</strong><small>'+esc(pin.park)+'</small><small>'+esc(powerStatus(pin))+'</small><small>'+(missing?'Not collected':'Owned: '+quantity)+'</small></div>';
 }
 const PIN_PURCHASE_PRICE=100;
 function unownedPins(){
@@ -2644,14 +2707,15 @@ function offerDoublesPinPurchase(playerIndex){
  });
 }
 function resetPins(){
- pinTradeVisit=null;
+ pinTradeVisit=null;pinRound=1;pinPowerUses={};
  players.forEach(function(p){p.pins=[p.startingPin];p.pinTradesThisTurn=0});
  castMemberPins=[];
 }
 function collectPin(playerIndex){
  const p=players[playerIndex];if(!p.pins)p.pins=[];
- const missing=PIN_DESIGNS.filter(function(pin){return !p.pins.includes(pin.id)});
- const pool=missing.length?missing:PIN_DESIGNS;
+ const available=PIN_DESIGNS.filter(function(pin){return !pin.optional||!players.some(function(other){return (other.pins||[]).includes(pin.id)})});
+ const missing=available.filter(function(pin){return !p.pins.includes(pin.id)});
+ const pool=missing.length?missing:available;
  const pin=pool[Math.floor(Math.random()*pool.length)];p.pins.push(pin.id);
  addLog(p.name+' collected the '+pin.name+' pin.');renderScores();return pin;
 }
@@ -2663,7 +2727,7 @@ function showPinReward(playerIndex,onContinue){
 function showPinBook(playerIndex){
  if(turnLocked)return;
  const p=players[playerIndex],pins=p.pins||[];
- const sets=[...new Set(PIN_DESIGNS.map(function(pin){return pin.park}))].filter(function(park){return PIN_DESIGNS.filter(function(pin){return pin.park===park}).every(function(pin){return pins.includes(pin.id)})});
+ const sets=[...new Set(PIN_DESIGNS.filter(function(pin){return !pin.optional}).map(function(pin){return pin.park}))].filter(function(park){return PIN_DESIGNS.filter(function(pin){return pin.park===park}).every(function(pin){return pins.includes(pin.id)})});
  modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><div class="badge">📌 PIN COLLECTION</div><h2>'+esc(p.name)+'\'s Pins</h2><p>'+new Set(pins).size+' designs collected • '+pins.length+' pins to keep or trade.</p><p>'+sets.length+' complete park set'+(sets.length===1?'':'s')+'.</p><div class="pin-grid">'+PIN_DESIGNS.map(function(pin){const quantity=pins.filter(function(id){return id===pin.id}).length;return pinMarkup(pin,quantity,!quantity)}).join('')+'</div><div class="actions"><button class="primary" id="pinBookClose">Back to Board</button>'+'</div></div></div>';
  document.getElementById('pinBookClose').addEventListener('click',closeModal);
 }
@@ -2808,7 +2872,7 @@ function showPinTrading(){
 }
 
 function showRules(){
- modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><h2>Quick Rules</h2><p><strong>End-of-Turn Property Trading:</strong> After finishing a turn, choose whether to trade before passing to the next player. Pick another active player, offer exactly one property, and request exactly one of theirs. The other player accepts or declines. One offer per turn; no money changes hands. Ownership, rent, and Castle Finale progress update after an accepted trade. You can skip trading.</p><p><strong>Pin Traders:</strong> Each player chooses one starting pin after choosing a playing piece. All 20 designs are available, and each starting pin must be different. There are 20 designs in four park sets, and two Magic &amp; Mischief cards add a mystery pin. Land on one of eight Pin Traders spaces (two per park) for one optional one-for-one swap with a Cast Member holding up to five random pins not owned by any player or another active player. Player trades require that player to accept. Trades cost no money. Choose Finish Visit to end your turn, whether you trade or skip. Duplicate pins can be traded. All five pins from the park where you own every property are required for the Castle Finale.</p><p><strong>Autograph Book:</strong> Correct answers (except the winning Final Challenge) have a 25% chance of a surprise character autograph with confetti. Every player is guaranteed a visit by their third correct answer since their last autograph. Three Magic &amp; Mischief cards guarantee an autograph. Collect all 50; each new visit chooses a missing character first. After completing your book, repeat character visits are still possible. Open your book from your player card. Autographs are optional.</p><p>The board has <strong>80 spaces</strong> (19 park spaces on each side, plus four transportation corners). Each side is themed to one park: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom.</p><p>Choose a unique token, roll both dice, and move the combined total (2–12 spaces) around the board. Rolling doubles opens a popup asking whether the rolling player wants to buy one pin not owned by any player for $100, or skip, including on transportation bonus rolls. No doubles cash payout is given. Doubles do not give an extra turn. When you land on an unowned attraction, the game checks whether you can afford it. If you can, choose whether to attempt the purchase; answering the park-themed trivia correctly buys it automatically. If you cannot afford it, your turn ends. Land on another player\'s property to see a rent popup. Choose to pay the rent or use a Magic Rent Pass (the bank pays the owner). If you cannot afford rent and choose &ldquo;I spent all my money at Disney!&rdquo;, your remaining money goes to the owner and you lose the game. Your turns are skipped, your pawn is removed, and your properties return to the bank. Remaining players continue toward the Castle Finale. The four middle-of-the-park <strong>Nighttime Show</strong> spaces cost $200 each and work as a set: rent is $25 with 1 show, $50 with 2, $100 with 3, and $200 with all 4.</p><p>All four corners are <strong>transportation hubs</strong>. If you land exactly on one, you may choose to roll again and travel that many extra spaces. Completing a lap does not pay money.</p><p><strong>Magic &amp; Mischief:</strong> Land on either card space on a park side to draw from the shared pile of 45 cards. Apply its reward, cost, movement, or special perk. Card travel plays the destination normally; laps do not pay money. You may choose to use a Magic Rent Pass in the rent popup; the bank pays the owner. Five Security cards move your pawn to the center Security spot and skip your next turn. Resume from the space you left when you next roll; no lap bonus is paid for being sent to Security. Cards do not repeat until the deck is used up.</p><p>Each of the four parks has its own shuffled deck of <strong>30 intermediate questions</strong> (120 park questions total). Resorts &amp; Dining and Disney History each have 10 intermediate questions. A few Challenge questions add variety, and the Castle Finale favors these without requiring expert-level trivia. Questions do not repeat within a park until its deck is used up.</p><p>Correct answers on Trivia and Pixie Dust spaces earn category badges. Attraction and nighttime show purchase questions do not award badges. <strong>Pixie Dust</strong> awards $10 for a correct answer. Wrong answers lose no money. <strong>Snack Break</strong> uses a shuffled deck of 30 real Disney food photos; identify the food from four answers to earn $50. To win, collect all six badges, own <strong>all 10 properties in one park, including its Nighttime Show</strong>, and collect <strong>all five pins from that same park</strong>. Then choose the <strong>Cinderella Castle Finale</strong> space in the center instead of rolling and answer the Final Challenge correctly. If you miss the Final Challenge, complete another full lap of the 80-space board before trying again. Backward movement reduces your lap progress; Security trips do not count. Your cash balance and autographs are not win requirements.</p><div class="actions"><button class="primary" id="closeRules">Got It</button></div></div></div>';
+ modalRoot.innerHTML='<div class="modal-backdrop"><div class="modal"><h2>Quick Rules</h2><p><strong>Optional Power Pins:</strong> Food and Resort pins are optional; winning still requires only your completed park’s five pins. Powers work while you own the pin, do not stack with duplicates, and used powers stay used when traded. A round is a full cycle of player turns, including skipped turns. Pretzel and Ice Cream retries refresh each round and offer a fresh question; Ice Cream excludes the Finale. Contemporary and Wilderness Lodge are once per game. Open your pin collection to see every power and its availability.</p><p><strong>End-of-Turn Property Trading:</strong> After finishing a turn, choose whether to trade before passing to the next player. Pick another active player, offer exactly one property, and request exactly one of theirs. The other player accepts or declines. One offer per turn; no money changes hands. Ownership, rent, and Castle Finale progress update after an accepted trade. You can skip trading.</p><p><strong>Pin Traders:</strong> Each player chooses one starting pin after choosing a playing piece. All 30 designs are available, and each starting pin must be different. There are 30 designs in four park sets and two optional power sets, and two Magic &amp; Mischief cards add a mystery pin. Land on one of eight Pin Traders spaces (two per park) for one optional one-for-one swap with a Cast Member holding up to five random pins not owned by any player or another active player. Player trades require that player to accept. Trades cost no money. Choose Finish Visit to end your turn, whether you trade or skip. Duplicate pins can be traded. All five pins from the park where you own every property are required for the Castle Finale.</p><p><strong>Autograph Book:</strong> Correct answers (except the winning Final Challenge) have a 25% chance of a surprise character autograph with confetti. Every player is guaranteed a visit by their third correct answer since their last autograph. Three Magic &amp; Mischief cards guarantee an autograph. Collect all 50; each new visit chooses a missing character first. After completing your book, repeat character visits are still possible. Open your book from your player card. Autographs are optional.</p><p>The board has <strong>80 spaces</strong> (19 park spaces on each side, plus four transportation corners). Each side is themed to one park: Magic Kingdom, EPCOT, Hollywood Studios, and Animal Kingdom.</p><p>Choose a unique token, roll both dice, and move the combined total (2–12 spaces) around the board. Rolling doubles opens a popup asking whether the rolling player wants to buy one pin not owned by any player for $100, or skip, including on transportation bonus rolls. No doubles cash payout is given. Doubles do not give an extra turn. When you land on an unowned attraction, the game checks whether you can afford it. If you can, choose whether to attempt the purchase; answering the park-themed trivia correctly buys it automatically. If you cannot afford it, your turn ends. Land on another player\'s property to see a rent popup. Choose to pay the rent or use a Magic Rent Pass (the bank pays the owner). If you cannot afford rent and choose &ldquo;I spent all my money at Disney!&rdquo;, your remaining money goes to the owner and you lose the game. Your turns are skipped, your pawn is removed, and your properties return to the bank. Remaining players continue toward the Castle Finale. The four middle-of-the-park <strong>Nighttime Show</strong> spaces cost $200 each and work as a set: rent is $25 with 1 show, $50 with 2, $100 with 3, and $200 with all 4.</p><p>All four corners are <strong>transportation hubs</strong>. If you land exactly on one, you may choose to roll again and travel that many extra spaces. Completing a lap does not pay money.</p><p><strong>Magic &amp; Mischief:</strong> Land on either card space on a park side to draw from the shared pile of 45 cards. Apply its reward, cost, movement, or special perk. Card travel plays the destination normally; laps do not pay money. You may choose to use a Magic Rent Pass in the rent popup; the bank pays the owner. Five Security cards move your pawn to the center Security spot and skip your next turn. Resume from the space you left when you next roll; no lap bonus is paid for being sent to Security. Cards do not repeat until the deck is used up.</p><p>Each of the four parks has its own shuffled deck of <strong>30 intermediate questions</strong> (120 park questions total). Resorts &amp; Dining and Disney History each have 10 intermediate questions. A few Challenge questions add variety, and the Castle Finale favors these without requiring expert-level trivia. Questions do not repeat within a park until its deck is used up.</p><p>Correct answers on Trivia and Pixie Dust spaces earn category badges. Attraction and nighttime show purchase questions do not award badges. <strong>Pixie Dust</strong> awards $10 for a correct answer. Wrong answers lose no money. <strong>Snack Break</strong> uses a shuffled deck of 30 real Disney food photos; identify the food from four answers to earn $50. To win, collect all six badges, own <strong>all 10 properties in one park, including its Nighttime Show</strong>, and collect <strong>all five pins from that same park</strong>. Then choose the <strong>Cinderella Castle Finale</strong> space in the center instead of rolling and answer the Final Challenge correctly. If you miss the Final Challenge, complete another full lap of the 80-space board before trying again. Backward movement reduces your lap progress; Security trips do not count. Your cash balance and autographs are not win requirements.</p><div class="actions"><button class="primary" id="closeRules">Got It</button></div></div></div>';
  document.getElementById('closeRules').addEventListener('click',closeModal);
 }
 showSetup();
