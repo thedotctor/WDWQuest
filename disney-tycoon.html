@@ -181,7 +181,7 @@ const adjacent=i=>[i-GRID,i+GRID,...(i%GRID?[i-1]:[]),...(i%GRID<GRID-1?[i+1]:[]
 const operatingCost=t=>t.category==='food'?(t.draw==='cart'?15:t.price>=700?60:35):t.category==='characters'?45:t.category==='rides'||t.category==='legacy'?(t.draw==='coaster'||t.draw==='mountain'?100:40):0;
 const minimumIncome=t=>operatingCost(t)*.5;
 const visitorIncome=t=>t.category==='food'?3:t.category==='characters'?2:t.category==='rides'||t.category==='legacy'?2:0;
-const money=n=>'$'+n.toLocaleString();
+const money=n=>'
 function detail(){if(selected===null){el('qt-detail').innerHTML=`<strong>${types[tool].icon} ${types[tool].name}</strong><p><small>Build cost ${money(types[tool].price)}${operatingCost(types[tool])?' · Daily out '+money(operatingCost(types[tool]))+' · Daily min in '+money(minimumIncome(types[tool]))+' · Income '+money(visitorIncome(types[tool]))+' per visitor, with the daily minimum guaranteed':''}</small></p><small>Tap an empty green lot ${tool==='tree'?'to add scenery.':'beside a path to build.'}</small>`;return}const lot=lots[selected],t=types[lot.type];el('qt-detail').innerHTML=`<strong>${t.icon} ${t.name} · Level ${lot.level}</strong><p><small>${lot.type==='tree'?'Helps guests enjoy their park.':lot.type==='path'?'Connects your attractions to the entrance.':'Attracts '+t.guests*lot.level+' guests · Daily out '+money(operatingCost(t))+' · Daily min in '+money(minimumIncome(t))+' · Income '+money(visitorIncome(t))+' per visitor, with the daily minimum guaranteed'}</small></p>${!['tree','path'].includes(lot.type)?'<button class="cursor-interaction" id="qt-upgrade">Upgrade · $250</button>':''}`;const b=el('qt-detail').querySelector('#qt-upgrade');if(b){b.disabled=cash<250||lot.level>=3;b.addEventListener('click',()=>{if(cash<250||lot.level>=3)return;cash-=250;lot.level++;el('qt-log').textContent=t.name+' upgraded! It can serve more guests.';draw()})}}
 function draw(){savePark();el('qt-cash').textContent=money(cash);el('qt-guests').textContent=guests;el('qt-income').textContent=money(session?session.credited:lastIncome);el('qt-expenses').textContent=money(session?session.expenses:estimateDay().expenses);el('qt-day').textContent=day;el('qt-next').disabled=!!session||lots[ENTRANCE].type!=='path';el('qt-progress').style.width=Math.min(100,guests/5)+'%';el('qt-goal-status').textContent=guests>=500?'✓ Goal complete!':guests+' / 500 guests';el('qt-tools').innerHTML=catalogMarkup();el('qt-map').innerHTML=lots.map((l,i)=>`<button class="qt-lot cursor-interaction ${l.type||''}  ${i===ENTRANCE?'entrance-lot':''} ${selected===i?'selected':''}" data-lot="${i}" ${types[l.type]&&!["tree","path"].includes(l.type)?'data-venue="true"':''} aria-label="Lot ${i+1}: ${l.type==='gate'?'Main Street Entrance':l.type==='castle'?'Castle':l.type==='water'?'Pond':l.type?types[l.type].name+', level '+l.level:'Empty grass'}">${!l.type?'<span class="qt-empty">＋</span>':l.type==='gate'?'<span class="qt-gate">🎟️</span>':l.type==='castle'?'<span class="qt-castle" aria-hidden="true"><span></span><span></span><span></span></span>':types[l.type]?.draw==='castle'?'<span class="qt-castle" aria-hidden="true"><span></span><span></span><span></span></span>':types[l.type]?.draw?'<span class="qt-art '+types[l.type].draw+'"></span>':''}</button>`).join('');detail();refreshFinance()}
 root.addEventListener('click',e=>{if(e.target.closest('#qt-storage')){placingStored=true;tool=inventory[0].type;buildCategory=types[tool].category==='legacy'?'rides':types[tool].category;selected=null;draw();el('qt-log').textContent='Tap an empty lot to place your stored '+types[tool].name+' for free.';return}const t=e.target.closest('[data-tool]');if(t){tool=t.dataset.tool;selected=null;draw();return}const b=e.target.closest('[data-lot]');if(!b)return;const i=Number(b.dataset.lot);if(lots[i].type){if(types[lots[i].type]){selected=i;detail();draw()}else el('qt-log').textContent=lots[i].type==='water'?'The pond adds character. Build around it.':lots[i].type==='castle'?'The castle anchors your park. Main Street leads to the central hub, with attractions in the surrounding lands.':'Welcome to Main Street! This is where guests enter your park.';return}if(!placingStored&&cash<types[tool].price){el('qt-log').textContent='Not enough funds. Open for another day to earn more.';return}if(tool!=='tree'&&!adjacent(i)&&!(tool==='path'&&i===ENTRANCE)){el('qt-log').textContent='Start your first walkway at the entrance lot in the bottom center, then extend it to reach this spot.';return}if(placingStored){lots[i]={...inventory.shift()};placingStored=false}else{cash-=types[tool].price;lots[i].type=tool}selected=i;el('qt-log').textContent=types[tool].name+' built! Open your park to see its effect.';draw()});
@@ -224,7 +224,113 @@ function advanceDay(now){
   if(!session)return;
   if(!session.paused)session.elapsedMs=Math.min(DAY_DURATION_MS,session.elapsedMs+Math.max(0,now-session.lastTick));
   session.lastTick=now;
-  const ratio=session.elapsedMs/DAY_DURATION_MS,earned=Math.floor(session.income*ratio),oldGuests=guests;
+  const ratio=session.elapsedMs/DAY_DURATION_MS,earned=ratio===1?session.income:Math.floor(session.income*ratio*100)/100,oldGuests=guests;
+  cash+=earned-session.credited;session.credited=earned;guests=Math.floor(session.targetGuests*ratio);
+  if(Math.ceil(oldGuests/30)!==Math.ceil(guests/30))root.dispatchEvent(new Event('qt-guests-changed'));
+  if(session.elapsedMs>=DAY_DURATION_MS){
+    lastIncome=session.income;lastExpenses=session.expenses;cash-=session.expenses;
+    const profit=lastIncome-lastExpenses;session=null;
+    el('qt-log').textContent='Day '+day+' closed: '+money(lastIncome)+' money in − '+money(lastExpenses)+' money out = '+money(profit)+' profit. Open when you’re ready for another day.';
+    day++;el('qt-day').textContent=day;
+    draw();
+  }
+  refreshFinance();savePark();
+}
+el('qt-next').addEventListener('click',()=>{
+  if(session||lots[ENTRANCE].type!=='path')return;
+  const estimate=estimateDay();guests=0;lastIncome=0;lastExpenses=0;
+  session={elapsedMs:0,lastTick:Date.now(),paused:false,...estimate,credited:0};
+  el('qt-log').textContent='Park open for 10 minutes. Estimated money in: '+money(estimate.income)+' · operating costs: '+money(estimate.expenses)+'. Buildings added during this day open tomorrow.';
+  draw();refreshFinance();
+});
+el('qt-pause-day').addEventListener('click',()=>{
+  if(!session)return;advanceDay(Date.now());if(!session)return;
+  session.paused=!session.paused;session.lastTick=Date.now();root.dispatchEvent(new CustomEvent('qt-day-paused',{detail:session.paused}));refreshFinance();savePark();
+});
+setInterval(()=>advanceDay(Date.now()),1000);
+
+draw();advanceDay(Date.now());refreshFinance();
+})();
+</script>
+<script>
+(()=>{
+const root=document.getElementById('quest-tycoon'),map=root.querySelector('#qt-map'),toggle=root.querySelector('#qt-motion');
+const GRID=9,ENTRANCE=76;
+let paused=matchMedia('(prefers-reduced-motion: reduce)').matches||root.dataset.dayPaused==='true',last=0,time=0,layer=null;
+const walkers=[];
+function motion(){root.dataset.paused=String(paused);toggle.textContent=paused?'Play animation':'Pause animation';toggle.setAttribute('aria-pressed',String(!paused))}
+toggle.addEventListener('click',()=>{paused=!paused;motion()});root.addEventListener('qt-day-paused',e=>{paused=e.detail||matchMedia('(prefers-reduced-motion: reduce)').matches;motion()});motion();
+function route(){
+const paths=new Set([...map.querySelectorAll('.path')].map(b=>Number(b.dataset.lot)));
+if(!paths.has(ENTRANCE))return [];
+const adjacent=i=>[i-GRID,i+GRID,...(i%GRID?[i-1]:[]),...(i%GRID<GRID-1?[i+1]:[])].filter(n=>paths.has(n));
+const destinations=[...map.querySelectorAll('[data-venue]')].flatMap(b=>adjacent(Number(b.dataset.lot)));
+const target=destinations.length?destinations[Math.floor(Math.random()*destinations.length)]:ENTRANCE;
+const queue=[[ENTRANCE]],seen=new Set([ENTRANCE]);
+while(queue.length){const r=queue.shift(),end=r[r.length-1];if(end===target)return r.length===1?[ENTRANCE,ENTRANCE]:r.concat(r.slice(0,-1).reverse());for(const n of adjacent(end)){if(!seen.has(n)){seen.add(n);queue.push([...r,n])}}}
+return [ENTRANCE,ENTRANCE];
+}
+function populate(){
+observer.disconnect();
+layer=document.createElement('div');layer.className='qt-walkers';layer.setAttribute('aria-hidden','true');map.appendChild(layer);
+walkers.length=0;
+const visitorCount=Number(root.querySelector('#qt-guests').textContent)||0;
+for(let i=0;i<Math.min(22,Math.ceil(visitorCount/30));i++){const person=document.createElement('span');person.className='qt-person qt-walking';layer.appendChild(person);const r=route();if(!r.length){person.remove();continue}walkers.push({person,r,progress:Math.random()*(r.length-1),speed:.35+Math.random()*.25,lane:(Math.random()-.5)*2.2,wait:0});const w=walkers[walkers.length-1],k=Math.min(r.length-2,Math.floor(w.progress)),f=w.progress-k,a=r[k],b=r[k+1];person.style.left=(((a%GRID+.5)+(b%GRID-a%GRID)*f)/GRID*100+w.lane)+'%';person.style.top=(((Math.floor(a/GRID)+.5)+(Math.floor(b/GRID)-Math.floor(a/GRID))*f)/GRID*100+w.lane)+'%';}
+map.querySelectorAll('.qt-art.coaster').forEach(a=>{const car=document.createElement('span');car.className='qt-car';car.style.left='92%';car.style.top='47%';a.appendChild(car)});
+map.querySelectorAll('.qt-art.food').forEach(a=>{const puff=document.createElement('span');puff.className='qt-puff';a.appendChild(puff)});
+observer.observe(map,{childList:true});
+}
+const observer=new MutationObserver(populate);root.addEventListener('qt-guests-changed',populate);populate();
+function frame(now){const dt=last?Math.min((now-last)/1000,.08):0;last=now;if(!paused){time+=dt;for(const w of walkers){if(w.wait>0){w.wait-=dt;w.person.classList.remove('qt-walking')}else{w.person.classList.add('qt-walking');w.progress+=dt*w.speed;if(w.progress>=w.r.length-1){w.r=route();w.progress=0;w.wait=1.5+Math.random()*2}else if(Math.floor(w.progress)===Math.floor((w.r.length-1)/2)&&Math.floor(w.progress-dt*w.speed)!==Math.floor(w.progress)){w.wait=2+Math.random()*3}}const k=Math.min(w.r.length-2,Math.floor(w.progress)),f=w.progress-k,a=w.r[k],b=w.r[k+1];const x=(a%GRID+.5)+(b%GRID-a%GRID)*f,y=(Math.floor(a/GRID)+.5)+(Math.floor(b/GRID)-Math.floor(a/GRID))*f;w.person.style.left=(x/GRID*100+w.lane)+'%';w.person.style.top=(y/GRID*100+w.lane)+'%'}map.querySelectorAll('.qt-car').forEach((car,i)=>{const angle=time*1.7+i;car.style.left=(50+42*Math.cos(angle))+'%';car.style.top=(47+26*Math.sin(angle))+'%';car.style.transform='translate(-50%,-50%) rotate('+(-Math.atan2(26*Math.cos(angle),42*Math.sin(angle))*180/Math.PI)+'deg)'})}requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+})();
+</script>
+</div>
+
+<footer>Unofficial Disney fan game. Not affiliated with or endorsed by Disney.</footer></body></html>+n.toLocaleString(undefined,{minimumFractionDigits:Number.isInteger(n)?0:2,maximumFractionDigits:2});
+function detail(){if(selected===null){el('qt-detail').innerHTML=`<strong>${types[tool].icon} ${types[tool].name}</strong><p><small>Build cost ${money(types[tool].price)}${operatingCost(types[tool])?' · Daily out '+money(operatingCost(types[tool]))+' · Daily min in '+money(minimumIncome(types[tool]))+' · Income '+money(visitorIncome(types[tool]))+' per visitor, with the daily minimum guaranteed':''}</small></p><small>Tap an empty green lot ${tool==='tree'?'to add scenery.':'beside a path to build.'}</small>`;return}const lot=lots[selected],t=types[lot.type];el('qt-detail').innerHTML=`<strong>${t.icon} ${t.name} · Level ${lot.level}</strong><p><small>${lot.type==='tree'?'Helps guests enjoy their park.':lot.type==='path'?'Connects your attractions to the entrance.':'Attracts '+t.guests*lot.level+' guests · Daily out '+money(operatingCost(t))+' · Daily min in '+money(minimumIncome(t))+' · Income '+money(visitorIncome(t))+' per visitor, with the daily minimum guaranteed'}</small></p>${!['tree','path'].includes(lot.type)?'<button class="cursor-interaction" id="qt-upgrade">Upgrade · $250</button>':''}`;const b=el('qt-detail').querySelector('#qt-upgrade');if(b){b.disabled=cash<250||lot.level>=3;b.addEventListener('click',()=>{if(cash<250||lot.level>=3)return;cash-=250;lot.level++;el('qt-log').textContent=t.name+' upgraded! It can serve more guests.';draw()})}}
+function draw(){savePark();el('qt-cash').textContent=money(cash);el('qt-guests').textContent=guests;el('qt-income').textContent=money(session?session.credited:lastIncome);el('qt-expenses').textContent=money(session?session.expenses:estimateDay().expenses);el('qt-day').textContent=day;el('qt-next').disabled=!!session||lots[ENTRANCE].type!=='path';el('qt-progress').style.width=Math.min(100,guests/5)+'%';el('qt-goal-status').textContent=guests>=500?'✓ Goal complete!':guests+' / 500 guests';el('qt-tools').innerHTML=catalogMarkup();el('qt-map').innerHTML=lots.map((l,i)=>`<button class="qt-lot cursor-interaction ${l.type||''}  ${i===ENTRANCE?'entrance-lot':''} ${selected===i?'selected':''}" data-lot="${i}" ${types[l.type]&&!["tree","path"].includes(l.type)?'data-venue="true"':''} aria-label="Lot ${i+1}: ${l.type==='gate'?'Main Street Entrance':l.type==='castle'?'Castle':l.type==='water'?'Pond':l.type?types[l.type].name+', level '+l.level:'Empty grass'}">${!l.type?'<span class="qt-empty">＋</span>':l.type==='gate'?'<span class="qt-gate">🎟️</span>':l.type==='castle'?'<span class="qt-castle" aria-hidden="true"><span></span><span></span><span></span></span>':types[l.type]?.draw==='castle'?'<span class="qt-castle" aria-hidden="true"><span></span><span></span><span></span></span>':types[l.type]?.draw?'<span class="qt-art '+types[l.type].draw+'"></span>':''}</button>`).join('');detail();refreshFinance()}
+root.addEventListener('click',e=>{if(e.target.closest('#qt-storage')){placingStored=true;tool=inventory[0].type;buildCategory=types[tool].category==='legacy'?'rides':types[tool].category;selected=null;draw();el('qt-log').textContent='Tap an empty lot to place your stored '+types[tool].name+' for free.';return}const t=e.target.closest('[data-tool]');if(t){tool=t.dataset.tool;selected=null;draw();return}const b=e.target.closest('[data-lot]');if(!b)return;const i=Number(b.dataset.lot);if(lots[i].type){if(types[lots[i].type]){selected=i;detail();draw()}else el('qt-log').textContent=lots[i].type==='water'?'The pond adds character. Build around it.':lots[i].type==='castle'?'The castle anchors your park. Main Street leads to the central hub, with attractions in the surrounding lands.':'Welcome to Main Street! This is where guests enter your park.';return}if(!placingStored&&cash<types[tool].price){el('qt-log').textContent='Not enough funds. Open for another day to earn more.';return}if(tool!=='tree'&&!adjacent(i)&&!(tool==='path'&&i===ENTRANCE)){el('qt-log').textContent='Start your first walkway at the entrance lot in the bottom center, then extend it to reach this spot.';return}if(placingStored){lots[i]={...inventory.shift()};placingStored=false}else{cash-=types[tool].price;lots[i].type=tool}selected=i;el('qt-log').textContent=types[tool].name+' built! Open your park to see its effect.';draw()});
+function estimateDay(){
+  let targetGuests=80,expenses=0;const copies={},venues=[];
+  lots.forEach((l,index)=>{const t=types[l.type];if(!t)return;
+    const repeat=copies[l.type]||0;copies[l.type]=repeat+1;
+    const appeal=Math.round(t.guests*l.level/(1+repeat*.5));
+    targetGuests+=appeal;expenses+=operatingCost(t);
+    if(minimumIncome(t))venues.push({index,type:l.type,category:t.category,appeal,level:l.level,
+      capacity:(t.capacity||(t.category==='characters'?100:220))*l.level});
+  });
+  targetGuests=lots[ENTRANCE].type==='path'?targetGuests+Math.min(60,(day-1)*15):0;
+  const weights={};venues.forEach(v=>weights[v.category]=(weights[v.category]||0)+v.appeal);
+  const buildings=venues.map(v=>{
+    const t=types[v.type],visitsPerGuest=v.category==='food'?.65:v.category==='characters'?.6:3;
+    const visits=Math.min(v.capacity,Math.floor(targetGuests*visitsPerGuest*v.appeal/weights[v.category]));
+    const minimum=targetGuests?minimumIncome(t):0;
+    return {...v,visits,minimum,expenses:operatingCost(t),income:Math.max(minimum,visits*visitorIncome(t))};
+  });
+  const minimum=buildings.reduce((sum,b)=>sum+b.minimum,0);
+  return {targetGuests,expenses,minimum,buildings,income:targetGuests*5+buildings.reduce((sum,b)=>sum+b.income,0)};
+}
+function refreshFinance(){
+root.dataset.dayPaused=String(!!session&&!!session.paused);
+const forecast=estimateDay();el('qt-forecast').textContent='Next day estimate: '+money(forecast.income)+' in − '+money(forecast.expenses)+' out = '+money(forecast.income-forecast.expenses)+' profit. Building minimum income: '+money(forecast.minimum)+'/day; more visits can earn more.';
+  const remaining=session?Math.max(0,DAY_DURATION_MS-session.elapsedMs):DAY_DURATION_MS;
+  const seconds=Math.ceil(remaining/1000);el('qt-clock').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
+  el('qt-income').textContent=money(session?session.credited:lastIncome);
+  el('qt-expenses').textContent=money(session?session.expenses:estimateDay().expenses);
+  el('qt-pause-day').disabled=!session;
+  el('qt-pause-day').textContent=session&&session.paused?'Resume day':'Pause day';
+  el('qt-next').textContent=session?'Park is open':'Open park · 10-minute day';
+  el('qt-next').disabled=!!session||lots[ENTRANCE].type!=='path';
+  el('qt-cash').textContent=money(cash);el('qt-guests').textContent=guests;
+  el('qt-progress').style.width=Math.min(100,guests/5)+'%';
+  el('qt-goal-status').textContent=guests>=500?'✓ Goal complete!':guests+' / 500 guests';
+}
+function advanceDay(now){
+  if(!session)return;
+  if(!session.paused)session.elapsedMs=Math.min(DAY_DURATION_MS,session.elapsedMs+Math.max(0,now-session.lastTick));
+  session.lastTick=now;
+  const ratio=session.elapsedMs/DAY_DURATION_MS,earned=ratio===1?session.income:Math.floor(session.income*ratio*100)/100,oldGuests=guests;
   cash+=earned-session.credited;session.credited=earned;guests=Math.floor(session.targetGuests*ratio);
   if(Math.ceil(oldGuests/30)!==Math.ceil(guests/30))root.dispatchEvent(new Event('qt-guests-changed'));
   if(session.elapsedMs>=DAY_DURATION_MS){
