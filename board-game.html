@@ -2988,8 +2988,6 @@ SPACES.forEach((s,i)=>{const r=spaceLayout(i),tile=box(world,r.x,.15,r.z,r.w-.03
 const banner=box(world,r.x,.299,r.z,r.w*.86,.018,r.d*.86,material(colors[r.side],.12,.25),.005);banner.visible=true;
 const t={x:r.x,z:r.z,park:r.side,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=r.w<r.d?.54:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
 if(r.side%2)model.rotation.y=Math.PI/2;
-const pz=r.z+(r.side===0?.79:r.side===2?-.79:0),px=r.x+(r.side===1?-.79:r.side===3?.79:0);
-const label=plaque(world,s.name,px,.306,pz,r.side%2?1.65:r.w*.9,r.side%2?r.d*.91:.4,'#384c68',r.side%2?Math.PI/2:0);
 const flag=cyl(world,r.x,.307,r.z,.095,.07,gold);flag.visible=false;ownerFlags.push(flag);
 });
 // Raised, high-contrast interior nameplates face each park's playing spaces.
