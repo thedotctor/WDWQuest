@@ -73,7 +73,7 @@ export async function createTycoonView(canvas,map,root){
   let sceneryMotions=[],angle=.38,zoom=1,lastDraw=0,elapsed=0;
   const tileGroups=[],visitorModels=[],ray=new T.Raycaster(),pointer=new T.Vector2();
   floor(world,0,-.25,0,9.4,.5,9.4,mat('#253e57',.3,.28));
-  floor(world,0,.001,0,9.35,.002,9.35,mat('#7fae96',.02,.65));
+  floor(world,0,.001,0,9.35,.002,9.35,mat('#294a3a',.02,.65));
   for(const x of [-4.67,4.67])box(world,x,-.06,0,.06,.12,9.4,gold);
   for(const z of [-4.67,4.67])box(world,0,-.06,z,9.4,.12,.06,gold);
   const gate=group(0,4.78);for(const x of [-.5,.5]){box(gate,x,.3,0,.09,.6,.09,cream);ball(gate,x,.65,0,.06,gold);}sign(gate,'PARK ENTRANCE',0,.63,0,1.1,.17);
@@ -84,7 +84,7 @@ export async function createTycoonView(canvas,map,root){
     const buttons=[...map.querySelectorAll('[data-lot]')];
     for(const b of buttons){const i=+b.dataset.lot,x=i%9-4,z=Math.floor(i/9)-4,g=group(x,z);g.userData.lot=i;tileGroups.push(g);
       const kind=b.querySelector('.qt-art')?.classList[1]||(b.querySelector('.qt-castle')?'castle':'');
-      floor(g,0,.012,0,.965,.024,.965,mat(b.classList.contains('path')?'#dcd6c5':i%2?'#92bba3':'#9ec3ab',.04,.45));
+      floor(g,0,.012,0,.965,.024,.965,mat(b.classList.contains('path')?'#dcd6c5':i%2?'#345b46':'#3b644d',.04,.45));
       if(b.classList.contains('path')){for(const a of [-.25,.25])for(const c of [-.25,.25])floor(g,a,.027,c,.44,.006,.44,cream);}
       else if(kind){const m=new T.Group();g.add(m);m.position.y=.028;
         if(kind==='castle'){m.scale.setScalar(.42);castle(m,0,0,1);}
