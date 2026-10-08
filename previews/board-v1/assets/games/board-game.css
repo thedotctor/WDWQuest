@@ -1,0 +1,150 @@
+/* WDWQuest: park after dark. Shared lobby, HUD and board presentation. */
+:root{--bg:#080e1a;--panel:#111c2c;--panel2:#19283b;--border:#2b3c52;--accent:#f1cb7b;--gold:#f1cb7b;--muted:#9eafc5;--text:#f4f2ee}
+body{background:radial-gradient(ellipse at 50% 0,#182c44 0,transparent 65%),#080e1a;font-family:Inter,"Avenir Next",system-ui,sans-serif;min-height:100vh}
+button,a,input{ -webkit-tap-highlight-color:transparent }
+button{transition:background .18s,border-color .18s,box-shadow .18s,transform .18s}
+button:not(:disabled):hover{filter:brightness(1.12)}
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #f1cb7b;outline-offset:4px}
+button:disabled{cursor:not-allowed}
+.primary{background:linear-gradient(135deg,#f7dea4,#e8b85e);color:#1c2431;box-shadow:0 4px 16px #ebbd5720;border-radius:10px;font-size:13px;letter-spacing:.02em}
+.secondary{background:#17263a;border-color:#34445a;border-radius:10px;font-size:12px}
+.shell,.shell:has(.game-layout),.shell:has(.with-3d){max-width:1660px;padding:24px 32px;margin:auto}
+.top{margin:0 0 25px;flex-wrap:nowrap;min-height:52px}
+.quest-brand{display:flex;align-items:center;gap:12px;font-size:25px;font-weight:850;letter-spacing:-1px;color:var(--text)!important}
+.brand-gold{color:var(--gold)}
+.quest-brand small{display:block;letter-spacing:.21em;font-size:8px;font-weight:650;color:var(--muted);margin-top:2px}
+.brand-mark{display:grid;place-items:center;width:44px;height:44px;color:var(--gold);border:1px solid #d4b57666;border-radius:13px;background:linear-gradient(145deg,#f1cb7b19,#101d30);font-size:32px;box-shadow:inset 0 0 15px #f1cb7b0c}
+.top-meta{display:flex;gap:22px;align-items:center}
+.session-tag{font-size:9px;font-weight:700;letter-spacing:.16em;color:var(--muted);display:flex;align-items:center;gap:8px}
+.session-tag:before{content:"";width:5px;height:5px;border-radius:50%;background:#88cea8;box-shadow:0 0 9px #88cea866}
+.top .arcade-link{font-size:12px;color:#dce4ee;padding:9px 15px;border:1px solid #34445a;border-radius:9px}
+.panel{background:linear-gradient(140deg,#19283cf5,#101a2bf5);border:1px solid #38486080;box-shadow:inset 0 1px 0 #ffffff09,0 12px 34px #00000018}
+/* A proper game lobby, with entirely local artwork. */
+.adventure-lobby,.collection-lobby{position:relative;overflow:hidden;padding:40px;border-radius:24px;max-width:1180px;margin:32px auto 0}
+.adventure-lobby{min-height:675px;background:radial-gradient(ellipse at 85% 40%,#2b426660,transparent 65%),linear-gradient(130deg,#19283c,#0d1729)}
+.lobby-art{position:absolute;right:-4%;top:40px;width:56%;height:95%;background:url('board-castle.svg') center/contain no-repeat;pointer-events:none;opacity:.9;mask-image:linear-gradient(to right,transparent,#000 15%);z-index:0}
+.adventure-lobby>:not(.lobby-art){position:relative;z-index:1}
+.setup-steps{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:42px;color:#8395ad;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.setup-steps span{padding-bottom:9px;border-bottom:2px solid #34465f}
+.setup-steps .active{border-color:var(--gold);color:var(--gold)}
+.lobby-kicker{color:var(--gold);font-size:9px;font-weight:750;letter-spacing:.19em;text-transform:uppercase}
+.adventure-lobby h1{font-size:clamp(40px,5vw,66px);letter-spacing:-.045em;line-height:1.07;margin:18px 0}
+.adventure-lobby h1 span{color:var(--gold)}
+.lobby-description{color:#b6c3d5;font-size:15px;line-height:1.7;max-width:390px}
+.lobby-facts{display:flex;gap:14px;color:#b3c2d7;font-size:10px;margin:23px 0 35px}
+.lobby-facts span+span:before{content:'·';color:var(--gold);margin-right:14px}
+.adventure-lobby h3{display:flex;align-items:center;gap:15px;font-size:16px;margin:0 0 12px}
+.adventure-lobby .badge{font-size:10px;padding:4px 9px;background:#101d31}
+.adventure-lobby>.muted{font-size:12px;max-width:440px}
+.adventure-lobby .setup-grid{max-width:510px;position:relative}
+.player-row{grid-template-columns:65px minmax(0,1fr) auto;font-size:12px}
+.player-row input{background:#0b1729;border-color:#3b4d64;font-size:14px;border-radius:9px}
+.adventure-lobby .actions{margin-top:20px}
+.adventure-lobby #setupMsg{font-size:11px;color:#c2ad80}
+.collection-lobby h1{font-size:clamp(28px,4vw,44px);letter-spacing:-.035em;margin:12px 0}
+.collection-lobby>.muted{max-width:660px;line-height:1.7;font-size:13px}
+.collection-lobby h2{font-size:17px;margin:25px 0 15px}
+.collection-lobby .setup-steps{margin-bottom:25px}
+.token-choice-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.token-choice{min-height:165px;border-radius:16px;background:radial-gradient(ellipse at 50% 40%,#34517055,transparent 70%),#142238;border-color:#35465c;box-shadow:inset 0 1px 0 #ffffff08}
+.token-choice .token-art{width:98px;height:98px}
+.token-choice.selected,.starting-pin-choice.selected{outline:2px solid var(--gold);outline-offset:0;background:#263343;box-shadow:0 0 25px #efc16d15}
+.token-choice .token-label{font-size:11px;font-weight:650;color:#e7e6e2}
+.token-player-btn.active{outline:1px solid var(--gold);background:#2a3340}
+.starting-pin-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.starting-pin-choice{background:linear-gradient(145deg,#1d2d44,#111e31);border-width:1px;border-color:#3a4a60;transition:transform .18s,border-color .18s}
+.starting-pin-choice:not(:disabled):hover{transform:translateY(-3px);border-color:var(--pin-color)}
+/* The board is the main stage; the player HUD has its own reserved space. */
+.with-3d{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:16px;align-items:start}
+.with-3d .turn-panel{grid-column:2;grid-row:1/4;position:sticky;left:auto;top:20px;transform:none;width:100%;max-height:none;overflow:visible;z-index:2;border-radius:18px;padding:22px 17px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(150deg,#1b2b41,#0e192b);box-shadow:inset 0 1px 0 #ffffff0c,0 12px 32px #0003}
+.with-3d .turn-panel:before{content:'YOUR NEXT MOVE';color:var(--gold);font-size:9px;letter-spacing:.18em;font-weight:750}
+.with-3d .turn-panel .turn{font-size:19px;font-weight:750;letter-spacing:-.025em;margin:0;overflow-wrap:anywhere;max-width:100%}
+.with-3d .turn-panel .dice{min-height:100px;width:100%;margin:0;background:radial-gradient(ellipse,#3a50613d,transparent 70%);border-radius:12px;min-width:0;padding:12px}
+.with-3d .turn-panel .dice-pair{gap:24px;flex-direction:row}
+.with-3d .turn-panel .die-cube{--size:50px;--half:25px}
+.with-3d .turn-panel .die-face{font-size:35px;background:linear-gradient(140deg,#fffcf4,#dce2e9);border-color:#ede4d0;color:#24374b}
+.with-3d .turn-panel .status{font-size:12px;line-height:1.6;max-width:none;min-height:38px;text-align:center;margin:0;color:#b1bfd1}
+.with-3d .turn-panel .actions{display:grid;grid-template-columns:1fr;gap:9px;width:100%;margin:0}
+.with-3d .turn-panel .actions button{width:100%;min-width:0;min-height:43px;font-size:12px}
+.with-3d #currentPlayerCenter{zoom:1;position:static;transform:none;width:100%;max-width:none;margin:4px 0 0;text-align:left;border-top:1px solid #36475c;padding-top:18px}
+.with-3d #currentPlayerCenter .player-card{border:0;border-radius:0;padding:0;background:transparent;box-shadow:none;outline:none;display:flex;flex-direction:column;align-items:flex-start;gap:9px}
+.with-3d #currentPlayerCenter .mini.gold{display:block;font-size:8px;color:#9bacbf;letter-spacing:.15em}
+.with-3d #currentPlayerCenter .name{font-size:14px;justify-content:flex-start;gap:5px;white-space:normal;overflow-wrap:anywhere}
+.with-3d #currentPlayerCenter .cash{font-size:32px;letter-spacing:-.045em;color:var(--gold);font-weight:650;margin:0}
+.with-3d #currentPlayerCenter .mini{font-size:10px;line-height:1.5}
+.with-3d #currentPlayerCenter .stats-buttons{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;margin:4px 0 0}
+.with-3d #currentPlayerCenter .stats-buttons button{font-size:10px;padding:8px 5px;width:100%;min-height:40px}
+.quest-goal{margin-top:22px;padding-top:18px;border-top:1px solid #36475c}
+.quest-goal .lobby-kicker{font-size:8px}
+.quest-badges{display:flex;justify-content:space-between;gap:5px;margin:13px 0}
+.quest-medal{display:grid;place-items:center;width:28px;height:31px;font-size:16px;border:1px solid #40506a;border-radius:8px;background:#182538;filter:grayscale(1);opacity:.45}
+.quest-medal.earned{filter:none;opacity:1;border-color:#dfb96d;background:#f1cb7b15;box-shadow:0 0 12px #f1cb7b20}
+.quest-goal p{font-size:10px;color:#9eafc5;line-height:1.6;margin:12px 0}
+.quest-progress{height:4px;border-radius:9px;background:#2f3c50;overflow:hidden}
+.quest-progress span{display:block;height:100%;background:var(--gold);transition:width .3s}
+.board3d-host{grid-column:1;grid-row:1;border-color:#35465f;border-radius:20px;background:#0b1425;box-shadow:0 22px 60px #0004;position:relative}
+.board3d-toolbar{background:linear-gradient(110deg,#1c2b40,#111d2f);padding:19px 22px;gap:14px;border-color:#ffffff0c}
+.board3d-toolbar strong{font-size:20px;font-weight:650;letter-spacing:-.03em;line-height:1.5}
+.scene-kicker{display:block;color:var(--gold);font-size:8px;letter-spacing:.16em;font-weight:650}
+.board3d-toolbar>div{gap:5px}
+.board3d-toolbar button{border:1px solid #34475f;border-radius:8px;background:#101d30;font-size:10px;font-weight:600;color:#aebed4;min-height:35px;padding:7px 10px;box-shadow:none}
+.board3d-toolbar button[aria-pressed=true]{background:#f1cb7b14;color:#f4d798;border:1px solid #c9a76266}
+.board3d-toolbar label{font-size:10px;color:#a7b6cb;gap:7px}
+.board3d-toolbar input{width:75px;accent-color:var(--gold);min-height:30px}
+.board3d-stage{position:relative;isolation:isolate;background:radial-gradient(ellipse at 50% 62%,#354d695e,transparent 65%),radial-gradient(ellipse at 20% 10%,#27394d,#0b1425 75%);overflow:hidden}
+.board3d-stage:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.45;background-image:radial-gradient(circle,#d8e9ff 0 1px,transparent 1.5px),radial-gradient(circle,#ffdea0 0 .7px,transparent 1.2px);background-size:127px 113px,193px 157px;background-position:13px 7px,51px 45px;mask-image:linear-gradient(#000,transparent 75%)}
+.board3d-stage canvas{height:clamp(520px,65vh,760px);width:100%;outline:none}
+.scene-hint{position:absolute;bottom:17px;left:22px;display:flex;gap:16px;color:#bcc9d8;font-size:9px;pointer-events:none;letter-spacing:.02em;background:#0a142a66;border:1px solid #ffffff0d;border-radius:20px;padding:8px 12px}
+.board3d-info{background:#142238;border-color:#33445a;border-left:3px solid var(--park-color,var(--gold));display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:15px 22px;min-height:70px}
+.board3d-info strong{font-size:14px;font-weight:650}
+.board3d-info span{font-size:10px;color:#9fb0c8;line-height:1.5}
+.daylight .board3d-stage{background:radial-gradient(ellipse at 50% 50%,#8ba4b4,#3b536b 90%)}
+.daylight .board3d-stage:before{opacity:0}
+.board3d-game-controls{grid-column:1;grid-row:2;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.board3d-game-controls>*{border:1px solid #39465d!important;background:linear-gradient(140deg,#1b293d,#111e30)!important;min-height:125px!important;border-radius:14px!important;padding:15px 10px!important;gap:6px!important;box-shadow:inset 0 1px 0 #ffffff08,0 8px 24px #0002!important;position:relative;overflow:hidden;color:#d7deea}
+.board3d-game-controls>*:before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#d4b57688,transparent)}
+.board3d-game-controls .magic-pile:before{background:linear-gradient(90deg,transparent,#b68be8,transparent)}
+.board3d-game-controls .security-spot:before{background:linear-gradient(90deg,transparent,#6eb9df,transparent)}
+.board3d-game-controls .castle-finale-space:disabled{opacity:.8}
+.board3d-game-controls .castle-icon,.board3d-game-controls .pin-kiosk>span,.board3d-game-controls .magic-pile-icon,.board3d-game-controls .security-icon{font-size:27px!important;filter:drop-shadow(0 3px 8px #0004)}
+.board3d-game-controls strong,.board3d-game-controls .castle-finale-space strong{font-size:12px!important;font-weight:650!important;line-height:1.3}
+.board3d-game-controls small,.board3d-game-controls .security-caption,.board3d-game-controls #magicPileCount,.board3d-game-controls #castleFinaleStatus{font-size:9px!important;line-height:1.5!important;color:#a8b8cb;max-width:180px}
+.board3d-game-controls .magic-pile br{display:none}
+.board3d-game-controls .security-tokens:empty{display:none}
+.with-3d>.board-key,.with-3d>.log{grid-column:1/-1;background:#111d2e;border-color:#2d3b51;border-radius:12px;box-shadow:none}
+.with-3d>.board-wrap{grid-column:1;grid-row:3}
+.with-3d>.board-photo-credit{grid-column:1}
+.board-key summary,.log summary{font-size:12px;color:#b1c0d4;padding:14px 18px}
+.modal-backdrop{background:#050b18cf;backdrop-filter:blur(12px)}
+.modal{background:linear-gradient(145deg,#20314a,#101c2e);border-color:#64708266;box-shadow:0 30px 100px #0008;border-radius:22px;padding:26px}
+.modal h2{letter-spacing:-.025em}
+.answer{background:#142238;border-color:#3a4c65;border-radius:12px;font-size:14px;line-height:1.5;padding:15px}
+.answer:not(:disabled):hover{background:#24364d;border-color:var(--gold)}
+/* The classic board remains usable when 3D is unavailable or switched off. */
+.board{background-image:none;background-color:#13283a}
+.classic-board .board-wrap{height:auto;grid-row:3;overflow:auto;max-width:100%}
+.classic-board .board{width:1200px;max-width:none}
+.classic-board .board3d-host .board3d-stage,.classic-board .board3d-info{display:none}
+.board-photo-credit{display:none}
+@media(min-width:1700px){.board3d-stage canvas{height:760px}}
+@media(max-width:1200px){.shell,.shell:has(.game-layout),.shell:has(.with-3d){padding:20px}.with-3d{grid-template-columns:minmax(0,1fr) 230px}.board3d-toolbar strong{width:100%}.board3d-toolbar{gap:10px;padding:15px 18px}.token-choice-grid,.starting-pin-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:900px){.with-3d{grid-template-columns:minmax(0,1fr)}.with-3d .turn-panel{grid-column:1;grid-row:2;position:static;display:grid;grid-template-columns:1fr 1fr;gap:12px 22px;padding:20px;text-align:left}.with-3d .turn-panel:before{grid-column:1}.with-3d .turn-panel .turn{grid-column:1}.with-3d .turn-panel .dice{grid-column:1;min-height:90px}.with-3d .turn-panel .status{grid-column:1;text-align:left}.with-3d .turn-panel .actions{grid-column:1}.with-3d #currentPlayerCenter{grid-column:2;grid-row:1/6;border-top:0;border-left:1px solid #36475c;padding:0 0 0 22px;margin:0}.board3d-game-controls{grid-row:3}.with-3d>.board-wrap{grid-row:4}.board3d-stage canvas{height:580px}.board3d-toolbar strong{width:auto}.adventure-lobby{padding:30px}.lobby-art{width:58%;opacity:.5;right:-10%}.collection-lobby{padding:28px}}
+@media(max-width:600px){.shell,.shell:has(.game-layout),.shell:has(.with-3d){padding:14px 12px}.top{margin-bottom:17px}.quest-brand{font-size:21px;gap:8px}.brand-mark{width:35px;height:38px;font-size:26px}.quest-brand small{font-size:6px}.session-tag{display:none}.top .arcade-link{font-size:10px;padding:8px 10px}.adventure-lobby,.collection-lobby{margin-top:10px;padding:24px 20px;border-radius:18px}.adventure-lobby{min-height:0}.lobby-art{width:100%;height:450px;top:25px;right:-35%;opacity:.3}.setup-steps{font-size:8px;gap:13px;margin-bottom:32px}.lobby-kicker{font-size:8px}.lobby-description{font-size:13px;max-width:290px}.lobby-facts{font-size:9px;gap:10px}.lobby-facts span+span:before{margin-right:10px}.player-row{grid-template-columns:1fr;gap:7px}.player-row .secondary{width:auto;justify-self:start}.adventure-lobby .actions{display:grid}.token-choice-grid,.starting-pin-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.token-choice{min-height:128px;padding:9px 4px}.token-choice .token-art{width:70px;height:70px}.token-choice .token-label{font-size:10px}.starting-pin-choice{padding:10px 5px;min-height:160px}.starting-pin-choice .pin-art{width:49px;height:49px;font-size:27px}.starting-pin-choice strong{font-size:10px}.starting-pin-choice small{font-size:8px}.collection-lobby h2{font-size:15px}.board3d-toolbar{padding:14px;gap:10px}.board3d-toolbar strong{width:100%;font-size:19px}.board3d-toolbar>div{gap:5px}.board3d-toolbar button{font-size:9px;padding:8px;min-height:36px}.board3d-stage canvas{height:430px}.scene-hint{bottom:10px;left:10px;font-size:8px;gap:10px;padding:7px 10px}.board3d-info{padding:13px 15px}.with-3d .turn-panel{padding:17px 14px;gap:9px 14px}.with-3d .turn-panel .turn{font-size:16px}.with-3d .turn-panel .dice{min-height:85px;padding:8px}.with-3d .turn-panel .die-cube{--size:42px;--half:21px}.with-3d .turn-panel .dice-pair{gap:15px}.with-3d .turn-panel .die-face{font-size:29px}.with-3d .turn-panel .status{font-size:10px;line-height:1.5}.with-3d #currentPlayerCenter{padding-left:14px}.with-3d #currentPlayerCenter .cash{font-size:27px}.with-3d #currentPlayerCenter .name{font-size:12px;gap:3px}.with-3d #currentPlayerCenter .stats-buttons{grid-template-columns:1fr}.with-3d #currentPlayerCenter .stats-buttons button{min-height:34px}.quest-goal{margin-top:14px;padding-top:13px}.quest-badges{gap:3px;flex-wrap:wrap;justify-content:flex-start}.quest-medal{width:24px;height:26px;font-size:14px}.quest-goal p{font-size:9px}.board3d-game-controls{grid-template-columns:1fr 1fr;gap:9px}.board3d-game-controls>*{min-height:120px!important}.modal{padding:20px}.question{font-size:22px}.answers{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}.starting-pin-choice:not(:disabled):hover{transform:none}}
+.primary:disabled{opacity:.4;box-shadow:none}
+.board3d-stage:after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 80px #070d1b55}
+.board3d-info{position:relative;padding-right:105px}
+.space-browser{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:flex;gap:6px}
+.space-browser button{font-size:14px;min-width:32px;min-height:32px;padding:3px 8px;border-radius:7px;background:#203148;color:#c6d3e4}
+@media(max-width:600px){
+ body:has(.with-3d){padding-bottom:82px}
+ .with-3d .turn-panel .actions #rollBtn{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:12px;right:12px;width:calc(100% - 24px);min-height:48px;z-index:50;border:1px solid #ffe4ae;box-shadow:0 8px 28px #0008,0 0 0 5px #0b142dcc}
+ body:has(#modalRoot .modal) .with-3d #rollBtn{visibility:hidden}
+}
+/* Local classic fallback still reserves room for the turn controls. */
+.game-layout:not(.with-3d){display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:16px}
+.game-layout:not(.with-3d)>.board-wrap{grid-column:1;grid-row:1;overflow:auto}
+.game-layout:not(.with-3d) .board{width:1200px;max-width:none}
+.game-layout:not(.with-3d)>.turn-panel{grid-column:2;grid-row:1;position:sticky;left:auto;top:20px;transform:none;width:100%;max-height:none}
+.game-layout:not(.with-3d)>.board-key,.game-layout:not(.with-3d)>.log{grid-column:1/-1}
+@media(max-width:900px){.game-layout:not(.with-3d){grid-template-columns:minmax(0,1fr)}.game-layout:not(.with-3d)>.turn-panel{grid-column:1;grid-row:2;position:static}.game-layout:not(.with-3d)>.board-wrap{max-width:100%}}
