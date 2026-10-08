@@ -23,13 +23,24 @@ export async function createParkView(canvas){
   function tree(p,x,z,s=1){cyl(p,x,.4*s,z,.06*s,.8*s,mat('#8a705a'));ball(p,x,1.07*s,z,.38*s,mat('#69a994'));ball(p,x-.21*s,.85*s,z,.26*s,mat('#7fc0a1'));ball(p,x+.23*s,.88*s,z,.27*s,mat('#74b49b'));shadow(p,x,z,.45*s,.28*s);}
   function castle(p,x,z,scale=1){const g=new T.Group();g.position.set(x,0,z);g.scale.setScalar(scale);p.add(g);box(g,0,.55,0,1.2,1.1,.65,stone);box(g,0,1,0,.35,2,.4,stone);for(const [a,h] of [[-.66,1.25],[.66,1.25],[-.34,1.65],[.34,1.65],[0,2.25]]){cyl(g,a,h/2,0,.12,h,stone);cone(g,a,h+.18,0,.19,.4,blue);cyl(g,a,h+.51,0,.012,.26,gold);box(g,a+.075,h+.59,0,.15,.08,.018,gold);}box(g,0,.21,.35,.22,.42,.04,windowMat);for(const a of [-.4,0,.4])box(g,a,.69,.35,.085,.19,.04,windowMat);shadow(g,0,0,.85,.65);}
   function storefront(p,x,z,color,title){const g=new T.Group();g.position.set(x,0,z);p.add(g);box(g,0,.8,0,1.4,1.6,.85,mat(color,.12,.3));box(g,0,1.66,0,1.55,.11,1,cream);box(g,0,1.82,0,1.25,.22,.6,mat('#9c8391'));box(g,0,1.08,.55,1.53,.1,.56,cream);for(let i=0;i<6;i++)box(g,-.62+i*.25,1.09,.55,.13,.105,.57,mat('#ca848b',.1,.27));sign(g,title,0,1.39,.45,1.23,.23);for(const x of [-.43,0,.43]){box(g,x,.5,.46,.27,.68,.04,windowMat);box(g,x,.54,.49,.025,.59,.02,cream);}shadow(g,0,.1,.8,.65);}
-  let currentLevel=null,coins=[],flags=[],scenery=[],decks=[],sparks=[],pawn=null,limbs=[],lastDraw=-1,lightCenter=0;
-  function disposeLevel(){world.traverse(o=>{if(o.isMesh){if(![...geos.values()].includes(o.geometry))o.geometry.dispose();const m=o.material;if(m.map){m.map.dispose();m.dispose();}else if(![...mats.values()].includes(m))m.dispose();}});world.clear();coins=[];flags=[];scenery=[];decks=[];sparks=[];}
+  let currentLevel=null,coins=[],flags=[],scenery=[],decks=[],sparks=[],dangerObjects=[],pawn=null,limbs=[],lastDraw=-1,lightCenter=0;
+  function disposeLevel(){world.traverse(o=>{if(o.isMesh){if(![...geos.values()].includes(o.geometry))o.geometry.dispose();const m=o.material;if(m.map){m.map.dispose();m.dispose();}else if(![...mats.values()].includes(m))m.dispose();}});world.clear();coins=[];flags=[];scenery=[];decks=[];sparks=[];dangerObjects=[];}
   function build(game){disposeLevel();currentLevel=game.level;const L=game.level;
     for(const p of L.platforms){const x=(p.x+p.w/2)/100,y=(460-p.y)/100,w=p.w/100,g=group();floor(g,x,y-.22,0,w,.36,1.85,mat(p.y===460?'#b6bac2':'#c2b28e',.18,.26));floor(g,x,y-.035,0,w+.025,.07,1.95,cream);box(g,x,y-.24,.94,w,.05,.04,gold);if(p.y<460){for(const a of [-w/2+.13,w/2-.13])box(g,x+a,y/2-.25,-.65,.11,y-.15,.18,mat('#87919e',.25,.3));}else for(let j=0;j<Math.floor(w/1.2);j++){floor(g,p.x/100+.7+j*1.2,y+.008,0,.75,.012,1.3,mat('#d8d6ce',.05,.35));}decks.push({g,x,w});}
     for(const c of L.coins){const g=group(c.x/100,0);const m=cyl(g,0,0,0,.105,.037,gold);m.rotation.x=Math.PI/2;const inset=cyl(g,0,0,.023,.073,.007,mat('#ffe49d',.4,.2));inset.rotation.x=Math.PI/2;coins.push({g,c});}
     for(const h of L.hazards){const g=group((h.x+h.w/2)/100,0);
-      if(h.type==='thorns'){
+      if(h.type==='flame'){
+        box(g,0,.025,0,.42,.05,.34,mat('#354459',.2,.4));
+        for(const x of [-.12,0,.12])box(g,x,.058,0,.052,.018,.27,mat('#bbaa69',.2,.34));
+        const flames=new T.Group();g.add(flames);
+        for(const [x,z,scale] of [[-.105,.03,.78],[0,0,1],[.105,-.02,.68]]){const red=cone(flames,x,.265*scale+.07,z,.086*scale,.46*scale,mat('#e87550',.04,.45));red.rotation.z=-x*1.2;cone(flames,x,.2*scale+.065,z+.02,.051*scale,.31*scale,mat('#ffd38a',.05,.38));}
+        dangerObjects.push({g,h,anim:flames,type:'flame'});
+      }else if(h.type==='spikedBall'){
+        const rolling=new T.Group();rolling.position.y=.22;g.add(rolling);ball(rolling,0,0,0,.14,mat('#667182',.48,.35));
+        const directions=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1],[.7,.7,0],[-.7,.7,0],[.7,-.7,0],[-.7,-.7,0]];
+        for(const dir of directions){const v=new T.Vector3(...dir).normalize();const spike=cone(rolling,v.x*.173,v.y*.173,v.z*.173,.038,.105,mat('#c7ced6',.5,.3));spike.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),v);}
+        dangerObjects.push({g,h,anim:rolling,type:'spikedBall'});
+      }else if(h.type==='thorns'){
         box(g,0,.028,0,.4,.056,.32,mat('#665b65',.05,.6));
         ball(g,0,.14,0,.12,mat('#456f66',.08,.44));
         for(let i=0;i<7;i++){const angle=i*Math.PI*2/7;const spike=cone(g,Math.cos(angle)*.095,.22,Math.sin(angle)*.07,.045,.2,mat(i%2?'#aeb78b':'#ca95ac',.05,.4));spike.rotation.z=-Math.cos(angle)*.62;spike.rotation.x=Math.sin(angle)*.62;}
@@ -53,6 +64,7 @@ export async function createParkView(canvas){
   }
   const backgrounds=['radial-gradient(ellipse at 75% 12%,#fff1d0 0,transparent 25%),linear-gradient(#7ab6d8,#dbe7ed)','radial-gradient(ellipse at 80% 15%,#ffd89c 0,transparent 26%),linear-gradient(#777aac,#ebc4b9)','radial-gradient(ellipse at 80% 15%,#8199bf 0,transparent 20%),linear-gradient(#142345,#687eaa)'];
   return {draw(game,time){if(document.hidden)return;if(currentLevel!==game.level){limbs=[];build(game);canvas.style.background=backgrounds[game.stage];}if(renderer.software&&time-lastDraw<1/18)return;lastDraw=time;
+    for(const danger of dangerObjects){danger.g.position.x=(danger.h.x+danger.h.w/2)/100;danger.g.visible=danger.g.position.x>game.camera/100-2&&danger.g.position.x<game.camera/100+12;if(danger.type==='flame'){danger.anim.scale.y=.92+Math.sin(game.elapsed*13+danger.h.phase)*.08;danger.anim.rotation.y=Math.sin(game.elapsed*7+danger.h.phase)*.13;}else danger.anim.rotation.z=-(danger.h.x-danger.h.baseX)/14;}
     for(const spark of sparks){spark.mesh.position.x=spark.x+Math.sin(time*15+spark.phase)*.012;spark.mesh.position.y=spark.y+Math.sin(time*12+spark.phase)*.02;spark.mesh.visible=Math.sin(time*18+spark.phase)>-.5;}
     const center=game.camera/100+4.8;camera.position.set(center+1.25,5.1,12);camera.lookAt(center,1.4,0);camera.updateProjectionMatrix();key.position.set(center-3,10,7);key.target.position.set(center,0,0);for(const g of scenery)g.visible=g.position.x>center-9&&g.position.x<center+11;for(const d of decks)d.g.visible=d.x+d.w/2>center-7&&d.x-d.w/2<center+7;
     for(const {g,c} of coins){g.visible=!c.taken&&c.x/100>center-7&&c.x/100<center+7;g.position.y=(460-c.y)/100+.025+Math.sin(time*3+c.x)*.025;g.rotation.y=time*2;}
