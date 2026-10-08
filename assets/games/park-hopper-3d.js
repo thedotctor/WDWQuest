@@ -18,7 +18,7 @@ export async function createParkView(canvas){
   function ball(p,x,y,z,r,m){return mesh(p,new T.SphereGeometry(r,renderer.software?8:20,renderer.software?5:12),m,x,y,z);}
   function cone(p,x,y,z,r,h,m){return mesh(p,new T.ConeGeometry(r,h,renderer.software?8:20),m,x,y,z);}
   function group(x=0,z=0){const g=new T.Group();g.position.set(x,0,z);world.add(g);return g;}
-  function sign(p,title,x,y,z,w=.95,h=.2){box(p,x,y,z,w,h,.055,mat('#223b5d',.2,.3));const c=document.createElement('canvas');c.width=384;c.height=96;const ctx=c.getContext('2d');ctx.fillStyle='#223b5d';ctx.fillRect(0,0,384,96);ctx.fillStyle='#fff0cb';ctx.font='700 35px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(title,192,48,360);const tex=new T.CanvasTexture(c);tex.colorSpace=T.SRGBColorSpace;mesh(p,new T.PlaneGeometry(w*.95,h*.9),new T.MeshBasicMaterial({map:tex,side:T.DoubleSide}),x,y,z+.03);}
+  function sign(p,title,x,y,z,w=.95,h=.2){box(p,x,y,z,w,h,.055,mat('#223b5d',.2,.3));const c=document.createElement('canvas');c.width=384;c.height=96;const ctx=c.getContext('2d');ctx.fillStyle='#223b5d';ctx.fillRect(0,0,384,96);ctx.fillStyle='#fff0cb';ctx.font='700 35px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(title,192,48,360);const tex=new T.CanvasTexture(c);tex.colorSpace=T.SRGBColorSpace;return mesh(p,new T.PlaneGeometry(w*.95,h*.9),new T.MeshBasicMaterial({map:tex,side:T.DoubleSide}),x,y,z+.03);}
   function shadow(p,x,z,rx,rz){const s=mesh(p,new T.CircleGeometry(1,20),new T.MeshBasicMaterial({color:'#162b48',transparent:true,opacity:.14,depthWrite:false}),x,.013,z);s.rotation.x=-Math.PI/2;s.scale.set(rx,rz,1);s.castShadow=false;}
   function tree(p,x,z,s=1){cyl(p,x,.4*s,z,.06*s,.8*s,mat('#8a705a'));ball(p,x,1.07*s,z,.38*s,mat('#69a994'));ball(p,x-.21*s,.85*s,z,.26*s,mat('#7fc0a1'));ball(p,x+.23*s,.88*s,z,.27*s,mat('#74b49b'));shadow(p,x,z,.45*s,.28*s);}
   function castle(p,x,z,scale=1){const g=new T.Group();g.position.set(x,0,z);g.scale.setScalar(scale);p.add(g);box(g,0,.55,0,1.2,1.1,.65,stone);box(g,0,1,0,.35,2,.4,stone);for(const [a,h] of [[-.66,1.25],[.66,1.25],[-.34,1.65],[.34,1.65],[0,2.25]]){cyl(g,a,h/2,0,.12,h,stone);cone(g,a,h+.18,0,.19,.4,blue);cyl(g,a,h+.51,0,.012,.26,gold);box(g,a+.075,h+.59,0,.15,.08,.018,gold);}box(g,0,.21,.35,.22,.42,.04,windowMat);for(const a of [-.4,0,.4])box(g,a,.69,.35,.085,.19,.04,windowMat);shadow(g,0,0,.85,.65);}
@@ -102,7 +102,17 @@ export async function createParkView(canvas){
         for(const x of [-.13,0,.13]){const stripe=box(g,x,.038,.175,.055,.025,.016,mat('#25354b'));stripe.rotation.z=-.45;}
       }shadow(g,0,0,.24,.18);
     }
-    for(const f of L.checkpoints){const g=group(f.x/100,-.33);cyl(g,0,.48,0,.02,.96,gold);const flag=box(g,.16,.85,0,.29,.19,.018,mat('#b4becd'));sign(g,'SAVE',0,1.13,0,.55,.16);flags.push({g,f,flag});}
+    const checkpointBlue=mat('#4bd6ee',.12,.28),checkpointGreen=mat('#91e8b2',.12,.28);checkpointBlue.emissive=new T.Color('#218ca8');checkpointBlue.emissiveIntensity=.23;checkpointGreen.emissive=new T.Color('#40996b');checkpointGreen.emissiveIntensity=.3;
+    for(const f of L.checkpoints){const g=group(f.x/100,-.33);
+      floor(g,.05,.025,.2,.64,.05,1.48,checkpointBlue);
+      cyl(g,0,.88,0,.038,1.76,cream);ball(g,0,1.82,0,.065,gold);
+      const flag=box(g,.37,1.57,.025,.72,.43,.035,checkpointBlue);box(g,.37,1.57,.049,.54,.026,.006,cream);box(g,.37,1.57,.05,.026,.29,.006,cream);
+      const label=sign(g,'CHECKPOINT',.18,2.02,.055,1.38,.3);
+      const ring=mesh(g,new T.TorusGeometry(.32,.035,6,24),checkpointBlue,.06,.08,.2);ring.rotation.x=-Math.PI/2;
+      const arrow=cone(g,.06,.39,.2,.11,.19,gold);arrow.rotation.z=Math.PI;
+      const glow=mesh(g,new T.CircleGeometry(.41,24),new T.MeshBasicMaterial({color:'#4bd6ee',transparent:true,opacity:.18,depthWrite:false}),.06,.057,.2);glow.rotation.x=-Math.PI/2;
+      flags.push({g,f,flag,label,ring,glow,blue:checkpointBlue,green:checkpointGreen,active:false});
+    }
     const scenes=['popcorn','carousel','characters','teacups','dole','coaster','pretzel','wheel','characters','icecream','fly','boat'];
     for(let i=0;i<14;i++){const x=i*4.1+.8,g=group(x,-2.6),kind=scenes[(i+game.stage*3)%scenes.length];
       if(['popcorn','dole','pretzel','icecream'].includes(kind))foodCart(g,kind);
@@ -130,7 +140,11 @@ export async function createParkView(canvas){
     }
     const center=game.camera/100+4.8;camera.position.set(center+1.25,5.1,12);camera.lookAt(center,1.4,0);camera.updateProjectionMatrix();key.position.set(center-3,10,7);key.target.position.set(center,0,0);for(const g of scenery)g.visible=g.position.x>center-9&&g.position.x<center+11;for(const d of decks)d.g.visible=d.x+d.w/2>center-7&&d.x-d.w/2<center+7;
     for(const {g,c} of coins){g.visible=!c.taken&&c.x/100>center-7&&c.x/100<center+7;g.position.y=(460-c.y)/100+.025+Math.sin(time*3+c.x)*.025;g.rotation.y=time*2;}
-    for(const {flag,f} of flags)flag.material=f.active?gold:mat('#b4becd');const p=game.player;pawn.position.set((p.x+p.w/2)/100,(460-p.y-p.h)/100,0);pawn.rotation.y=p.facing>0?Math.PI/3:-Math.PI/3;pawn.visible=!p.invincible||Math.floor(time*12)%2===0;const moving=p.onGround&&Math.abs(p.vx)>0;for(let i=0;i<limbs.length;i++)limbs[i].rotation.x=moving?Math.sin(time*14+(i%2)*Math.PI)*.48:!p.onGround?(i<2?.25:-.5):0;
+    for(const marker of flags){const {flag,f,ring,glow,label}=marker;flag.material=f.active?marker.green:marker.blue;ring.material=flag.material;flag.rotation.y=Math.sin(game.elapsed*2.4+f.x)*.08;
+      const pulse=f.active?1+Math.sin(game.elapsed*3)*.09:1;ring.scale.set(pulse,pulse,pulse);glow.material.color.set(f.active?'#91e8b2':'#4bd6ee');glow.material.opacity=f.active?.3:.18;
+      if(marker.active!==f.active){marker.active=f.active;const c=label.material.map.image,x=c.getContext('2d');x.fillStyle='#223b5d';x.fillRect(0,0,c.width,c.height);x.fillStyle=f.active?'#b5ffcf':'#fff0cb';x.font='700 35px system-ui';x.textAlign='center';x.textBaseline='middle';x.fillText(f.active?'CHECKPOINT SAVED':'CHECKPOINT',192,48,360);label.material.map.needsUpdate=true;}
+    }
+    const p=game.player;pawn.position.set((p.x+p.w/2)/100,(460-p.y-p.h)/100,0);pawn.rotation.y=p.facing>0?Math.PI/3:-Math.PI/3;pawn.visible=!p.invincible||Math.floor(time*12)%2===0;const moving=p.onGround&&Math.abs(p.vx)>0;for(let i=0;i<limbs.length;i++)limbs[i].rotation.x=moving?Math.sin(time*14+(i%2)*Math.PI)*.48:!p.onGround?(i<2?.25:-.5):0;
     renderer.render(scene,camera);
   },software:renderer.software};
 }
