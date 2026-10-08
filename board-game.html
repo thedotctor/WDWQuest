@@ -106,6 +106,35 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <style>
 .with-3d #currentPlayerCenter{zoom:1}.with-3d .turn-panel .actions{display:flex;flex-wrap:wrap;width:auto;gap:8px}.with-3d .turn-panel .actions button{width:auto;min-width:130px}.with-3d .turn-panel .dice-pair{display:flex;flex-direction:row;gap:14px}.with-3d .turn-panel{z-index:1}
 </style>
+
+<style>
+/* Keep dice beside the board with a reserved left rail. */
+.shell:has(.with-3d){max-width:none;padding-left:216px}
+.with-3d .turn-panel{position:fixed;left:12px;top:50%;transform:translateY(-50%);width:188px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;padding:12px}
+.with-3d .turn-panel .turn{font-size:15px}
+.with-3d .turn-panel .status{text-align:center;font-size:12px;width:100%;overflow-wrap:anywhere}
+.with-3d .turn-panel .actions{display:flex;flex-direction:column;width:100%;gap:7px}
+.with-3d .turn-panel .actions button{width:100%;min-width:0}
+.with-3d .turn-panel .dice-pair{gap:10px}
+.with-3d .turn-panel .dice{min-width:116px;padding:6px}
+.with-3d #currentPlayerCenter .player-card{flex-direction:column;align-items:center;gap:7px;padding:9px}
+.with-3d #currentPlayerCenter .name{white-space:normal;justify-content:center}
+.with-3d #currentPlayerCenter .cash{font-size:21px}
+.with-3d #currentPlayerCenter .stats-buttons{flex-direction:column;width:100%;margin:0;gap:6px}
+.with-3d #currentPlayerCenter .stats-buttons button{width:100%;font-size:11px;padding:8px 4px}
+@media(max-width:760px){
+.shell:has(.with-3d){padding:10px 10px 10px 150px}
+.with-3d .turn-panel{left:4px;width:136px;padding:7px;gap:7px}
+.with-3d .turn-panel .turn{font-size:12px}
+.with-3d .turn-panel .status{font-size:10px}
+.with-3d .turn-panel .actions button{font-size:11px;padding:8px 5px}
+.with-3d .turn-panel .dice{min-width:0;width:100%;min-height:58px;padding:4px}
+.with-3d .turn-panel .dice-pair{gap:8px}
+.with-3d .turn-panel .die-cube{--size:42px;--half:21px}
+.with-3d #currentPlayerCenter .player-card{padding:6px;font-size:11px}
+.with-3d #currentPlayerCenter .cash{font-size:18px}
+}
+</style>
 </head>
 <body>
 <div class="shell">
