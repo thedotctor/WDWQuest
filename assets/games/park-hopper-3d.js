@@ -26,7 +26,7 @@ export async function createParkView(canvas){
   let currentLevel=null,coins=[],flags=[],scenery=[],decks=[],sparks=[],pawn=null,limbs=[],lastDraw=-1,lightCenter=0;
   function disposeLevel(){world.traverse(o=>{if(o.isMesh){if(![...geos.values()].includes(o.geometry))o.geometry.dispose();const m=o.material;if(m.map){m.map.dispose();m.dispose();}else if(![...mats.values()].includes(m))m.dispose();}});world.clear();coins=[];flags=[];scenery=[];decks=[];sparks=[];}
   function build(game){disposeLevel();currentLevel=game.level;const L=game.level;
-    for(const p of L.platforms){const x=(p.x+p.w/2)/100,y=(460-p.y)/100,w=p.w/100,g=group();floor(g,x,y-.18,0,w,.36,1.85,mat(p.y===460?'#b6bac2':'#c2b28e',.18,.26));floor(g,x,y-.035,0,w+.025,.07,1.95,cream);box(g,x,y-.24,.94,w,.05,.04,gold);if(p.y<460){for(const a of [-w/2+.13,w/2-.13])box(g,x+a,y/2-.25,0,.11,y-.15,.7,mat('#87919e',.25,.3));}else for(let j=0;j<Math.floor(w/1.2);j++){floor(g,p.x/100+.7+j*1.2,y+.008,0,.75,.012,1.3,mat('#d8d6ce',.05,.35));}decks.push({g,x,w});}
+    for(const p of L.platforms){const x=(p.x+p.w/2)/100,y=(460-p.y)/100,w=p.w/100,g=group();floor(g,x,y-.22,0,w,.36,1.85,mat(p.y===460?'#b6bac2':'#c2b28e',.18,.26));floor(g,x,y-.035,0,w+.025,.07,1.95,cream);box(g,x,y-.24,.94,w,.05,.04,gold);if(p.y<460){for(const a of [-w/2+.13,w/2-.13])box(g,x+a,y/2-.25,-.65,.11,y-.15,.18,mat('#87919e',.25,.3));}else for(let j=0;j<Math.floor(w/1.2);j++){floor(g,p.x/100+.7+j*1.2,y+.008,0,.75,.012,1.3,mat('#d8d6ce',.05,.35));}decks.push({g,x,w});}
     for(const c of L.coins){const g=group(c.x/100,0);const m=cyl(g,0,0,0,.105,.037,gold);m.rotation.x=Math.PI/2;const inset=cyl(g,0,0,.023,.073,.007,mat('#ffe49d',.4,.2));inset.rotation.x=Math.PI/2;coins.push({g,c});}
     for(const h of L.hazards){const g=group((h.x+h.w/2)/100,0);
       if(h.type==='thorns'){
@@ -41,7 +41,7 @@ export async function createParkView(canvas){
         sign(g,'⚡',0,.2,.16,.19,.14);
         for(const x of [-.1,.1])cyl(g,x,.345,0,.025,.04,mat('#97adbd',.3,.3));
         const wire=new T.CatmullRomCurve3([new T.Vector3(-.1,.35,0),new T.Vector3(-.08,.405,0),new T.Vector3(.025,.37,0)]);mesh(g,new T.TubeGeometry(wire,5,.009,4,false),mat('#697e95'),0,0,0);
-        for(let j=0;j<4;j++){const bolt=box(g,0,.39,0,.018,.075,.016,mat('#b4edff',.15,.3));bolt.rotation.z=(j%2?1:-1)*.55;sparks.push({mesh:bolt,x:(j-1.5)*.053,y:.395+(j%2)*.025,phase:h.x+j});}
+        for(let j=0;j<4;j++){const bolt=box(g,0,.39,0,.025,.1,.018,mat('#b4edff',.15,.3));bolt.rotation.z=(j%2?1:-1)*.55;sparks.push({mesh:bolt,x:(j-1.5)*.053,y:.395+(j%2)*.025,phase:h.x+j});}
         for(const x of [-.13,0,.13]){const stripe=box(g,x,.038,.175,.055,.025,.016,mat('#25354b'));stripe.rotation.z=-.45;}
       }shadow(g,0,0,.24,.18);
     }
