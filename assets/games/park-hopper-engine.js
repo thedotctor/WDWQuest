@@ -1,12 +1,12 @@
 (function(root){
   'use strict';
-  const W=960,H=540,G=1300,SPEED=265,JUMP=540;
+  const W=960,H=540,G=1300,SPEED=265,JUMP=650;
   const themes=[{name:'Main Street Morning',sky:['#62b9eb','#e9f6f9'],grass:'#76bb8b',accent:'#eeab69'}, {name:'Adventure at Sunset',sky:['#776eb7','#ffc4a0'],grass:'#729b80',accent:'#ffd07d'}, {name:'Castle After Dark',sky:['#111b42','#4f659a'],grass:'#506f80',accent:'#a5d7ff'}];
   function level(index){
     const shift=index*45;
     const platforms=[{x:0,y:460,w:890,h:100},{x:1020,y:460,w:1150,h:100},{x:2300,y:460,w:1210,h:100},{x:3640,y:460,w:980,h:100},{x:4750,y:460,w:1250,h:100},
       {x:420,y:355,w:150,h:24},{x:650,y:305,w:140,h:24},{x:1240,y:350,w:175,h:24},{x:1510,y:280,w:160,h:24},{x:1820,y:345,w:145,h:24},{x:2500,y:340,w:170,h:24},{x:2770,y:265,w:180,h:24},{x:3170,y:335,w:160,h:24},{x:3910,y:335,w:190,h:24},{x:4250,y:275,w:175,h:24},{x:4910,y:350,w:170,h:24},{x:5220,y:280,w:180,h:24}];
-    const hazards=[650,1330,1870,2660,3270,3960,4440,5120].map((x,i)=>({x:x+shift,y:426,w:42,h:34,type:i%2?'thorns':'electric'}));
+    const hazards=[650,1330,1870,2660,3270,3960,4440,5120].map((x,i)=>{const type=['electric','thorns','flame','spikedBall'][i%4],height=type==='flame'?58:type==='spikedBall'?44:34;return {x:x+shift,baseX:x+shift,y:460-height,w:type==='spikedBall'?46:42,h:height,type,phase:i};});
     const coins=[]; for(let x=250;x<5650;x+=170){if(![890,2170,3510,4620].some(g=>x>g-25&&x<g+155))coins.push({x,y:408,taken:false});}
     platforms.filter(p=>p.y<460).forEach(p=>{for(let j=0;j<3;j++)coins.push({x:p.x+25+j*40,y:p.y-33,taken:false});});
     [955,2235,3575,4685].forEach(x=>coins.push({x,y:330,taken:false}));
@@ -25,7 +25,7 @@
     hurt(){const p=this.player;if(p.invincible>0||this.mode!=='playing')return;this.lives--;this.events.push('hurt');if(this.lives<=0){this.mode='gameOver';return;}Object.assign(p,{x:this.spawn.x,y:this.spawn.y,vx:0,vy:0,onGround:false,invincible:1.8});this.jumpBuffer=0;this.coyote=0;}
     update(dt,input={}){
       if(this.mode!=='playing')return;
-      dt=Math.max(0,Math.min(dt,.05));this.elapsed+=dt;
+      dt=Math.max(0,Math.min(dt,.05));this.elapsed+=dt;for(const h of this.level.hazards)if(h.type==='spikedBall')h.x=h.baseX+Math.sin(this.elapsed*1.9+h.phase)*32;
       const count=Math.max(1,Math.ceil(dt/(1/120)));for(let i=0;i<count&&this.mode==='playing';i++)this.step(dt/count,input);
     }
     step(dt,input){
