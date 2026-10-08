@@ -3067,11 +3067,36 @@ function fountainPlaza(){
  rideAnimations.push(time=>{jet.scale.y=.9+Math.sin(time*2)*.12;drops.forEach(({drop,curve,offset})=>drop.position.copy(curve.getPointAt((time*.6+offset)%1)));ripples.forEach((r,i)=>{const k=((time*.23+i/3)%1);r.scale.setScalar(1+k*2.45);});});
  for(const [x,color] of [[-5.95,'#e4b94b'],[-3.65,'#d46e82']]){const host=parkGuest(color,'#c58e6d',true);host.position.set(x,.3,4.9);host.scale.setScalar(1.15);world.add(host);rideAnimations.push(time=>{host.userData.arms[1].rotation.z=2.5+Math.sin(time*3+x)*.32;});}
 }
+const courtyardStops=[{x:4.6,z:1.05},{x:-4.8,z:.52},{x:-2.2,z:-4.3},{x:2,z:-4.3}];
+function courtyardSign(p,text,y,z,w){
+ const c=document.createElement('canvas');c.width=768;c.height=128;const ct=c.getContext('2d');ct.fillStyle='#233a59';ct.fillRect(0,0,768,128);ct.fillStyle='#fff5d8';ct.font='800 74px system-ui';ct.textAlign='center';ct.textBaseline='middle';ct.fillText(text,384,67,726);const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;return mesh(p,new THREE.PlaneGeometry(w,.28),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}),0,y,z,false);
+}
+function courtyardDestinations(){
+ for(const [x,z,name,color] of [[4.6,-.15,'PARK CAFE','#709b94'],[-4.8,-.4,'GIFT SHOP','#a184b8']]){
+  const shop=new THREE.Group();shop.position.set(x,.25,z);world.add(shop);
+  box(shop,0,0,0,2.05,1.05,1.35,porcelain,.07);box(shop,0,1.05,0,2.3,.18,1.58,material(color,.15,.3),.035);
+  box(shop,0,.03,.7,.37,.69,.035,glass,.012);windows(shop,-.65,.3,.7,.6,.45,1);windows(shop,.65,.3,.7,.6,.45,1);
+  for(let i=0;i<8;i++)box(shop,(i-3.5)*.28,.91,.85,.275,.07,.42,i%2?porcelain:material(color,.12,.3),.009);
+  courtyardSign(shop,name,1.2,.8,1.85);
+ }
+ const carousel=new THREE.Group();carousel.position.set(-2.2,.25,-5.5);world.add(carousel);cyl(carousel,0,0,0,1.1,.12,gold);cyl(carousel,0,.12,0,.075,1.65,porcelain);cone(carousel,0,1.78,0,1.2,.48,material('#c78693',.25,.24));ball(carousel,0,2.28,0,.09,gold);
+ const spin=new THREE.Group();carousel.add(spin);cyl(spin,0,.12,0,1.03,.05,material('#7396bf',.15,.25));
+ for(let i=0;i<6;i++){const a=i/6*Math.PI*2,x=Math.cos(a)*.72,z=Math.sin(a)*.72;cyl(spin,x,.15,z,.02,1.6,gold);box(spin,x,.57,z,.27,.13,.36,i%2?porcelain:material('#d1a8bb'),.055);}
+ rideAnimations.push(time=>{spin.rotation.y=time*.5;spin.children.forEach((m,i)=>{if(i>0&&i%2===0)m.position.y=.57+Math.sin(time*2+i)*.09;});});
+ const cups=attraction({x:2,z:-5.5,park:1,shape:'spinner',name:'Courtyard Cups'});cups.position.set(2,.25,-5.5);cups.scale.setScalar(1.25);
+ for(const stop of courtyardStops){const angle=Math.atan2(stop.z,stop.x),outer=new THREE.Vector3(Math.cos(angle)*7.27,.295,Math.sin(angle)*7.27),inner=new THREE.Vector3(stop.x,.295,stop.z);const route=new THREE.LineCurve3(outer,inner);mesh(world,new THREE.TubeGeometry(route,1,.07,4,false),material('#e2d4bb',.02,.45),0,0,0,false);}
+ for(const z of [.6,1.65]){const table=new THREE.Group();table.position.set(6.25,.27,z);world.add(table);cyl(table,0,0,0,.045,.43,gold);cyl(table,0,.43,0,.28,.045,porcelain);for(const sign of [-1,1]){box(table,sign*.45,0,0,.2,.27,.21,material('#709b94'),.035);box(table,sign*.45,.27,0,.24,.035,.24,porcelain,.01);}}
+}
 function strollingGuests(){
  const path=mesh(world,new THREE.RingGeometry(7.07,7.47,renderer.software?48:96),material('#dbcdb5',.02,.48),0,.285,0,false);path.rotation.x=-Math.PI/2;
  const palette=['#ecb84d','#628fcb','#d7748b','#78b3a0','#a088cc','#e69c63'];
- for(let i=0;i<12;i++){const guest=parkGuest(palette[i%palette.length],['#d5a17d','#a57552','#f0c3a4'][i%3],i%3===0);world.add(guest);const direction=i%3===0?-1:1,radius=7.25+(i%2)*.09,phase=i/12*Math.PI*2,speed=.075+(i%4)*.007;
- const update=time=>{const a=phase+time*speed*direction,stride=Math.sin(time*5.4+phase);guest.position.set(Math.cos(a)*radius,.29+Math.abs(stride)*.015,Math.sin(a)*radius);guest.rotation.y=-a+(direction>0?0:Math.PI);guest.userData.legs[0].rotation.x=stride*.45;guest.userData.legs[1].rotation.x=-stride*.45;guest.userData.arms[0].rotation.x=-stride*.3;guest.userData.arms[1].rotation.x=stride*.3;};update(0);rideAnimations.push(update);}
+ for(let i=0;i<12;i++){const guest=parkGuest(palette[i%palette.length],['#d5a17d','#a57552','#f0c3a4'][i%3],i%3===0);world.add(guest);const stop=courtyardStops[i%courtyardStops.length],a=Math.atan2(stop.z,stop.x),radius=7.25+(i%2)*.09,outer={x:Math.cos(a)*radius,z:Math.sin(a)*radius};
+ const update=time=>{const local=(time*(.85+(i%3)*.08)+i*3.1)%35;let x,z,angle,walking=true;
+ if(local<5){const f=local/5;x=outer.x+(stop.x-outer.x)*f;z=outer.z+(stop.z-outer.z)*f;angle=Math.atan2(stop.x-outer.x,stop.z-outer.z);}
+ else if(local<10){x=stop.x;z=stop.z;angle=Math.atan2(-stop.x,-stop.z);walking=false;}
+ else if(local<15){const f=(local-10)/5;x=stop.x+(outer.x-stop.x)*f;z=stop.z+(outer.z-stop.z)*f;angle=Math.atan2(outer.x-stop.x,outer.z-stop.z);}
+ else{const b=a+(local-15)/20*Math.PI*2;x=Math.cos(b)*radius;z=Math.sin(b)*radius;angle=-b;}
+ const stride=walking?Math.sin(time*5.4+i):0;guest.visible=!(local>6.5&&local<9.5);guest.position.set(x,.29+Math.abs(stride)*.015,z);guest.rotation.y=angle;guest.userData.legs[0].rotation.x=stride*.45;guest.userData.legs[1].rotation.x=-stride*.45;guest.userData.arms[0].rotation.x=-stride*.3;guest.userData.arms[1].rotation.x=stride*.3;};update(0);rideAnimations.push(update);}
 }
 function securityCheckpoint(){
  const p=new THREE.Group();p.position.set(5.2,.4,4.2);world.add(p);
@@ -3088,7 +3113,7 @@ function securityCheckpoint(){
 }
 
 for(const [id,text,x,z,mat] of [['pinKiosk','PIN TRADERS',-5.2,-3.3,gold],['magicPile','MAGIC & MISCHIEF',5.2,-3.3,material('#9582bb',.3)],['securitySpot','PARK SECURITY',5.2,4.2,blue]]){const m=box(world,x,.25,z,2.3,.12,1.6,mat,.04);m.userData.control=id;centerTargets.push(m);if(id==='securitySpot'){securityCheckpoint();plaque(world,text,x,.405,z+.66,2.1,.38,'#f2e7cc');}else plaque(world,text,x,.395,z,2.1,.8,'#f2e7cc');}
-fountainPlaza();strollingGuests();
+fountainPlaza();courtyardDestinations();strollingGuests();
 const castleTarget=box(world,0,.24,0,3.2,.02,2.6,material('#d8cbb0',.15,.3),.005);castleTarget.userData.control='castleFinaleBtn';centerTargets.push(castleTarget);
 const highlight=ring(world,spaces[0].x,.335,spaces[0].z,.4,.024,gold);
 const pawns=[],tweens=[],previous=[];
