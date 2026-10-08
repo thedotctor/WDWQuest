@@ -2,7 +2,7 @@ const loadThree=()=>import('https://cdn.jsdelivr.net/npm/three@0.170.0/build/thr
 export async function createTycoonView(canvas,map,root){
   const T=await loadThree(),motionPreference=window.matchMedia('(prefers-reduced-motion: reduce)');let renderer;
   try{renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});}catch(e){renderer=softwareRenderer(T,canvas);}
-  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setSize(800,680);renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setSize(800,680,false);renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;
   const scene=new T.Scene(),camera=new T.OrthographicCamera(-6.8,6.8,5.78,-5.78,.1,100),world=new T.Group();scene.add(world);
   scene.add(new T.HemisphereLight('#f0f5fc','#7c8799',1.65));
   const key=new T.DirectionalLight('#fff5e7',1.9);key.position.set(-3,10,7);key.castShadow=true;key.shadow.mapSize.set(1024,1024);Object.assign(key.shadow.camera,{left:-8,right:8,top:8,bottom:-8,near:.1,far:30});key.shadow.bias=-.0004;key.shadow.normalBias=.02;key.shadow.radius=4;scene.add(key);scene.add(key.target);
@@ -105,7 +105,7 @@ export async function createTycoonView(canvas,map,root){
     if(!map.querySelector('.selected'))highlight.visible=false;
   }
   new MutationObserver(rebuild).observe(map,{childList:true});rebuild();
-  function cameraUpdate(){const w=canvas.clientWidth||800,h=canvas.clientHeight||680,aspect=w/h,span=6.65/zoom;camera.left=-span*aspect;camera.right=span*aspect;camera.top=span;camera.bottom=-span;camera.position.set(Math.sin(angle)*14,13,Math.cos(angle)*14);camera.lookAt(0,0,0);camera.updateProjectionMatrix();camera.updateMatrixWorld();renderer.setSize(w,h);}
+  function cameraUpdate(){const w=canvas.clientWidth||800,h=canvas.clientHeight||680,aspect=w/h,span=6.65/zoom;camera.left=-span*aspect;camera.right=span*aspect;camera.top=span;camera.bottom=-span;camera.position.set(Math.sin(angle)*14,13,Math.cos(angle)*14);camera.lookAt(0,0,0);camera.updateProjectionMatrix();camera.updateMatrixWorld();renderer.setSize(w,h,false);}
   new ResizeObserver(cameraUpdate).observe(canvas);cameraUpdate();
   canvas.addEventListener('click',e=>{const rect=canvas.getBoundingClientRect();pointer.set((e.clientX-rect.left)/rect.width*2-1,1-(e.clientY-rect.top)/rect.height*2);ray.setFromCamera(pointer,camera);const hits=ray.intersectObjects(tileGroups,true);if(!hits.length)return;let g=hits[0].object;while(g&&g.userData.lot===undefined)g=g.parent;if(g)map.querySelector('[data-lot="'+g.userData.lot+'"]').click();});
   const controls=document.createElement('div');controls.className='qt-view-controls';controls.innerHTML='<button data-view="left" aria-label="Rotate park left">↶</button><button data-view="right" aria-label="Rotate park right">↷</button><button data-view="in" aria-label="Zoom in">＋</button><button data-view="out" aria-label="Zoom out">−</button><button data-view="reset">Reset view</button><button data-view="flat" aria-pressed="false">Flat view</button>';canvas.parentNode.append(controls);
