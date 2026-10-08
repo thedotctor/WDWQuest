@@ -24,7 +24,7 @@
 <script>
 (()=>{'use strict';
 const game=new ParkPlatformer(),canvas=document.getElementById('scene'),ctx=canvas.getContext('2d'),keys=new Set(),touch={left:false,right:false},$=id=>document.getElementById(id);let best=0,last=0,clock=0,lastMode='',lastHud='',view3d=null;
-import('./assets/games/park-hopper-3d.js?v=4').then(m=>m.createParkView($('scene3d'))).then(v=>{view3d=v;$('scene3d').hidden=false;canvas.parentElement.classList.add('has-3d');}).catch(e=>console.error('Park Hopper 3D unavailable',e));
+import('./assets/games/park-hopper-3d.js?v=5').then(m=>m.createParkView($('scene3d'))).then(v=>{view3d=v;$('scene3d').hidden=false;canvas.parentElement.classList.add('has-3d');}).catch(e=>console.error('Park Hopper 3D unavailable',e));
 try{best=Number(localStorage.getItem('wdwquest-park-hopper-best'))||0;}catch(e){}$('best').textContent='$'+best;
 const rand=n=>{const v=Math.sin(n*91.33)*14537.19;return v-Math.floor(v);};
 function rect(x,y,w,h,color,r=0){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
