@@ -106,7 +106,7 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <style>
 .with-3d #currentPlayerCenter{zoom:1}.with-3d .turn-panel .actions{display:flex;flex-wrap:wrap;width:auto;gap:8px}.with-3d .turn-panel .actions button{width:auto;min-width:130px}.with-3d .turn-panel .dice-pair{display:flex;flex-direction:row;gap:14px}.with-3d .turn-panel{z-index:1}
 </style>
-<style>.security-demo-controls{margin-bottom:16px}.security-demo-controls h1{margin:0 0 8px}.security-demo-controls p{color:var(--muted)}.security-demo-controls .actions{display:flex;flex-wrap:wrap;gap:8px}.turn-panel>.actions,.turn-panel>#dice{display:none}</style>
+<style>.security-demo-controls{margin-bottom:16px}.security-demo-controls h1{margin:0 0 8px}.security-demo-controls p{color:var(--muted)}.security-demo-controls .actions{display:flex;flex-wrap:wrap;gap:8px}#rollBtn,#rulesBtn,#dice{display:none!important}</style>
 </head>
 <body>
 <div class="shell">
@@ -3245,9 +3245,10 @@ const oldDice=animateDice;animateDice=async function(values){
  currentPlayer=0;owners={};gameOver=false;turnLocked=false;movingPlayer=-1;pawnArrivalClock=0;notePawnArrival(players[0]);questionDecks={};lastQuestionsByBadge={};resetMagicDeck();resetPins();renderGame();
  const bar=document.createElement('section');bar.className='panel security-demo-controls';bar.innerHTML='<h1>3D Security Test</h1><p>This separate test uses the real Magic &amp; Mischief card, 3D escort, missed-turn rule, and return to the original space.</p><div class="actions"><button class="primary" id="demoDraw" disabled>Draw Security Card</button><button class="secondary" id="demoMiss" disabled>Show Missed Turn</button><button class="secondary" id="demoReturn" disabled>Return to Board</button><button class="secondary" id="demoReplay">Replay Test</button></div><p id="demoProgress" aria-live="polite">Loading the 3D board…</p></section>';app.before(bar);
  const progress=bar.querySelector('#demoProgress'),draw=bar.querySelector('#demoDraw'),miss=bar.querySelector('#demoMiss'),back=bar.querySelector('#demoReturn');
- const ready=()=>{if(!document.querySelector('#board3dHost'))return false;draw.disabled=false;progress.textContent='Ready. Draw the card, then choose Draw a Card and Apply Card to watch the trip to Security.';return true;};
+ const focusCourtyard=()=>{const b=document.querySelector('[data-camera="board"]'),z=document.getElementById('board3dZoom');if(b)b.click();if(z){z.value='190';z.dispatchEvent(new Event('input',{bubbles:true}));}};
+ const ready=()=>{if(!document.querySelector('#board3dHost'))return false;draw.disabled=false;focusCourtyard();progress.textContent='Ready. Draw the card, then choose Draw a Card and Apply Card to watch the trip to Security.';return true;};
  const observer=new MutationObserver(()=>{if(ready())observer.disconnect();});observer.observe(app,{childList:true,subtree:true});if(ready())observer.disconnect();
- const originalApply=applyMagicCard;applyMagicCard=async function(card){await originalApply(card);if(card.effect==='security'){draw.disabled=true;miss.disabled=false;progress.textContent='The pawn is at Security. The original playing space is saved. Next, show the missed turn.';}};
+ const originalApply=applyMagicCard;applyMagicCard=async function(card){await originalApply(card);if(card.effect==='security'){focusCourtyard();draw.disabled=true;miss.disabled=false;progress.textContent='The pawn is at Security. The original playing space is saved. Next, show the missed turn.';}};
  draw.addEventListener('click',()=>{draw.disabled=true;magicDeck=[securityIndex];currentPlayer=0;turnLocked=true;renderAll();showMagicDraw(magicIndex);progress.textContent='Apply the Security card to start the 3D escort.';});
  miss.addEventListener('click',()=>{miss.disabled=true;advanceTurn('Next Player ended the demonstration turn.');back.disabled=false;progress.textContent='Security Demo missed one turn. Choose Return to Board to leave the checkpoint.';});
  back.addEventListener('click',async()=>{back.disabled=true;advanceTurn('Next Player ended the following turn.');leaveSecurity(players[0]);renderAll();setStatus('Security Demo returned to <strong>'+esc(SPACES[magicIndex].name)+'</strong>.');await wait(900);progress.textContent='Returned to the original space. The missed turn is complete. Replay Test starts again.';});
