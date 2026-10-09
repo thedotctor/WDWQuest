@@ -3832,10 +3832,21 @@ function remyKitchenSpot(p){
   ball(rat,side*.021,.125,-.094,.006,dark,8);
  }
  const snout=ball(rat,0,.101,-.101,.025,gray,12);snout.scale.set(.7,.6,1.15);ball(rat,0,.108,-.127,.008,pink,8);
- const tailCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(0,.056,.073),new THREE.Vector3(.025,.035,.12),new THREE.Vector3(-.015,.029,.16),new THREE.Vector3(.035,.034,.18)]);mesh(rat,new THREE.TubeGeometry(tailCurve,16,.005,5,false),pink,0,0,0);
+ const tailCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(0,.056,.073),new THREE.Vector3(.025,.035,.12),new THREE.Vector3(-.015,.029,.16),new THREE.Vector3(.035,.034,.18)]);const tail=mesh(rat,new THREE.TubeGeometry(tailCurve,16,.005,5,false),pink,0,0,0);
  cyl(rat,0,.153,-.054,.024,.031,white,.028,12);for(const x of [-.018,0,.018])ball(rat,x,.188,-.054,.021,white,10);
  const feet=[];for(const side of [-1,1])for(const z of [-.035,.046]){const foot=ball(rat,side*.038,.029,z,.013,pink,8);foot.scale.set(.6,.5,1.3);feet.push(foot);}
- const scurry=time=>{const a=time*Math.PI*2/9;rat.position.set(Math.sin(a)*.026,.006+Math.abs(Math.sin(time*10))*.003,-.25+Math.cos(a)*.53);rat.rotation.y=Math.atan2(-Math.cos(a)*.026,Math.sin(a)*.53);feet.forEach((f,i)=>{f.position.y=.029+Math.max(0,Math.sin(time*10+i*Math.PI/2))*.009;});};
+ // Short, unequal dashes and sniffing pauses replace the boat-like oval motion.
+ const stops=[{x:0,z:.49,run:1.05,rest:.65},{x:-.05,z:.2,run:.75,rest:.3},{x:.055,z:-.19,run:.9,rest:.8},{x:-.04,z:-.55,run:.8,rest:.4},{x:0,z:-.89,run:1.15,rest:.7},{x:.055,z:-.49,run:.65,rest:.25},{x:-.055,z:-.09,run:.95,rest:.6},{x:.04,z:.25,run:.85,rest:.85}];
+ const cycle=stops.reduce((total,s)=>total+s.run+s.rest,0);
+ const scurry=time=>{
+  let elapsed=time%cycle,index=0;
+  while(elapsed>=stops[index].run+stops[index].rest){elapsed-=stops[index].run+stops[index].rest;index++;}
+  const from=stops[index],to=stops[(index+1)%stops.length],moving=elapsed<from.run,t=Math.min(elapsed/from.run,1),ease=t*t*(3-2*t),pause=Math.max(0,elapsed-from.run);
+  rat.position.set(from.x+(to.x-from.x)*ease,.006+(moving?Math.abs(Math.sin(time*18))*.007:Math.sin(pause*5)*.002),from.z+(to.z-from.z)*ease);
+  rat.rotation.y=Math.atan2(-(to.x-from.x),-(to.z-from.z))+(moving?Math.sin(time*9)*.025:Math.sin(pause*5)*.12);
+  feet.forEach((f,i)=>{f.position.y=.029+(moving?Math.max(0,Math.sin(time*18+i*Math.PI/2))*.014:0);});
+  tail.rotation.y=Math.sin(time*(moving?6:2))*.12;head.position.y=.116+(moving?0:Math.sin(pause*6)*.005);
+ };
  scurry(0);rideAnimations.push(scurry);
 }
 // A fast test car follows a banked oval road with safety barriers.
