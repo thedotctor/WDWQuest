@@ -214,6 +214,42 @@ class BoardGameTests(unittest.TestCase):
         self.page.locator('[data-camera="board"]').click()
         self.page.wait_for_function("Math.abs(cameraSample.x) < .1 && Math.abs(cameraSample.z) < .1")
 
+    def test_all_twelve_tokens_use_solid_3d_pawns(self):
+        self.page.evaluate("""async () => {
+            const THREE=await import('./assets/vendor/three.module.js');
+            window.reviewThree=THREE;
+            const add=THREE.Object3D.prototype.add;
+            THREE.Object3D.prototype.add=function(...objects){
+                if(this.isScene)window.pawnReviewScene=this;
+                return add.apply(this,objects);
+            };
+        }""")
+        self.start_game()
+        seen=[]
+        for start,count in [(0,8),(8,4)]:
+            self.page.evaluate("""([start,count]) => {
+                const template=JSON.parse(JSON.stringify(players[0]));
+                players=TOKEN_OPTIONS.slice(start,start+count).map((token,i)=>({...JSON.parse(JSON.stringify(template)),name:token.name,token:token.id,startingPin:PIN_DESIGNS[i].id,pos:i+1}));
+                currentPlayer=0;renderGame();
+            }""", [start,count])
+            self.page.wait_for_function("""count => {
+                let found=0;pawnReviewScene.traverse(o=>{if(o.userData.tokenId)found++;});
+                return found===count;
+            }""",arg=count,timeout=30000)
+            results=self.page.evaluate("""() => {
+                const results=[];pawnReviewScene.traverse(pawn=>{
+                    if(!pawn.userData.tokenId)return;
+                    let meshes=0,billboards=0;pawn.traverse(o=>{if(o.isMesh){meshes++;if(o.geometry.type==='PlaneGeometry')billboards++;}});
+                    results.push({id:pawn.userData.tokenId,meshes,billboards});
+                });return results;
+            }""")
+            self.assertEqual(len(results),count)
+            for pawn in results:
+                self.assertGreaterEqual(pawn['meshes'],7,pawn['id'])
+                self.assertEqual(pawn['billboards'],0,pawn['id'])
+                seen.append(pawn['id'])
+        self.assertEqual(len(set(seen)),12)
+
     def test_complete_board_scenes_fit_the_original_spaces(self):
         self.page.evaluate("""async () => {
             const THREE = await import('./assets/vendor/three.module.js');
