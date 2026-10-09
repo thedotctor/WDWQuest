@@ -3937,6 +3937,8 @@ function soarinSpot(p){
  const screenMaterial=new THREE.MeshBasicMaterial({map:scenes[0],side:THREE.DoubleSide});const screen=mesh(p,new THREE.PlaneGeometry(.8,.6),screenMaterial,0,.715,-.855,false);screen.name='Soarin changing landscape screen';
  for(const x of [-.37,.37])box(p,x,.055,-.1,.025,.98,.025,steel,.003);box(p,0,1.035,-.1,.8,.028,.04,steel,.003);
  const flying=new THREE.Group();flying.name='Soarin flying gondola';flying.position.set(0,1.025,-.1);p.add(flying);
+ // The hanger carriage lifts along the uprights while the suspended seats bank.
+ box(flying,0,-.012,0,.76,.024,.045,steel,.003);
  for(const x of [-.275,.275])cyl(flying,x,-.58,0,.009,.58,steel,.009,8);
  box(flying,0,-.6,0,.6,.035,.16,steel,.004);
  for(const x of [-.18,0,.18]){
@@ -3945,7 +3947,12 @@ function soarinSpot(p){
   for(const side of [-1,1])box(flying,x+side*.022,-.637,-.055,.018,.095,.022,dark,.003);
   box(flying,x,-.515,-.074,.12,.014,.012,dark,.002);
  }
- let lastScene=-1;const flight=time=>{flying.rotation.set(Math.sin(time*.7)*.08,0,Math.sin(time*.55)*.07);const scene=Math.floor(time/6)%scenes.length;if(scene!==lastScene){screenMaterial.map=scenes[scene];screenMaterial.needsUpdate=true;lastScene=scene;}};
+ let lastScene=-1;const flight=time=>{
+  // Slow climbs, forward swoops, and broad alternating banks keep the flight graceful.
+  flying.position.y=.965+Math.sin(time*.48)*.06;
+  flying.rotation.set(Math.sin(time*.62)*.28,Math.sin(time*.39)*.055,Math.sin(time*.48)*.2);
+  const scene=Math.floor(time/6)%scenes.length;if(scene!==lastScene){screenMaterial.map=scenes[scene];screenMaterial.needsUpdate=true;lastScene=scene;}
+ };
  flight(0);rideAnimations.push(flight);plaque(p,'SOARIN',0,.058,.5,.8,.17,'#d3e7ed');
 }
 function attraction(t){const p=new THREE.Group();p.position.set(t.x,.29,t.z-.17);world.add(p);const cream=material('#e6d6c1',.09,.3),mauve=material('#9c82b5',.13,.24),color=material(colors[t.park],.12,.23);
