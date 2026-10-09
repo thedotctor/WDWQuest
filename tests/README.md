@@ -27,3 +27,7 @@ Publishing: requested board updates now go directly to the main `board-game.html
 and its assets on `main`. The arcade links to that page. The separate
 `previews/board-v1/` copy is retained as a historical preview; new changes do not
 need to be published there first.
+
+The root `.nojekyll` keeps GitHub Pages from running Jekyll on this static site.
+The board preloads its local Three.js module while the setup screen is loading.
+Versioned board links bypass a cached page but do not bypass the Pages deployment queue.
