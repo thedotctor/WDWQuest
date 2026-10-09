@@ -3235,6 +3235,44 @@ function magicDeckSpot(p){
  };
  shuffle(0);rideAnimations.push(shuffle);
 }
+// A staffed pin-trading kiosk, sized to the existing property tile.
+function pinTradingSpot(p,park){
+ p.name='Pin Traders stand';
+ const ivory=material('#fff0d2',.03,.6),navy=material('#293c56',.08,.55),wood=material('#b88e62',.02,.7),uniform=material('#6bb6aa',.02,.6),skin=material('#dfad85',.02,.65),hair=material('#49382f',.02,.8),parkColor=material(colors[park],.08,.5);
+ box(p,0,0,0,.94,.04,2.2,material('#cbbfa8',.02,.75),.008);
+ // Counter, brass trim, and the park-colored striped canopy.
+ box(p,0,.045,-.04,.77,.42,.3,wood,.012);box(p,0,.47,-.04,.83,.045,.36,navy,.008);
+ box(p,0,.115,.117,.64,.24,.012,navy,.003);box(p,0,.105,.13,.67,.014,.015,gold,.002);
+ for(const x of [-.37,.37]){cyl(p,x,.05,-.85,.018,1.29,ivory,.018,10);cyl(p,x,.05,-.43,.018,1.29,ivory,.018,10);}
+ for(let i=0;i<10;i++){
+  const awning=box(p,(i-4.5)*.083,1.34,-.65,.082,.035,.44,i%2?ivory:parkColor,.003);awning.rotation.x=.08;
+  box(p,(i-4.5)*.083,1.255,-.42,.082,.09,.025,i%2?ivory:parkColor,.003);
+ }
+ // A readable hanging shop sign above the Cast Member's head.
+ const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128;const ctx=canvas.getContext('2d');ctx.fillStyle='#293c56';ctx.fillRect(0,0,512,128);ctx.strokeStyle='#e3c87e';ctx.lineWidth=7;ctx.strokeRect(5,5,502,118);ctx.fillStyle='#fff0d2';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 48px serif';ctx.fillText('PIN TRADING',256,65);
+ const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
+ mesh(p,new THREE.PlaneGeometry(.63,.15),new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide}),0,1.18,-.397,false);
+ // Friendly uniformed Cast Member behind the counter.
+ const staff=new THREE.Group();staff.name='Pin trading Cast Member';staff.position.set(0,.045,-.3);p.add(staff);
+ for(const x of [-.063,.063]){box(staff,x,0,.015,.09,.045,.14,navy,.008);box(staff,x,.045,0,.072,.35,.09,ivory,.01);}
+ box(staff,0,.39,0,.245,.42,.18,uniform,.025);box(staff,0,.39,.105,.24,.025,.015,navy,.002);
+ cyl(staff,0,.81,0,.038,.075,skin,.038,10);ball(staff,0,.98,0,.115,skin,16);
+ const cap=ball(staff,0,1.045,-.025,.105,hair,16);cap.scale.y=.6;
+ for(const x of [-.037,.037])ball(staff,x,.993,.108,.011,navy,8);
+ const smile=box(staff,0,.935,.108,.033,.006,.006,hair,.001);smile.rotation.z=.05;
+ for(const side of [-1,1]){const arm=new THREE.Group();arm.position.set(side*.14,.76,0);staff.add(arm);box(arm,0,-.19,0,.065,.2,.075,uniform,.012);box(arm,0,-.28,0,.052,.1,.06,skin,.01);ball(arm,0,-.29,.012,.034,skin,10);arm.rotation.z=side*.17;}
+ // Dark lanyard, oval name badge, and six enamel pins on the uniform.
+ for(const side of [-1,1]){const strap=box(staff,side*.035,.56,.108,.013,.23,.008,navy,.002);strap.rotation.z=side*-.14;}
+ const badge=ball(staff,.073,.748,.11,.027,ivory,10);badge.scale.set(1.5,.65,.2);
+ const pinColors=['#ec646f','#68c7ee','#edc44f','#bb83dd','#77c789','#f09850'];
+ function pin(parent,x,y,z,index,r=.021){
+  const rim=ball(parent,x,y,z,r,gold,10);rim.scale.z=.28;
+  const enamel=ball(parent,x,y,z+.008,r*.76,material(pinColors[index],.2,.4),10);enamel.scale.z=.26;
+ }
+ for(let i=0;i<6;i++)pin(staff,(i%2?1:-1)*.038,.67-Math.floor(i/2)*.065,.124,i);
+ // More pins on the counter display make the kiosk recognizable at a distance.
+ for(let i=0;i<6;i++)pin(p,(i-2.5)*.095,.245,.135,i,.033);
+}
 function attraction(t){const p=new THREE.Group();p.position.set(t.x,.29,t.z-.17);world.add(p);const cream=material('#e6d6c1',.09,.3),mauve=material('#9c82b5',.13,.24),color=material(colors[t.park],.12,.23);
 if(t.shape==='monorail'){monorailSpot(p);}
 else if(t.shape==='mainstreet'){mainStreetSpot(p);}
@@ -3251,7 +3289,7 @@ else if(t.shape==='food'){box(p,0,0,0,.8,.43,.58,cream);box(p,0,.43,0,.94,.12,.7
 else if(t.shape==='station'){box(p,0,0,0,1.25,.33,.38,porcelain,.055);windows(p,0,.15,.21,1.04,.105,5);box(p,0,.34,0,1.38,.12,.55,blue,.05);cyl(p,-.48,-.03,.2,.06,.05,gold);cyl(p,.48,-.03,.2,.06,.05,gold);}
 else if(t.shape==='building'){box(p,0,0,0,.98,.56,.66,porcelain);box(p,0,.56,0,1.06,.09,.74,color);windows(p,0,.22,.34,.85,.18,4);box(p,0,.65,0,.35,.3,.35,trim);}
 else if(t.shape==='show'){box(p,0,0,0,.86,.58,.45,mauve);ring(p,0,.7,0,.25,.035,gold);ball(p,0,.98,0,.12,gold);}
-else if(t.shape==='pin'){cyl(p,0,0,0,.35,.06,gold);cyl(p,0,.06,0,.065,.25,gold);const gem=mesh(p,new THREE.OctahedronGeometry(.25),material('#b7a1db',.42,.16),0,.53,0);gem.rotation.z=Math.PI/5;}
+else if(t.shape==='pin'){pinTradingSpot(p,t.park);}
 else if(t.shape==='trivia'){
  p.name=t.name;
  const mark=new THREE.Group();p.add(mark);mark.position.z=-.35;
@@ -3306,8 +3344,8 @@ function outsideSpaceLabel(space,index,r){
 
 SPACES.forEach((s,i)=>{const r=spaceLayout(i),tile=box(world,r.x,.15,r.z,r.w-.035,.14,r.d-.035,porcelain,.025);tile.userData.space=i;tileMeshes.push(tile);spaces.push(r);
 const banner=box(world,r.x,.299,r.z,r.w*.86,.018,r.d*.86,material(colors[r.side],.12,.25),.005);banner.visible=true;
-const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia','mansion','cards'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
-if(['monorail','mainstreet','trivia','mansion','cards'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
+const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia','mansion','cards','pin'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
+if(['monorail','mainstreet','trivia','mansion','cards','pin'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
 if(r.side%2)model.rotation.y=Math.PI/2;
 outsideSpaceLabel(s,i,r);
 const flag=cyl(world,r.x,.307,r.z,.095,.07,gold);flag.visible=false;ownerFlags.push(flag);
@@ -3475,7 +3513,7 @@ const rotations={1:[0,0,0],2:[-Math.PI/2,0,0],3:[0,0,Math.PI/2],4:[0,0,-Math.PI/
 let diceValues=[1,1],diceStart=0,raf=0,last=0,width=0,height=0,selected=players[currentPlayer].pos,angle=.24,targetAngle=.24,mode='free',zoom=1,distance=44,targetDistance=44,look=new THREE.Vector3(),target=new THREE.Vector3(),drag=null,flat=false,showSpaceNames=false,dragMode='pan',wasMoving=false,autoFollow=false,followIndex=currentPlayer;
 const pointers=new Map();let pinch=null;
 const ray=new THREE.Raycaster(),resizeObserver=new ResizeObserver(resize);
-function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(['trivia','magic'].includes(SPACES[player.pos].type)){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/haunted mansion/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.91)};if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
+function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(['trivia','magic','pin'].includes(SPACES[player.pos].type)){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/haunted mansion/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.91)};if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
 function info(index){selected=index;const s=SPACES[index],owner=owners[index],r=spaces[index];highlight.position.set(r.x,.34,r.z);const price=s.type==='property'?' · '+(owner===undefined?'Buy $'+s.cost:'Rent $'+rentForSpace(index)):'';document.getElementById('board3dInfo').style.setProperty('--park-color',colors[r.side]);document.getElementById('board3dInfo').innerHTML='<strong>'+esc(s.icon+' '+s.name)+'</strong><span>Space '+(index+1)+' / 80 · '+esc(s.park||['Magic Kingdom','EPCOT','Hollywood Studios','Animal Kingdom'][r.side])+price+(owner===undefined?'': ' · Owned by '+esc(players[owner].name))+'</span><div class="space-browser"><button class="secondary" data-space-step="-1" aria-label="Previous board space">←</button><button class="secondary" data-space-step="1" aria-label="Next board space">→</button></div>';drawRequest();}
 function updateCameraButtons(){host.querySelectorAll('[data-camera="free"],[data-camera="board"],[data-camera="follow"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.camera===mode)));}
 function freeCamera(){mode='free';autoFollow=false;updateCameraButtons();}
