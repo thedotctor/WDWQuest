@@ -3131,6 +3131,53 @@ function mainStreetSpot(p){
  for(const side of [-1,1])for(const z of [-.98,.99]){cyl(p,side*.205,.09,z,.012,.27,roof,.012,8);ball(p,side*.205,.39,z,.032,ivory,8);}
  for(let j=0;j<4;j++)box(p,0,.076,.78+j*.065,.31,.006,.03,ivory,.001);
 }
+// Liberty Square's red-brick Gothic Revival mansion, within one property tile.
+function hauntedMansionSpot(p){
+ p.name='Haunted Mansion';
+ const stone=material('#c3b7a1',.02,.75),roof=material('#384f46',.08,.7),dark=material('#142a2e',.16,.45),green=material('#58847a',.15,.45),lawn=material('#66765b',.01,.8);
+ const canvas=document.createElement('canvas');canvas.width=128;canvas.height=128;const ctx=canvas.getContext('2d');ctx.fillStyle='#8f5143';ctx.fillRect(0,0,128,128);
+ for(let row=0;row<8;row++)for(let col=-1;col<5;col++){ctx.fillStyle=(row+col)%3===0?'#ab6852':'#9a5848';ctx.fillRect(col*32+(row%2)*16+1,row*16+1,30,14);}
+ const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
+ const brick=new THREE.MeshStandardMaterial({color:'#ffffff',map:texture,roughness:.85});
+ box(p,0,0,0,.94,.045,2.2,lawn,.006);box(p,0,.046,.7,.34,.014,.7,stone,.002);
+ const house=new THREE.Group();p.add(house);house.position.z=-.36;
+ box(house,0,.06,0,.76,.74,.86,brick,.005);box(house,0,.025,0,.8,.065,.9,stone,.004);
+ // Sloped slate roof and paired stepped Dutch Gothic gables.
+ for(const side of [-1,1]){const slope=box(house,side*.19,.83,0,.44,.025,.92,roof,.002);slope.rotation.z=side*-.53;}
+ function gable(x,z){
+  const sh=new THREE.Shape();sh.moveTo(-.18,0);sh.lineTo(-.18,.1);sh.lineTo(-.13,.1);sh.lineTo(-.13,.19);sh.lineTo(-.085,.19);sh.lineTo(-.085,.28);sh.lineTo(-.04,.28);sh.lineTo(-.04,.35);sh.lineTo(.04,.35);sh.lineTo(.04,.28);sh.lineTo(.085,.28);sh.lineTo(.085,.19);sh.lineTo(.13,.19);sh.lineTo(.13,.1);sh.lineTo(.18,.1);sh.lineTo(.18,0);sh.closePath();
+  mesh(house,new THREE.ExtrudeGeometry(sh,{depth:.045,bevelEnabled:false}),brick,x,.78,z);
+  for(const [w,y] of [[.37,.095],[.27,.185],[.18,.275],[.095,.345]])box(house,x,.78+y,z+.027,w,.018,.075,stone,.002);
+  box(house,x,.835,z+.052,.055,.12,.012,dark,.002);
+ }
+ for(const x of [-.2,.2]){gable(x,.44);gable(x,-.48);}
+ // Stone lintels, tall shadowed windows, and divided panes.
+ for(const z of [-.444,.448])for(const x of [-.27,0,.27])for(const y of [.19,.51]){
+  box(house,x,y,z,.13,.205,.016,stone,.004);box(house,x,y+.018,z+Math.sign(z)*.012,.092,.163,.013,dark,.003);
+  box(house,x,y+.018,z+Math.sign(z)*.024,.009,.163,.007,stone,.001);box(house,x,y+.096,z+Math.sign(z)*.024,.092,.008,.007,stone,.001);
+ }
+ for(const side of [-1,1])for(const z of [-.25,.04,.3])for(const y of [.21,.53]){
+  box(house,side*.387,y,z,.015,.18,.11,stone,.003);box(house,side*.398,y+.015,z,.009,.15,.08,dark,.002);box(house,side*.404,y+.015,z,.006,.15,.008,stone,.001);
+ }
+ for(const [x,z,h] of [[-.28,-.24,.46],[.27,.16,.52],[.05,-.32,.38]]){
+  box(house,x,.88,z,.085,h,.09,brick,.002);box(house,x,.88+h,z,.12,.025,.12,stone,.003);
+  for(const dx of [-.025,.025])cyl(house,x+dx,.91+h,z,.016,.07,dark,.016,8);
+ }
+ // The signature green-framed glass conservatory at the front.
+ box(p,0,.07,.36,.7,.32,.38,green,.004);
+ for(const x of [-.28,-.14,0,.14,.28]){box(p,x,.12,.559,.105,.22,.01,dark,.002);box(p,x,.12,.568,.007,.22,.007,green,.001);}
+ for(const x of [-.354,.354])for(const z of [.25,.4])box(p,x,.12,z,.008,.22,.105,dark,.002);
+ for(const side of [-1,1]){const slope=box(p,side*.18,.405,.36,.39,.014,.43,green,.002);slope.rotation.z=side*-.38;
+  for(const z of [.19,.27,.35,.43,.51]){const rib=box(p,side*.18,.421,z,.39,.012,.008,stone,.001);rib.rotation.z=side*-.38;}}
+ box(p,0,.44,.36,.017,.04,.44,green,.002);
+ // Low iron entrance fence, stone gateposts, and tiny grave markers.
+ for(const side of [-1,1]){
+  box(p,side*.38,.05,.76,.07,.24,.07,stone,.004);ball(p,side*.38,.32,.76,.04,stone,8);
+  for(let j=0;j<4;j++)cyl(p,side*(.22+j*.055),.06,.76,.007,.16,dark,.007,6);
+  box(p,side*.3,.15,.76,.2,.012,.012,dark,.001);
+  for(const z of [-.9,.52]){box(p,side*.4,.05,z,.075,.115,.035,stone,.012);ball(p,side*.4,.163,z,.036,stone,8);}
+ }
+}
 function attraction(t){const p=new THREE.Group();p.position.set(t.x,.29,t.z-.17);world.add(p);const cream=material('#e6d6c1',.09,.3),mauve=material('#9c82b5',.13,.24),color=material(colors[t.park],.12,.23);
 if(t.shape==='monorail'){monorailSpot(p);}
 else if(t.shape==='mainstreet'){mainStreetSpot(p);}
@@ -3139,7 +3186,7 @@ else if(t.shape==='spinner'){cyl(p,0,0,0,.62,.06,cream);const spin=new THREE.Gro
 else if(t.shape==='sphere'){cyl(p,0,0,0,.3,.28,trim);ball(p,0,.8,0,.57,material('#e5edf5',.52,.2),40);ring(p,0,.83,0,.572,.006,material('#aebbd0',.55));}
 else if(t.shape==='tower'){box(p,0,0,0,.78,1.43,.58,material('#d8b496',.08,.3),.045);box(p,-.21,1.2,-.02,.35,.43,.55,cream,.04);box(p,0,1.42,0,.91,.09,.67,gold,.02);for(const y of [.3,.65,1.02])windows(p,0,y,.3,.64,.15,3);box(p,0,0,.34,.44,.2,.24,cream);const lift=box(p,0,.3,.355,.23,.18,.08,gold,.018);rideAnimations.push(time=>{lift.position.y=.22+Math.pow((Math.sin(time*1.4)+1)/2,2)*.85;});}
 else if(t.shape==='coaster'){coasterTrack(p);}
-else if(t.shape==='mansion'){box(p,0,0,0,1.1,.65,.69,cream,.05);box(p,0,.65,0,1.2,.13,.78,mauve);box(p,0,.78,-.12,.6,.26,.42,cream);cone(p,0,1.04,-.12,.38,.25,mauve);for(const x of [-.44,-.22,.22,.44])cyl(p,x,0,.42,.027,.66,porcelain);windows(p,0,.28,.35,.95,.24,4);}
+else if(t.shape==='mansion'){hauntedMansionSpot(p);}
 else if(t.shape==='tree'){tree(p,0,0,0,1.45);}
 else if(t.shape==='boat'){cyl(p,0,0,0,.66,.025,material('#69b2c6',.34,.13));const boat=new THREE.Group();p.add(boat);box(boat,0,.08,0,.74,.22,.3,porcelain,.06);box(boat,0,.3,0,.33,.22,.29,cream);box(boat,0,.51,0,.43,.05,.36,gold,.015);cyl(boat,.13,.54,0,.035,.15,gold);const phase=rideAnimations.length;rideAnimations.push(time=>{boat.position.set(Math.sin(time*.65+phase)*.11,Math.sin(time*1.6+phase)*.018,Math.cos(time*.65+phase)*.1);boat.rotation.y=Math.sin(time*.65+phase)*.2;boat.rotation.z=Math.sin(time*1.3+phase)*.025;});}
 else if(t.shape==='food'){box(p,0,0,0,.8,.43,.58,cream);box(p,0,.43,0,.94,.12,.73,mauve);windows(p,0,.12,.3,.72,.18,2);for(const x of [-.37,.37])cyl(p,x,0,.3,.085,.06,gold);ball(p,0,.72,0,.12,gold);}
@@ -3201,8 +3248,8 @@ function outsideSpaceLabel(space,index,r){
 
 SPACES.forEach((s,i)=>{const r=spaceLayout(i),tile=box(world,r.x,.15,r.z,r.w-.035,.14,r.d-.035,porcelain,.025);tile.userData.space=i;tileMeshes.push(tile);spaces.push(r);
 const banner=box(world,r.x,.299,r.z,r.w*.86,.018,r.d*.86,material(colors[r.side],.12,.25),.005);banner.visible=true;
-const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
-if(['monorail','mainstreet','trivia'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
+const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia','mansion'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
+if(['monorail','mainstreet','trivia','mansion'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
 if(r.side%2)model.rotation.y=Math.PI/2;
 outsideSpaceLabel(s,i,r);
 const flag=cyl(world,r.x,.307,r.z,.095,.07,gold);flag.visible=false;ownerFlags.push(flag);
@@ -3370,7 +3417,7 @@ const rotations={1:[0,0,0],2:[-Math.PI/2,0,0],3:[0,0,Math.PI/2],4:[0,0,-Math.PI/
 let diceValues=[1,1],diceStart=0,raf=0,last=0,width=0,height=0,selected=players[currentPlayer].pos,angle=.24,targetAngle=.24,mode='free',zoom=1,distance=44,targetDistance=44,look=new THREE.Vector3(),target=new THREE.Vector3(),drag=null,flat=false,showSpaceNames=false,dragMode='pan',wasMoving=false,autoFollow=false,followIndex=currentPlayer;
 const pointers=new Map();let pinch=null;
 const ray=new THREE.Raycaster(),resizeObserver=new ResizeObserver(resize);
-function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(SPACES[player.pos].type==='trivia'){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
+function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(SPACES[player.pos].type==='trivia'){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/haunted mansion/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.91)};if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
 function info(index){selected=index;const s=SPACES[index],owner=owners[index],r=spaces[index];highlight.position.set(r.x,.34,r.z);const price=s.type==='property'?' · '+(owner===undefined?'Buy $'+s.cost:'Rent $'+rentForSpace(index)):'';document.getElementById('board3dInfo').style.setProperty('--park-color',colors[r.side]);document.getElementById('board3dInfo').innerHTML='<strong>'+esc(s.icon+' '+s.name)+'</strong><span>Space '+(index+1)+' / 80 · '+esc(s.park||['Magic Kingdom','EPCOT','Hollywood Studios','Animal Kingdom'][r.side])+price+(owner===undefined?'': ' · Owned by '+esc(players[owner].name))+'</span><div class="space-browser"><button class="secondary" data-space-step="-1" aria-label="Previous board space">←</button><button class="secondary" data-space-step="1" aria-label="Next board space">→</button></div>';drawRequest();}
 function updateCameraButtons(){host.querySelectorAll('[data-camera="free"],[data-camera="board"],[data-camera="follow"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.camera===mode)));}
 function freeCamera(){mode='free';autoFollow=false;updateCameraButtons();}
