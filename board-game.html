@@ -3273,10 +3273,61 @@ function pinTradingSpot(p,park){
  // More pins on the counter display make the kiosk recognizable at a distance.
  for(let i=0;i<6;i++)pin(p,(i-2.5)*.095,.245,.135,i,.033);
 }
+// A hovering Tinker Bell with a looping trail of golden pixie dust.
+function pixieDustSpot(p){
+ p.name='Pixie Dust';
+ const green=material('#79bb46',.04,.55),skin=material('#f0c39c',.02,.65),blonde=material('#f2cf65',.08,.55),eyes=material('#31546c',.03,.5),white=material('#fff6dc',.02,.65);
+ cyl(p,0,.01,-.3,.33,.035,material('#426c62',.06,.65),.33,24);ring(p,0,.052,-.3,.28,.009,gold);
+ const fairy=new THREE.Group();fairy.name='Tinker Bell';fairy.position.set(0,.23,-.3);p.add(fairy);
+ // Green slippers with white pom-poms and slender legs.
+ for(const side of [-1,1]){
+  const leg=box(fairy,side*.053,.13,0,.047,.35,.055,skin,.01);leg.rotation.z=side*.08;
+  const shoe=ball(fairy,side*.075,.125,.035,.054,green,12);shoe.scale.set(.68,.6,1.35);
+  ball(fairy,side*.075,.145,.075,.023,white,10);
+ }
+ cyl(fairy,0,.46,0,.15,.22,green,.07,16);box(fairy,0,.68,0,.15,.2,.11,green,.022);
+ for(let i=0;i<5;i++){const a=i/5*Math.PI*2;cone(fairy,Math.cos(a)*.103,.43,Math.sin(a)*.103,.043,.11,green);}
+ cyl(fairy,0,.88,0,.025,.05,skin,.025,10);
+ const head=ball(fairy,0,1.025,0,.108,skin,16);head.scale.y=1.05;
+ const hair=ball(fairy,0,1.084,-.028,.107,blonde,16);hair.scale.y=.65;
+ ball(fairy,0,1.183,-.035,.065,blonde,12);ring(fairy,0,1.153,-.035,.037,.006,green);
+ const fringe=ball(fairy,-.043,1.074,.068,.052,blonde,12);fringe.scale.set(1.2,.6,.5);fringe.rotation.z=-.3;
+ for(const x of [-.035,.035])ball(fairy,x,1.026,.099,.012,eyes,8);
+ box(fairy,0,.975,.098,.027,.005,.005,material('#b66c67',.02,.7),.001);
+ for(const side of [-1,1]){
+  const arm=new THREE.Group();arm.position.set(side*.094,.83,0);fairy.add(arm);
+  box(arm,0,-.19,0,.04,.2,.045,skin,.009);ball(arm,0,-.21,.01,.028,skin,10);arm.rotation.z=side*.95;
+ }
+ // Two pairs of translucent, softly luminous fairy wings.
+ const wingMaterial=new THREE.MeshStandardMaterial({color:'#cef5ef',emissive:'#93d6d1',emissiveIntensity:.25,transparent:true,opacity:.58,depthWrite:false,roughness:.6,side:THREE.DoubleSide});
+ const wings=[];
+ for(const side of [-1,1]){
+  const wing=new THREE.Group();wing.position.set(side*.05,.78,-.083);fairy.add(wing);wings.push({wing,side});
+  for(const [x,y,sx,sy,angle] of [[.13,.13,.088,.23,-.42],[.1,-.1,.075,.13,.6]]){
+   const leaf=ball(wing,side*x,y,0,1,wingMaterial,16);leaf.scale.set(sx,sy,.018);leaf.rotation.z=side*angle;leaf.castShadow=false;
+  }
+ }
+ const dust=[];
+ for(let i=0;i<16;i++){
+  const shimmer=new THREE.MeshBasicMaterial({color:i%3?'#ffe59a':'#fff9df',transparent:true,opacity:.85,depthWrite:false});
+  const mote=mesh(p,new THREE.OctahedronGeometry(i%4===0?.026:.016),shimmer,0,0,0,false);mote.name='Pixie dust sparkle';dust.push({mote,shimmer,offset:i/16});
+ }
+ const flutter=time=>{
+  fairy.position.y=.23+Math.sin(time*1.7)*.055;fairy.rotation.y=Math.sin(time*.8)*.18;
+  wings.forEach(({wing,side})=>wing.rotation.y=side*(.12+Math.sin(time*5)*.18));
+  dust.forEach(({mote,shimmer,offset})=>{
+   const phase=(time/3.7+offset)%1,a=phase*Math.PI*3+offset*8;
+   mote.position.set(Math.cos(a)*(.18+phase*.15),.18+(1-phase)*1.05,-.3+Math.sin(a)*.38);
+   mote.rotation.set(time*.7+offset,time*.9,offset*4);mote.scale.setScalar(.6+Math.sin(phase*Math.PI)*.6);shimmer.opacity=Math.sin(phase*Math.PI)*.9;
+  });
+ };
+ flutter(0);rideAnimations.push(flutter);
+}
 function attraction(t){const p=new THREE.Group();p.position.set(t.x,.29,t.z-.17);world.add(p);const cream=material('#e6d6c1',.09,.3),mauve=material('#9c82b5',.13,.24),color=material(colors[t.park],.12,.23);
 if(t.shape==='monorail'){monorailSpot(p);}
 else if(t.shape==='mainstreet'){mainStreetSpot(p);}
 else if(t.shape==='cards'){magicDeckSpot(p);}
+else if(t.shape==='magic'){pixieDustSpot(p);}
 else if(t.shape==='mountain'){const m=mesh(p,new THREE.ConeGeometry(.58,1.06,renderer.software?8:12),porcelain,0,.63,0);m.geometry.scale(1,1,.85);cone(p,-.3,.03,.1,.31,.62,material('#b6bad2',.09,.26));cyl(p,0,.04,0,.64,.04,blue);if(/space mountain|big thunder|everest/i.test(t.name||''))coasterTrack(p,true);for(let i=0;i<10;i++){const a=i/10*Math.PI*2;box(p,.48*Math.cos(a),.1,.48*Math.sin(a),.035,.37,.035,gold,.008)}}
 else if(t.shape==='spinner'){cyl(p,0,0,0,.62,.06,cream);const spin=new THREE.Group();p.add(spin);cyl(spin,0,.08,0,.075,.5,gold);for(let i=0;i<5;i++){const a=i/5*Math.PI*2;box(spin,.24*Math.cos(a),.2,.24*Math.sin(a),.42,.035,.05,gold,.008);const cup=cyl(spin,.43*Math.cos(a),.1,.43*Math.sin(a),.14,.16,i%2?mauve:blue,.17,12);cup.rotation.y=a;}const phase=rideAnimations.length*.4;rideAnimations.push(time=>{spin.rotation.y=time*.7+phase;});}
 else if(t.shape==='sphere'){cyl(p,0,0,0,.3,.28,trim);ball(p,0,.8,0,.57,material('#e5edf5',.52,.2),40);ring(p,0,.83,0,.572,.006,material('#aebbd0',.55));}
@@ -3344,8 +3395,8 @@ function outsideSpaceLabel(space,index,r){
 
 SPACES.forEach((s,i)=>{const r=spaceLayout(i),tile=box(world,r.x,.15,r.z,r.w-.035,.14,r.d-.035,porcelain,.025);tile.userData.space=i;tileMeshes.push(tile);spaces.push(r);
 const banner=box(world,r.x,.299,r.z,r.w*.86,.018,r.d*.86,material(colors[r.side],.12,.25),.005);banner.visible=true;
-const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia','mansion','cards','pin'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
-if(['monorail','mainstreet','trivia','mansion','cards','pin'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
+const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia','mansion','cards','pin','magic'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
+if(['monorail','mainstreet','trivia','mansion','cards','pin','magic'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
 if(r.side%2)model.rotation.y=Math.PI/2;
 outsideSpaceLabel(s,i,r);
 const flag=cyl(world,r.x,.307,r.z,.095,.07,gold);flag.visible=false;ownerFlags.push(flag);
@@ -3513,7 +3564,7 @@ const rotations={1:[0,0,0],2:[-Math.PI/2,0,0],3:[0,0,Math.PI/2],4:[0,0,-Math.PI/
 let diceValues=[1,1],diceStart=0,raf=0,last=0,width=0,height=0,selected=players[currentPlayer].pos,angle=.24,targetAngle=.24,mode='free',zoom=1,distance=44,targetDistance=44,look=new THREE.Vector3(),target=new THREE.Vector3(),drag=null,flat=false,showSpaceNames=false,dragMode='pan',wasMoving=false,autoFollow=false,followIndex=currentPlayer;
 const pointers=new Map();let pinch=null;
 const ray=new THREE.Raycaster(),resizeObserver=new ResizeObserver(resize);
-function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(['trivia','magic','pin'].includes(SPACES[player.pos].type)){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/haunted mansion/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.91)};if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
+function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(['trivia','magic','pin'].includes(SPACES[player.pos].type)||SPACES[player.pos].name==='Pixie Dust'){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/haunted mansion/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.91)};if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
 function info(index){selected=index;const s=SPACES[index],owner=owners[index],r=spaces[index];highlight.position.set(r.x,.34,r.z);const price=s.type==='property'?' · '+(owner===undefined?'Buy $'+s.cost:'Rent $'+rentForSpace(index)):'';document.getElementById('board3dInfo').style.setProperty('--park-color',colors[r.side]);document.getElementById('board3dInfo').innerHTML='<strong>'+esc(s.icon+' '+s.name)+'</strong><span>Space '+(index+1)+' / 80 · '+esc(s.park||['Magic Kingdom','EPCOT','Hollywood Studios','Animal Kingdom'][r.side])+price+(owner===undefined?'': ' · Owned by '+esc(players[owner].name))+'</span><div class="space-browser"><button class="secondary" data-space-step="-1" aria-label="Previous board space">←</button><button class="secondary" data-space-step="1" aria-label="Next board space">→</button></div>';drawRequest();}
 function updateCameraButtons(){host.querySelectorAll('[data-camera="free"],[data-camera="board"],[data-camera="follow"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.camera===mode)));}
 function freeCamera(){mode='free';autoFollow=false;updateCameraButtons();}
