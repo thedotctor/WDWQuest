@@ -2955,7 +2955,7 @@ function spaceLayout(i){const side=Math.floor(i/20),step=i%20,c=2.4,a=(24-2*c)/1
 if(!step)return {x:[-10.8,10.8,10.8,-10.8][side],z:[-10.8,-10.8,10.8,10.8][side],w:c,d:c,side};
 const offset=-12+c+(step-.5)*a;
 return side===0?{x:offset,z:-10.8,w:a,d:c,side}:side===1?{x:10.8,z:offset,w:c,d:a,side}:side===2?{x:-offset,z:10.8,w:a,d:c,side}:{x:-10.8,z:-offset,w:c,d:a,side};}
-function modelShape(s){if(s.type==='transport')return /boat/i.test(s.name)?'boat':'station';if(s.type==='pin')return 'pin';if(s.type==='trivia')return 'trivia';if(s.type==='magic'||s.name==='Pixie Dust')return 'magic';if(s.name==='Snack Break')return 'food';if(s.show)return 'show';if(/tea party|dumbo|astro orbiter|magic carpets|carousel/i.test(s.name))return 'spinner';if(/spaceship earth/i.test(s.name))return 'sphere';if(/tree of life|safaris|gorilla/i.test(s.name))return 'tree';if(/tower of terror/i.test(s.name))return 'tower';if(/haunted mansion/i.test(s.name))return 'mansion';if(/mountain|everest|flight of passage/i.test(s.name))return 'mountain';if(/test track|tron|slinky|mine train|rock.*roller|cosmic/i.test(s.name))return 'coaster';if(/pirates|jungle cruise|frozen|navi|na'vi/i.test(s.name))return 'boat';return 'building';}
+function modelShape(s){if(s.type==='transport')return /monorail/i.test(s.name)?'monorail':/boat/i.test(s.name)?'boat':'station';if(s.type==='pin')return 'pin';if(s.type==='trivia')return 'trivia';if(s.type==='magic'||s.name==='Pixie Dust')return 'magic';if(s.name==='Snack Break')return 'food';if(s.show)return 'show';if(/tea party|dumbo|astro orbiter|magic carpets|carousel/i.test(s.name))return 'spinner';if(/spaceship earth/i.test(s.name))return 'sphere';if(/tree of life|safaris|gorilla/i.test(s.name))return 'tree';if(/tower of terror/i.test(s.name))return 'tower';if(/haunted mansion/i.test(s.name))return 'mansion';if(/mountain|everest|flight of passage/i.test(s.name))return 'mountain';if(/test track|tron|slinky|mine train|rock.*roller|cosmic/i.test(s.name))return 'coaster';if(/pirates|jungle cruise|frozen|navi|na'vi/i.test(s.name))return 'boat';return 'building';}
 async function mount(){const board=document.getElementById('board');if(!board||document.getElementById('board3dHost'))return;
 let THREE;try{THREE=await loadThree();}catch(e){console.warn('3D view unavailable; the original board remains playable.',e);return;}
 if(!board.isConnected||document.getElementById('board3dHost'))return;
@@ -3059,8 +3059,44 @@ function coasterTrack(parent,mountain=false){
  rideAnimations.push(time=>{cars.forEach((car,i)=>{const u=((time/7+offset-i*.055)%1+1)%1,pos=curve.getPointAt(u),tangent=curve.getTangentAt(u);car.position.copy(pos);car.position.y+=.045;car.rotation.set(-Math.atan2(tangent.y,Math.hypot(tangent.x,tangent.z)),Math.atan2(tangent.x,tangent.z),0);});});
  rideAnimations[rideAnimations.length-1](0);
 }
+// A complete tile-sized Monorail Red scene, modeled after the Mark VI train.
+function monorailSpot(p){
+ p.name='Monorail Transportation Hub';
+ const white=material('#f5f4ed',.06,.34),stripe=material('#cf3043',.1,.4),windshield=material('#102a3c',.3,.2),concrete=material('#b3b9c1',.02,.7),ink=material('#394454',.05,.6),platform=material('#d1c9b4',.04,.65);
+ box(p,0,0,0,2.22,.075,2.22,platform,.055);
+ for(const x of [-.93,.93])box(p,x,.076,0,.065,.012,1.9,material('#ead488',.1,.55),.008);
+ const line=new THREE.Group();p.add(line);line.rotation.y=Math.PI/4;
+ // One guide beam, with the train straddling it rather than riding rails.
+ for(const x of [-.72,.72]){box(line,x,.075,0,.18,.47,.23,concrete,.025);box(line,x,.075,0,.35,.065,.34,concrete,.025);}
+ box(line,0,.5,0,2.18,.15,.19,concrete,.022);box(line,0,.65,0,2.17,.035,.16,ink,.009);
+ const train=new THREE.Group();line.add(train);train.position.y=.63;
+ for(const x of [-.62,0,.62]){
+  box(train,x,.035,0,.56,.32,.38,white,.05);box(train,x,.35,0,.5,.045,.33,white,.025);
+  for(const side of [-1,1]){
+   box(train,x,.118,side*.218,.54,.065,.009,stripe,.003);
+   for(const offset of [-.17,0,.17])box(train,x+offset,.225,side*.221,.12,.09,.008,windshield,.012);
+   for(const offset of [-.07,.07])box(train,x+offset,.05,side*.223,.006,.14,.006,concrete,.002);
+  }
+  box(train,x,-.03,0,.4,.065,.29,ink,.018);
+ }
+ for(const x of [-.31,.31]){box(train,x,.065,0,.07,.22,.31,ink,.01);for(let j=0;j<3;j++)box(train,x+(j-1)*.015,.08,.16,.006,.18,.008,concrete,.002);}
+ // Tapered, sloping pilot cabs with dark wraparound windshields at both ends.
+ function cab(sign){
+  const vertices=[],indices=[],sections=[[.88,.19,.065,.34],[1.07,.09,.09,.22]];
+  for(const [x,w,bottom,top] of sections)vertices.push(sign*x,bottom,-w,sign*x,bottom,w,sign*x,top,w,sign*x,top,-w);
+  for(const face of [[0,1,2,3],[4,7,6,5],[0,4,5,1],[1,5,6,2],[2,6,7,3],[3,7,4,0]])indices.push(face[0],face[1],face[2],face[0],face[2],face[3]);
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();
+  const body=white.clone();body.side=THREE.DoubleSide;mesh(train,g,body,0,0,0);
+  const front=box(train,sign*.99,.249,0,.017,.082,.25,windshield,.008);front.rotation.z=sign*-.56;
+  for(const side of [-1,1]){const glassPanel=box(train,sign*.905,.245,side*.18,.075,.085,.01,windshield,.008);glassPanel.rotation.y=side*sign*.45;const band=box(train,sign*.973,.12,side*.142,.18,.055,.012,stripe,.003);band.rotation.y=side*sign*.47;}
+  for(const side of [-1,1])box(train,sign*1.073,.135,side*.055,.012,.025,.028,material('#fff5be',.08,.3),.004);
+ }
+ cab(-1);cab(1);
+ plaque(p,'MONORAIL',0,.083,.83,1.55,.27,'#27394c');
+}
 function attraction(t){const p=new THREE.Group();p.position.set(t.x,.29,t.z-.17);world.add(p);const cream=material('#e6d6c1',.09,.3),mauve=material('#9c82b5',.13,.24),color=material(colors[t.park],.12,.23);
-if(t.shape==='mountain'){const m=mesh(p,new THREE.ConeGeometry(.58,1.06,renderer.software?8:12),porcelain,0,.63,0);m.geometry.scale(1,1,.85);cone(p,-.3,.03,.1,.31,.62,material('#b6bad2',.09,.26));cyl(p,0,.04,0,.64,.04,blue);if(/space mountain|big thunder|everest/i.test(t.name||''))coasterTrack(p,true);for(let i=0;i<10;i++){const a=i/10*Math.PI*2;box(p,.48*Math.cos(a),.1,.48*Math.sin(a),.035,.37,.035,gold,.008)}}
+if(t.shape==='monorail'){monorailSpot(p);}
+else if(t.shape==='mountain'){const m=mesh(p,new THREE.ConeGeometry(.58,1.06,renderer.software?8:12),porcelain,0,.63,0);m.geometry.scale(1,1,.85);cone(p,-.3,.03,.1,.31,.62,material('#b6bad2',.09,.26));cyl(p,0,.04,0,.64,.04,blue);if(/space mountain|big thunder|everest/i.test(t.name||''))coasterTrack(p,true);for(let i=0;i<10;i++){const a=i/10*Math.PI*2;box(p,.48*Math.cos(a),.1,.48*Math.sin(a),.035,.37,.035,gold,.008)}}
 else if(t.shape==='spinner'){cyl(p,0,0,0,.62,.06,cream);const spin=new THREE.Group();p.add(spin);cyl(spin,0,.08,0,.075,.5,gold);for(let i=0;i<5;i++){const a=i/5*Math.PI*2;box(spin,.24*Math.cos(a),.2,.24*Math.sin(a),.42,.035,.05,gold,.008);const cup=cyl(spin,.43*Math.cos(a),.1,.43*Math.sin(a),.14,.16,i%2?mauve:blue,.17,12);cup.rotation.y=a;}const phase=rideAnimations.length*.4;rideAnimations.push(time=>{spin.rotation.y=time*.7+phase;});}
 else if(t.shape==='sphere'){cyl(p,0,0,0,.3,.28,trim);ball(p,0,.8,0,.57,material('#e5edf5',.52,.2),40);ring(p,0,.83,0,.572,.006,material('#aebbd0',.55));}
 else if(t.shape==='tower'){box(p,0,0,0,.78,1.43,.58,material('#d8b496',.08,.3),.045);box(p,-.21,1.2,-.02,.35,.43,.55,cream,.04);box(p,0,1.42,0,.91,.09,.67,gold,.02);for(const y of [.3,.65,1.02])windows(p,0,y,.3,.64,.15,3);box(p,0,0,.34,.44,.2,.24,cream);const lift=box(p,0,.3,.355,.23,.18,.08,gold,.018);rideAnimations.push(time=>{lift.position.y=.22+Math.pow((Math.sin(time*1.4)+1)/2,2)*.85;});}
@@ -3112,7 +3148,8 @@ function outsideSpaceLabel(space,index,r){
 
 SPACES.forEach((s,i)=>{const r=spaceLayout(i),tile=box(world,r.x,.15,r.z,r.w-.035,.14,r.d-.035,porcelain,.025);tile.userData.space=i;tileMeshes.push(tile);spaces.push(r);
 const banner=box(world,r.x,.299,r.z,r.w*.86,.018,r.d*.86,material(colors[r.side],.12,.25),.005);banner.visible=true;
-const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=r.w<r.d?.54:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
+const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=t.shape==='monorail'?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
+if(t.shape==='monorail')model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
 if(r.side%2)model.rotation.y=Math.PI/2;
 outsideSpaceLabel(s,i,r);
 const flag=cyl(world,r.x,.307,r.z,.095,.07,gold);flag.visible=false;ownerFlags.push(flag);
@@ -3280,7 +3317,7 @@ const rotations={1:[0,0,0],2:[-Math.PI/2,0,0],3:[0,0,Math.PI/2],4:[0,0,-Math.PI/
 let diceValues=[1,1],diceStart=0,raf=0,last=0,width=0,height=0,selected=players[currentPlayer].pos,angle=.24,targetAngle=.24,mode='free',zoom=1,distance=44,targetDistance=44,look=new THREE.Vector3(),target=new THREE.Vector3(),drag=null,flat=false,showSpaceNames=false,dragMode='pan',wasMoving=false,autoFollow=false,followIndex=currentPlayer;
 const pointers=new Map();let pinch=null;
 const ray=new THREE.Raycaster(),resizeObserver=new ResizeObserver(resize);
-function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
+function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
 function info(index){selected=index;const s=SPACES[index],owner=owners[index],r=spaces[index];highlight.position.set(r.x,.34,r.z);const price=s.type==='property'?' · '+(owner===undefined?'Buy $'+s.cost:'Rent $'+rentForSpace(index)):'';document.getElementById('board3dInfo').style.setProperty('--park-color',colors[r.side]);document.getElementById('board3dInfo').innerHTML='<strong>'+esc(s.icon+' '+s.name)+'</strong><span>Space '+(index+1)+' / 80 · '+esc(s.park||['Magic Kingdom','EPCOT','Hollywood Studios','Animal Kingdom'][r.side])+price+(owner===undefined?'': ' · Owned by '+esc(players[owner].name))+'</span><div class="space-browser"><button class="secondary" data-space-step="-1" aria-label="Previous board space">←</button><button class="secondary" data-space-step="1" aria-label="Next board space">→</button></div>';drawRequest();}
 function updateCameraButtons(){host.querySelectorAll('[data-camera="free"],[data-camera="board"],[data-camera="follow"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.camera===mode)));}
 function freeCamera(){mode='free';autoFollow=false;updateCameraButtons();}
