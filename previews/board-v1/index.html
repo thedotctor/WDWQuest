@@ -3147,7 +3147,22 @@ else if(t.shape==='station'){box(p,0,0,0,1.25,.33,.38,porcelain,.055);windows(p,
 else if(t.shape==='building'){box(p,0,0,0,.98,.56,.66,porcelain);box(p,0,.56,0,1.06,.09,.74,color);windows(p,0,.22,.34,.85,.18,4);box(p,0,.65,0,.35,.3,.35,trim);}
 else if(t.shape==='show'){box(p,0,0,0,.86,.58,.45,mauve);ring(p,0,.7,0,.25,.035,gold);ball(p,0,.98,0,.12,gold);}
 else if(t.shape==='pin'){cyl(p,0,0,0,.35,.06,gold);cyl(p,0,.06,0,.065,.25,gold);const gem=mesh(p,new THREE.OctahedronGeometry(.25),material('#b7a1db',.42,.16),0,.53,0);gem.rotation.z=Math.PI/5;}
-else if(t.shape==='trivia'){box(p,0,0,0,.54,.41,.47,porcelain);plaque(p,'?',0,.425,0,.45,.45,'#596b95');cyl(p,0,.41,0,.19,.025,gold);}
+else if(t.shape==='trivia'){
+ p.name=t.name;
+ const mark=new THREE.Group();p.add(mark);mark.position.z=-.35;
+ // An extruded question mark silhouette stays readable from either side.
+ const shape=new THREE.Shape();
+ shape.moveTo(-.32,.85);shape.bezierCurveTo(-.32,1.12,-.16,1.25,.06,1.25);
+ shape.bezierCurveTo(.31,1.25,.4,1.08,.34,.87);
+ shape.bezierCurveTo(.3,.72,.13,.68,.11,.54);shape.lineTo(.11,.43);shape.lineTo(-.09,.43);shape.lineTo(-.09,.57);
+ shape.bezierCurveTo(-.09,.78,.13,.82,.14,.96);shape.bezierCurveTo(.16,1.09,-.12,1.11,-.12,.85);shape.closePath();
+ const geometry=new THREE.ExtrudeGeometry(shape,{depth:.16,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.025,bevelThickness:.025,curveSegments:renderer.software?8:16});
+ mesh(mark,geometry,color,0,0,-.08);ball(mark,.01,.22,0,.105,color,16);
+ cyl(p,0,.015,-.35,.34,.06,color,.34,24);cyl(p,0,.077,-.35,.27,.018,porcelain,.27,24);
+ const phase=t.park*.45;
+ const bounce=time=>{mark.position.y=.08+Math.abs(Math.sin(time*2.5+phase))*.24;};
+ bounce(0);rideAnimations.push(bounce);
+}
 else{cyl(p,0,0,0,.35,.045,gold);const gem=mesh(p,new THREE.OctahedronGeometry(.24),material('#bca4d6',.36,.1),0,.43,0);gem.rotation.y=.7;ball(p,.27,.74,.07,.045,gold);ball(p,-.22,.56,.16,.033,gold);}
 return p;}
 
@@ -3186,8 +3201,8 @@ function outsideSpaceLabel(space,index,r){
 
 SPACES.forEach((s,i)=>{const r=spaceLayout(i),tile=box(world,r.x,.15,r.z,r.w-.035,.14,r.d-.035,porcelain,.025);tile.userData.space=i;tileMeshes.push(tile);spaces.push(r);
 const banner=box(world,r.x,.299,r.z,r.w*.86,.018,r.d*.86,material(colors[r.side],.12,.25),.005);banner.visible=true;
-const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
-if(['monorail','mainstreet'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
+const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
+if(['monorail','mainstreet','trivia'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
 if(r.side%2)model.rotation.y=Math.PI/2;
 outsideSpaceLabel(s,i,r);
 const flag=cyl(world,r.x,.307,r.z,.095,.07,gold);flag.visible=false;ownerFlags.push(flag);
@@ -3355,7 +3370,7 @@ const rotations={1:[0,0,0],2:[-Math.PI/2,0,0],3:[0,0,Math.PI/2],4:[0,0,-Math.PI/
 let diceValues=[1,1],diceStart=0,raf=0,last=0,width=0,height=0,selected=players[currentPlayer].pos,angle=.24,targetAngle=.24,mode='free',zoom=1,distance=44,targetDistance=44,look=new THREE.Vector3(),target=new THREE.Vector3(),drag=null,flat=false,showSpaceNames=false,dragMode='pan',wasMoving=false,autoFollow=false,followIndex=currentPlayer;
 const pointers=new Map();let pinch=null;
 const ray=new THREE.Raycaster(),resizeObserver=new ResizeObserver(resize);
-function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
+function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(SPACES[player.pos].type==='trivia'){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
 function info(index){selected=index;const s=SPACES[index],owner=owners[index],r=spaces[index];highlight.position.set(r.x,.34,r.z);const price=s.type==='property'?' · '+(owner===undefined?'Buy $'+s.cost:'Rent $'+rentForSpace(index)):'';document.getElementById('board3dInfo').style.setProperty('--park-color',colors[r.side]);document.getElementById('board3dInfo').innerHTML='<strong>'+esc(s.icon+' '+s.name)+'</strong><span>Space '+(index+1)+' / 80 · '+esc(s.park||['Magic Kingdom','EPCOT','Hollywood Studios','Animal Kingdom'][r.side])+price+(owner===undefined?'': ' · Owned by '+esc(players[owner].name))+'</span><div class="space-browser"><button class="secondary" data-space-step="-1" aria-label="Previous board space">←</button><button class="secondary" data-space-step="1" aria-label="Next board space">→</button></div>';drawRequest();}
 function updateCameraButtons(){host.querySelectorAll('[data-camera="free"],[data-camera="board"],[data-camera="follow"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.camera===mode)));}
 function freeCamera(){mode='free';autoFollow=false;updateCameraButtons();}
