@@ -2956,7 +2956,7 @@ function spaceLayout(i){const side=Math.floor(i/20),step=i%20,c=2.4,a=(24-2*c)/1
 if(!step)return {x:[-10.8,10.8,10.8,-10.8][side],z:[-10.8,-10.8,10.8,10.8][side],w:c,d:c,side};
 const offset=-12+c+(step-.5)*a;
 return side===0?{x:offset,z:-10.8,w:a,d:c,side}:side===1?{x:10.8,z:offset,w:c,d:a,side}:side===2?{x:-offset,z:10.8,w:a,d:c,side}:{x:-10.8,z:-offset,w:c,d:a,side};}
-function modelShape(s){if(s.type==='transport')return /monorail/i.test(s.name)?'monorail':/boat/i.test(s.name)?'boat':'station';if(/main street/i.test(s.name))return 'mainstreet';if(s.type==='pin')return 'pin';if(s.type==='trivia')return 'trivia';if(s.type==='magic')return 'cards';if(s.name==='Pixie Dust')return 'magic';if(s.name==='Snack Break')return 'food';if(/happily ever after/i.test(s.name))return 'castleShow';if(s.show)return 'show';if(/tea party|dumbo|astro orbiter|magic carpets|carousel/i.test(s.name))return 'spinner';if(/spaceship earth/i.test(s.name))return 'sphere';if(/tree of life|safaris|gorilla/i.test(s.name))return 'tree';if(/tower of terror/i.test(s.name))return 'tower';if(/haunted mansion/i.test(s.name))return 'mansion';if(/space mountain/i.test(s.name))return 'spaceCoaster';if(/mountain|everest|flight of passage/i.test(s.name))return 'mountain';if(/test track|tron|slinky|mine train|rock.*roller|cosmic/i.test(s.name))return 'coaster';if(/pirates of the caribbean/i.test(s.name))return 'pirates';if(/jungle cruise/i.test(s.name))return 'jungle';if(/frozen|navi|na'vi/i.test(s.name))return 'boat';return 'building';}
+function modelShape(s){if(s.type==='transport')return /monorail/i.test(s.name)?'monorail':/boat/i.test(s.name)?'boat':'station';if(/main street/i.test(s.name))return 'mainstreet';if(s.type==='pin')return 'pin';if(s.type==='trivia')return 'trivia';if(s.type==='magic')return 'cards';if(s.name==='Pixie Dust')return 'magic';if(s.name==='Snack Break')return 'food';if(/happily ever after/i.test(s.name))return 'castleShow';if(s.show)return 'show';if(/tea party|dumbo|astro orbiter|magic carpets|carousel/i.test(s.name))return 'spinner';if(/spaceship earth/i.test(s.name))return 'sphere';if(/tree of life|safaris|gorilla/i.test(s.name))return 'tree';if(/tower of terror/i.test(s.name))return 'tower';if(/haunted mansion/i.test(s.name))return 'mansion';if(/space mountain/i.test(s.name))return 'spaceCoaster';if(/big thunder mountain/i.test(s.name))return 'thunder';if(/mountain|everest|flight of passage/i.test(s.name))return 'mountain';if(/test track|tron|slinky|mine train|rock.*roller|cosmic/i.test(s.name))return 'coaster';if(/pirates of the caribbean/i.test(s.name))return 'pirates';if(/jungle cruise/i.test(s.name))return 'jungle';if(/frozen|navi|na'vi/i.test(s.name))return 'boat';return 'building';}
 async function mount(){const board=document.getElementById('board');if(!board||document.getElementById('board3dHost'))return;
 let THREE;try{THREE=await loadThree();}catch(e){console.warn('3D view unavailable; the original board remains playable.',e);return;}
 if(!board.isConnected||document.getElementById('board3dHost'))return;
@@ -3518,6 +3518,51 @@ function snackSpot(p,park){
  }
  plaque(p,names[park],0,.08,.4,.88,.21,'#fff0cf');
 }
+// Red-rock buttes, timber trestles, and an Old West mine-train circuit.
+function bigThunderSpot(p){
+ p.name='Big Thunder Mountain Railroad';
+ const earth=material('#c59d68',.02,.85),sandstone=material('#b66f43',.02,.9),pale=material('#d29a62',.02,.9),wood=material('#735439',.02,.8),steel=material('#514d47',.3,.6),red=material('#9f4434',.05,.65),black=material('#29302f',.12,.6);
+ box(p,0,.01,0,.94,.04,2.2,earth,.009);
+ // Layered, angular desert peaks rise inside the track's footprint.
+ for(const [x,z,r,h] of [[-.055,-.33,.17,.98],[.105,-.07,.11,.65],[-.12,-.08,.095,.51]]){
+  for(let j=0;j<4;j++){
+   const radius=r*(1-j*.2),height=h*.24;
+   const peak=mesh(p,new THREE.CylinderGeometry(radius*.62,radius,height,6),j%2?pale:sandstone,x,.06+j*h*.23+height/2,z);peak.rotation.y=j*.13;
+  }
+  mesh(p,new THREE.ConeGeometry(r*.3,h*.2,5),sandstone,x,.06+h*.92+h*.1,z);
+ }
+ const points=[];for(let i=0;i<64;i++){const a=i/64*Math.PI*2;points.push(new THREE.Vector3(.305*Math.cos(a),.23+.1*Math.sin(a*2),-.25+.56*Math.sin(a)));}
+ const curve=new THREE.CatmullRomCurve3(points,true);
+ // Two metal rails on wooden sleepers, rather than a single coaster tube.
+ for(const side of [-1,1]){
+  const rails=[];for(let i=0;i<80;i++){const u=i/80,c=curve.getPointAt(u),t=curve.getTangentAt(u),n=new THREE.Vector3(-t.z,0,t.x).normalize();rails.push(c.addScaledVector(n,side*.026));}
+  mesh(p,new THREE.TubeGeometry(new THREE.CatmullRomCurve3(rails,true),renderer.software?48:96,.008,5,true),steel,0,0,0);
+ }
+ for(let i=0;i<24;i++){
+  const u=i/24,c=curve.getPointAt(u),t=curve.getTangentAt(u),yaw=Math.atan2(-t.x,-t.z);
+  const tie=box(p,c.x,c.y-.025,c.z,.09,.019,.025,wood,.002);tie.rotation.y=yaw;
+  if(i%3===0){for(const side of [-1,1]){const x=c.x+Math.cos(yaw)*side*.033,z=c.z-Math.sin(yaw)*side*.033;box(p,x,.055,z,.017,c.y-.055,.017,wood,.002);}const brace=box(p,c.x,.075,c.z,.09,.015,.02,wood,.002);brace.rotation.y=yaw;}
+ }
+ // A timber-framed mine entrance at the back of the loop.
+ for(const x of [-.205,.205])box(p,x,.075,-.8,.035,.35,.11,wood,.003);
+ box(p,0,.425,-.8,.45,.035,.13,wood,.003);box(p,0,.46,-.8,.39,.1,.025,sandstone,.003);plaque(p,'BIG THUNDER',0,.58,-.8,.43,.09,'#fff1c9');
+ const tunnel=new THREE.Shape();tunnel.moveTo(-.19,0);tunnel.lineTo(-.19,.48);tunnel.lineTo(.19,.48);tunnel.lineTo(.19,0);tunnel.lineTo(.17,0);tunnel.lineTo(.17,.27);tunnel.absarc(0,.27,.17,0,Math.PI,false);tunnel.lineTo(-.17,0);tunnel.closePath();
+ mesh(p,new THREE.ExtrudeGeometry(tunnel,{depth:.095,bevelEnabled:false,curveSegments:8}),sandstone,0,.055,-.86);
+ // A steam locomotive followed by two open mine cars.
+ const train=[];for(let i=0;i<3;i++){
+  const car=new THREE.Group();car.name=i?'Big Thunder mine car':'Big Thunder locomotive';p.add(car);
+  box(car,0,0,0,.073,.04,.12,i?red:black,.006);
+  if(i===0){
+   const boiler=mesh(car,new THREE.CylinderGeometry(.029,.029,.072,10),black,0,.068,-.021);boiler.rotation.x=Math.PI/2;
+   box(car,0,.04,.038,.067,.07,.045,red,.005);box(car,0,.11,.038,.082,.012,.06,wood,.002);cyl(car,0,.075,-.05,.013,.055,black,.016,8);
+  }else{for(const x of [-.038,.038])box(car,x,.04,0,.01,.048,.11,red,.002);for(const z of [-.034,.034])box(car,0,.04,z,.055,.02,.025,wood,.002);}
+  for(const x of [-.039,.039])for(const z of [-.037,.037]){const wheel=mesh(car,new THREE.CylinderGeometry(.016,.016,.009,8),steel,x,.005,z);wheel.rotation.z=Math.PI/2;}
+  train.push(car);
+ }
+ const green=material('#6e854a',.01,.85);for(const [x,z] of [[.4,.53],[-.4,-.62]]){cyl(p,x,.055,z,.014,.16,green,.014,8);box(p,x+.025,.15,z,.065,.015,.018,green,.003);cyl(p,x+.05,.165,z,.011,.045,green,.011,8);}
+ const run=time=>train.forEach((car,i)=>{const u=((time/10-i*.046)%1+1)%1,c=curve.getPointAt(u),t=curve.getTangentAt(u);car.position.copy(c);car.position.y+=.008;car.rotation.set(Math.atan2(t.y,Math.hypot(t.x,t.z)),Math.atan2(-t.x,-t.z),0);});
+ run(0);rideAnimations.push(run);
+}
 function attraction(t){const p=new THREE.Group();p.position.set(t.x,.29,t.z-.17);world.add(p);const cream=material('#e6d6c1',.09,.3),mauve=material('#9c82b5',.13,.24),color=material(colors[t.park],.12,.23);
 if(t.shape==='monorail'){monorailSpot(p);}
 else if(t.shape==='mainstreet'){mainStreetSpot(p);}
@@ -3527,6 +3572,7 @@ else if(t.shape==='pirates'){pirateShipSpot(p);}
 else if(t.shape==='jungle'){jungleCruiseSpot(p);}
 else if(t.shape==='castleShow'){happilyEverAfterSpot(p);}
 else if(t.shape==='spaceCoaster'){spaceMountainSpot(p);}
+else if(t.shape==='thunder'){bigThunderSpot(p);}
 else if(t.shape==='mountain'){const m=mesh(p,new THREE.ConeGeometry(.58,1.06,renderer.software?8:12),porcelain,0,.63,0);m.geometry.scale(1,1,.85);cone(p,-.3,.03,.1,.31,.62,material('#b6bad2',.09,.26));cyl(p,0,.04,0,.64,.04,blue);if(/space mountain|big thunder|everest/i.test(t.name||''))coasterTrack(p,true);for(let i=0;i<10;i++){const a=i/10*Math.PI*2;box(p,.48*Math.cos(a),.1,.48*Math.sin(a),.035,.37,.035,gold,.008)}}
 else if(t.shape==='spinner'){cyl(p,0,0,0,.62,.06,cream);const spin=new THREE.Group();p.add(spin);cyl(spin,0,.08,0,.075,.5,gold);for(let i=0;i<5;i++){const a=i/5*Math.PI*2;box(spin,.24*Math.cos(a),.2,.24*Math.sin(a),.42,.035,.05,gold,.008);const cup=cyl(spin,.43*Math.cos(a),.1,.43*Math.sin(a),.14,.16,i%2?mauve:blue,.17,12);cup.rotation.y=a;}const phase=rideAnimations.length*.4;rideAnimations.push(time=>{spin.rotation.y=time*.7+phase;});}
 else if(t.shape==='sphere'){cyl(p,0,0,0,.3,.28,trim);ball(p,0,.8,0,.57,material('#e5edf5',.52,.2),40);ring(p,0,.83,0,.572,.006,material('#aebbd0',.55));}
@@ -3594,8 +3640,8 @@ function outsideSpaceLabel(space,index,r){
 
 SPACES.forEach((s,i)=>{const r=spaceLayout(i),tile=box(world,r.x,.15,r.z,r.w-.035,.14,r.d-.035,porcelain,.025);tile.userData.space=i;tileMeshes.push(tile);spaces.push(r);
 const banner=box(world,r.x,.299,r.z,r.w*.86,.018,r.d*.86,material(colors[r.side],.12,.25),.005);banner.visible=true;
-const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates','jungle','castleShow','spaceCoaster','food'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
-if(['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates','jungle','castleShow','spaceCoaster','food'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
+const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates','jungle','castleShow','spaceCoaster','food','thunder'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
+if(['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates','jungle','castleShow','spaceCoaster','food','thunder'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
 if(r.side%2)model.rotation.y=Math.PI/2;
 outsideSpaceLabel(s,i,r);
 const flag=cyl(world,r.x,.307,r.z,.095,.07,gold);flag.visible=false;ownerFlags.push(flag);
@@ -3763,7 +3809,7 @@ const rotations={1:[0,0,0],2:[-Math.PI/2,0,0],3:[0,0,Math.PI/2],4:[0,0,-Math.PI/
 let diceValues=[1,1],diceStart=0,raf=0,last=0,width=0,height=0,selected=players[currentPlayer].pos,angle=.24,targetAngle=.24,mode='free',zoom=1,distance=44,targetDistance=44,look=new THREE.Vector3(),target=new THREE.Vector3(),drag=null,flat=false,showSpaceNames=false,dragMode='pan',wasMoving=false,autoFollow=false,followIndex=currentPlayer;
 const pointers=new Map();let pinch=null;
 const ray=new THREE.Raycaster(),resizeObserver=new ResizeObserver(resize);
-function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(['trivia','magic','pin'].includes(SPACES[player.pos].type)||['Pixie Dust','Snack Break'].includes(SPACES[player.pos].name)){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/space mountain/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.98:.82)};if(/happily ever after/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/jungle cruise/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.93)};if(/pirates of the caribbean/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/haunted mansion/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.91)};if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
+function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(['trivia','magic','pin'].includes(SPACES[player.pos].type)||['Pixie Dust','Snack Break'].includes(SPACES[player.pos].name)){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/big thunder mountain/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.98:.83)};if(/space mountain/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.98:.82)};if(/happily ever after/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/jungle cruise/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.93)};if(/pirates of the caribbean/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/haunted mansion/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.91)};if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
 function info(index){selected=index;const s=SPACES[index],owner=owners[index],r=spaces[index];highlight.position.set(r.x,.34,r.z);const price=s.type==='property'?' · '+(owner===undefined?'Buy $'+s.cost:'Rent $'+rentForSpace(index)):'';document.getElementById('board3dInfo').style.setProperty('--park-color',colors[r.side]);document.getElementById('board3dInfo').innerHTML='<strong>'+esc(s.icon+' '+s.name)+'</strong><span>Space '+(index+1)+' / 80 · '+esc(s.park||['Magic Kingdom','EPCOT','Hollywood Studios','Animal Kingdom'][r.side])+price+(owner===undefined?'': ' · Owned by '+esc(players[owner].name))+'</span><div class="space-browser"><button class="secondary" data-space-step="-1" aria-label="Previous board space">←</button><button class="secondary" data-space-step="1" aria-label="Next board space">→</button></div>';drawRequest();}
 function updateCameraButtons(){host.querySelectorAll('[data-camera="free"],[data-camera="board"],[data-camera="follow"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.camera===mode)));}
 function freeCamera(){mode='free';autoFollow=false;updateCameraButtons();}
