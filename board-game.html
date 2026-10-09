@@ -3214,19 +3214,23 @@ function magicDeckSpot(p){
  const deck=new THREE.Group();deck.name='Magic & Mischief deck';deck.position.z=-.3;p.add(deck);
  function card(parent,y){
   const c=new THREE.Group();parent.add(c);c.position.y=y;
-  box(c,0,0,0,.5,.023,.74,ivory,.012);
-  const face=mesh(c,new THREE.PlaneGeometry(.475,.715),artwork,0,.025,0,false);face.rotation.x=-Math.PI/2;
+  // WebGL artwork is the card surface itself, avoiding coplanar decals.
+  if(renderer.software){
+   box(c,0,0,0,.5,.023,.74,ivory,.004);
+   const face=mesh(c,new THREE.PlaneGeometry(.475,.715),artwork,0,.031,0,false);face.rotation.x=-Math.PI/2;
+  }else mesh(c,new THREE.BoxGeometry(.5,.023,.74),[ivory,ivory,artwork,artwork,ivory,ivory],0,.0115,0);
   return c;
  }
  for(let i=0;i<6;i++){const c=card(deck,i*.027);c.rotation.y=(i%2?1:-1)*.025;}
- const shuffling=[card(deck,.17),card(deck,.2)];
+ const shuffling=[card(deck,.18),card(deck,.235)];
  cyl(p,0,.012,-.3,.33,.035,back,.33,24);ring(p,0,.052,-.3,.28,.009,gold);
  const shuffle=time=>{
   deck.position.y=.44+Math.sin(time*.9)*.055;deck.rotation.z=Math.sin(time*.55)*.045;
   shuffling.forEach((c,i)=>{
-   const phase=(time/7+i*.5)%1,out=Math.pow(Math.sin(phase*Math.PI),2),side=i?1:-1;
-   c.position.set(side*out*.13,.17+i*.035+out*.22,side*out*.045);
-   c.rotation.set(side*out*.12,side*out*.13,side*out*.09);
+   // Keep the moving cards in separate horizontal layers throughout the cycle.
+   const phase=(time/7)%1,out=Math.pow(Math.sin(phase*Math.PI),2),side=i?1:-1;
+   c.position.set(side*out*.13,.18+i*.055+out*.17,side*out*.045);
+   c.rotation.set(0,side*out*.13,0);
   });
  };
  shuffle(0);rideAnimations.push(shuffle);
