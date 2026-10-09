@@ -4035,13 +4035,13 @@ function treeAwakeningsSpot(p){
  const show=time=>{const colors=['#7bdaff','#d990ed','#f4bc6a'];lights.forEach((lamp,i)=>{lamp.material.color.set(colors[(Math.floor(time/4)+i)%3]);lamp.scale.setScalar(.60+(Math.sin(time*1.4+i)+1)*.30);});branches.forEach((branch,i)=>branch.scale.y=1+Math.sin(time*.65+i)*.015);};show(0);rideAnimations.push(show);plaque(p,'TREE OF LIFE AWAKENINGS',0,.069,.97,.89,.13,'#d7e8a4');
 }
 function kaliRapidsSpot(p){
- spotBase(p,'#4fabc2');const route=ovalRoute(.24,.61,a=>.09+.025*Math.sin(a*3));mesh(p,new THREE.TubeGeometry(route,64,.10,8,true),material('#6ac4d5'),0,0,0);
+ spotBase(p,'#4fabc2');const route=ovalRoute(.24,.61,a=>.09+.025*Math.sin(a*3));mesh(p,new THREE.TubeGeometry(route,64,.032,8,true),material('#6ac4d5'),0,-.035,0);
  for(const [x,z] of [[-.35,-.64],[.35,-.23],[-.35,.25],[.35,.64]]){const rock=ball(p,x,.105,z,.078,material('#808b7b'),12);rock.scale.set(.9,1.25,1.3);}
  const carrier=new THREE.Group();carrier.name='Kali River Rapids moving raft';p.add(carrier);const raft=new THREE.Group();raft.name='Kali River Rapids spinning seats';carrier.add(raft);
  cyl(raft,0,0,0,.12,.033,material('#4b4643'),.12,20);ring(raft,0,.045,0,.10,.021,material('#c49158'));cyl(raft,0,.035,0,.025,.07,material('#c49158'),.025,10);
  for(let i=0;i<6;i++){const a=i*Math.PI/3;const seat=box(raft,Math.sin(a)*.073,.042,Math.cos(a)*.073,.042,.043,.025,material('#dca751'),.003);seat.rotation.y=a;}
  const spray=[];for(let i=0;i<8;i++)spray.push(ball(p,0,0,0,.012,material('#c7f0ef'),8));
- const rapids=time=>{followRoute(carrier,route,(time/11)%1);raft.rotation.y=time*.8;raft.rotation.z=Math.sin(time*3)*.035;spray.forEach((drop,i)=>{const k=(time*.8+i/8)%1;drop.position.set(carrier.position.x+Math.sin(i*2.4)*.14,carrier.position.y+.03+Math.sin(k*Math.PI)*.12,carrier.position.z+Math.cos(i*2.4)*.14);drop.scale.setScalar(1-k*.7);});};rapids(0);rideAnimations.push(rapids);plaque(p,'KALI RIVER RAPIDS',0,.069,.97,.86,.13,'#244e68');
+ const rapids=time=>{followRoute(carrier,route,(time/11)%1);carrier.position.y+=.02;raft.rotation.y=time*.8;raft.rotation.z=Math.sin(time*3)*.035;spray.forEach((drop,i)=>{const k=(time*.8+i/8)%1;drop.position.set(carrier.position.x+Math.sin(i*2.4)*.14,carrier.position.y+.03+Math.sin(k*Math.PI)*.12,carrier.position.z+Math.cos(i*2.4)*.14);drop.scale.setScalar(1-k*.7);});};rapids(0);rideAnimations.push(rapids);plaque(p,'KALI RIVER RAPIDS',0,.069,.97,.86,.13,'#244e68');
 }
 function lionKingSpot(p){
  spotBase(p,'#c99565');const goldMat=material('#dfaa4e'),brown=material('#9d6541'),dark=material('#4a3530');
