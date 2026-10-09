@@ -2955,7 +2955,7 @@ function spaceLayout(i){const side=Math.floor(i/20),step=i%20,c=2.4,a=(24-2*c)/1
 if(!step)return {x:[-10.8,10.8,10.8,-10.8][side],z:[-10.8,-10.8,10.8,10.8][side],w:c,d:c,side};
 const offset=-12+c+(step-.5)*a;
 return side===0?{x:offset,z:-10.8,w:a,d:c,side}:side===1?{x:10.8,z:offset,w:c,d:a,side}:side===2?{x:-offset,z:10.8,w:a,d:c,side}:{x:-10.8,z:-offset,w:c,d:a,side};}
-function modelShape(s){if(s.type==='transport')return /monorail/i.test(s.name)?'monorail':/boat/i.test(s.name)?'boat':'station';if(/main street/i.test(s.name))return 'mainstreet';if(s.type==='pin')return 'pin';if(s.type==='trivia')return 'trivia';if(s.type==='magic')return 'cards';if(s.name==='Pixie Dust')return 'magic';if(s.name==='Snack Break')return 'food';if(s.show)return 'show';if(/tea party|dumbo|astro orbiter|magic carpets|carousel/i.test(s.name))return 'spinner';if(/spaceship earth/i.test(s.name))return 'sphere';if(/tree of life|safaris|gorilla/i.test(s.name))return 'tree';if(/tower of terror/i.test(s.name))return 'tower';if(/haunted mansion/i.test(s.name))return 'mansion';if(/mountain|everest|flight of passage/i.test(s.name))return 'mountain';if(/test track|tron|slinky|mine train|rock.*roller|cosmic/i.test(s.name))return 'coaster';if(/pirates|jungle cruise|frozen|navi|na'vi/i.test(s.name))return 'boat';return 'building';}
+function modelShape(s){if(s.type==='transport')return /monorail/i.test(s.name)?'monorail':/boat/i.test(s.name)?'boat':'station';if(/main street/i.test(s.name))return 'mainstreet';if(s.type==='pin')return 'pin';if(s.type==='trivia')return 'trivia';if(s.type==='magic')return 'cards';if(s.name==='Pixie Dust')return 'magic';if(s.name==='Snack Break')return 'food';if(s.show)return 'show';if(/tea party|dumbo|astro orbiter|magic carpets|carousel/i.test(s.name))return 'spinner';if(/spaceship earth/i.test(s.name))return 'sphere';if(/tree of life|safaris|gorilla/i.test(s.name))return 'tree';if(/tower of terror/i.test(s.name))return 'tower';if(/haunted mansion/i.test(s.name))return 'mansion';if(/mountain|everest|flight of passage/i.test(s.name))return 'mountain';if(/test track|tron|slinky|mine train|rock.*roller|cosmic/i.test(s.name))return 'coaster';if(/pirates of the caribbean/i.test(s.name))return 'pirates';if(/jungle cruise|frozen|navi|na'vi/i.test(s.name))return 'boat';return 'building';}
 async function mount(){const board=document.getElementById('board');if(!board||document.getElementById('board3dHost'))return;
 let THREE;try{THREE=await loadThree();}catch(e){console.warn('3D view unavailable; the original board remains playable.',e);return;}
 if(!board.isConnected||document.getElementById('board3dHost'))return;
@@ -3323,11 +3323,64 @@ function pixieDustSpot(p){
  };
  flutter(0);rideAnimations.push(flutter);
 }
+// A sailing pirate ship and contained cannon effects on a tile-sized lagoon.
+function pirateShipSpot(p){
+ p.name='Pirates of the Caribbean';
+ const wood=material('#70462d',.03,.75),deckwood=material('#c49b66',.03,.65),iron=material('#29333b',.25,.6),sail=material('#eee1bd',.01,.8),water=material('#307f9c',.2,.45),foam=material('#8cced3',.03,.6);
+ box(p,0,.01,0,.94,.065,2.2,water,.012);
+ const ship=new THREE.Group();ship.name='Pirate ship';ship.position.z=-.28;p.add(ship);
+ function hull(width,height,y,mat){
+  const shape=new THREE.Shape();shape.moveTo(-width,-.48);shape.lineTo(width,-.48);shape.lineTo(width,.3);shape.quadraticCurveTo(width,.52,0,.66);shape.quadraticCurveTo(-width,.52,-width,.3);shape.closePath();
+  const geometry=new THREE.ExtrudeGeometry(shape,{depth:height,bevelEnabled:false,curveSegments:8});geometry.rotateX(-Math.PI/2);mesh(ship,geometry,mat,0,y,0);
+ }
+ hull(.15,.12,.08,wood);hull(.215,.13,.19,wood);hull(.207,.025,.32,deckwood);
+ for(const side of [-1,1]){
+  box(ship,side*.219,.22,-.04,.018,.018,.93,gold,.002);box(ship,side*.219,.31,-.04,.018,.027,.93,wood,.002);
+  for(let j=0;j<6;j++)box(ship,side*.215,.35,-.4+j*.15,.014,.08,.014,wood,.002);
+  box(ship,side*.215,.43,-.025,.017,.018,.83,wood,.002);
+ }
+ box(ship,0,.345,.36,.39,.18,.25,wood,.006);box(ship,0,.53,.36,.42,.025,.28,deckwood,.004);
+ for(const x of [-.13,0,.13])box(ship,x,.395,.49,.07,.07,.01,material('#c6ad62',.2,.55),.002);
+ // Two masts, rigging, pale canvas, and a skull-and-crossbones main sail.
+ const canvas=document.createElement('canvas');canvas.width=256;canvas.height=320;const ctx=canvas.getContext('2d');ctx.fillStyle='#263039';ctx.fillRect(0,0,256,320);ctx.strokeStyle='#fff0d2';ctx.lineWidth=12;ctx.beginPath();ctx.moveTo(65,230);ctx.lineTo(190,152);ctx.moveTo(65,152);ctx.lineTo(190,230);ctx.stroke();ctx.fillStyle='#fff0d2';ctx.beginPath();ctx.ellipse(128,111,48,43,0,0,Math.PI*2);ctx.fill();ctx.fillRect(108,143,40,20);ctx.fillStyle='#263039';for(const x of [109,147]){ctx.beginPath();ctx.arc(x,111,12,0,Math.PI*2);ctx.fill();}ctx.beginPath();ctx.moveTo(128,124);ctx.lineTo(119,139);ctx.lineTo(137,139);ctx.fill();
+ const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;const pirateCanvas=new THREE.MeshStandardMaterial({map:texture,side:THREE.DoubleSide,roughness:.9});
+ const plainCanvas=sail.clone();plainCanvas.side=THREE.DoubleSide;
+ function rope(a,b){const start=new THREE.Vector3(...a),end=new THREE.Vector3(...b),d=end.clone().sub(start);const r=mesh(ship,new THREE.CylinderGeometry(.004,.004,d.length(),5),iron,...start.clone().add(end).multiplyScalar(.5).toArray());r.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());}
+ for(const [z,height,w,h,mat] of [[-.22,1.05,.36,.48,pirateCanvas],[.28,.83,.3,.34,plainCanvas]]){
+  cyl(ship,0,.34,z,.016,height,wood,.014,10);box(ship,0,.34+height-.14,z,w+.06,.016,.016,wood,.002);
+  const geometry=new THREE.PlaneGeometry(w,h,6,5),positions=geometry.attributes.position;
+  for(let i=0;i<positions.count;i++)positions.setZ(i,Math.sin((positions.getX(i)/w+.5)*Math.PI)*.055);
+  geometry.computeVertexNormals();mesh(ship,geometry,mat,0,.34+height-.15-h/2,z+.01);
+  for(const side of [-1,1]){rope([side*.19,.35,z-.18],[0,.34+height-.07,z]);rope([side*.19,.35,z+.17],[0,.34+height-.07,z]);}
+ }
+ const flag=mesh(ship,new THREE.PlaneGeometry(.17,.1),pirateCanvas,.087,1.37,-.22);flag.rotation.y=.15;
+ const guns=[];
+ for(const side of [-1,1])for(let j=0;j<3;j++){
+  const z=-.3+j*.3,barrel=mesh(ship,new THREE.CylinderGeometry(.026,.032,.105,10),iron,side*.245,.267,z);barrel.rotation.z=Math.PI/2;
+  box(ship,side*.211,.235,z,.03,.07,.08,iron,.002);
+  const flash=mesh(ship,new THREE.OctahedronGeometry(.043),new THREE.MeshBasicMaterial({color:'#ffe4a0'}),side*.31,.267,z,false);flash.name='Cannon flash';
+  const smokeMaterial=new THREE.MeshBasicMaterial({color:'#e1dbce',transparent:true,opacity:.5,depthWrite:false});
+  const smoke=ball(ship,side*.31,.28,z,.045,smokeMaterial,10);smoke.castShadow=false;smoke.name='Cannon smoke';
+  guns.push({side,z,flash,smoke,smokeMaterial,offset:(j+(side>0?3:0))*.65});
+ }
+ const wakes=[];for(const side of [-1,1])for(let j=0;j<4;j++)wakes.push(box(p,side*.27,.079,-.68+j*.25,.04,.008,.11,foam,.002));
+ const sailAway=time=>{
+  ship.position.set(Math.sin(time*.65)*.022,.015+Math.sin(time*1.6)*.012,-.28+Math.sin(time*.45)*.07);ship.rotation.set(Math.sin(time*.9)*.025,Math.sin(time*.5)*.025,Math.sin(time*1.3)*.025);
+  flag.rotation.y=.15+Math.sin(time*2)*.12;
+  guns.forEach(({side,z,flash,smoke,smokeMaterial,offset})=>{
+   const phase=(time+offset)%5.5;flash.visible=phase<.12;flash.scale.setScalar(.8+Math.sin(phase*22)*.2);
+   smoke.visible=phase<1.1;const progress=Math.min(phase/1.1,1);smoke.position.set(side*(.31+progress*.055),.28+progress*.16,z);smoke.scale.setScalar(.35+progress*.65);smokeMaterial.opacity=(1-progress)*.6;
+  });
+  wakes.forEach((w,i)=>{w.position.z=-.68+(i%4)*.25+Math.sin(time*.8+i)*.025;});
+ };
+ sailAway(0);rideAnimations.push(sailAway);
+}
 function attraction(t){const p=new THREE.Group();p.position.set(t.x,.29,t.z-.17);world.add(p);const cream=material('#e6d6c1',.09,.3),mauve=material('#9c82b5',.13,.24),color=material(colors[t.park],.12,.23);
 if(t.shape==='monorail'){monorailSpot(p);}
 else if(t.shape==='mainstreet'){mainStreetSpot(p);}
 else if(t.shape==='cards'){magicDeckSpot(p);}
 else if(t.shape==='magic'){pixieDustSpot(p);}
+else if(t.shape==='pirates'){pirateShipSpot(p);}
 else if(t.shape==='mountain'){const m=mesh(p,new THREE.ConeGeometry(.58,1.06,renderer.software?8:12),porcelain,0,.63,0);m.geometry.scale(1,1,.85);cone(p,-.3,.03,.1,.31,.62,material('#b6bad2',.09,.26));cyl(p,0,.04,0,.64,.04,blue);if(/space mountain|big thunder|everest/i.test(t.name||''))coasterTrack(p,true);for(let i=0;i<10;i++){const a=i/10*Math.PI*2;box(p,.48*Math.cos(a),.1,.48*Math.sin(a),.035,.37,.035,gold,.008)}}
 else if(t.shape==='spinner'){cyl(p,0,0,0,.62,.06,cream);const spin=new THREE.Group();p.add(spin);cyl(spin,0,.08,0,.075,.5,gold);for(let i=0;i<5;i++){const a=i/5*Math.PI*2;box(spin,.24*Math.cos(a),.2,.24*Math.sin(a),.42,.035,.05,gold,.008);const cup=cyl(spin,.43*Math.cos(a),.1,.43*Math.sin(a),.14,.16,i%2?mauve:blue,.17,12);cup.rotation.y=a;}const phase=rideAnimations.length*.4;rideAnimations.push(time=>{spin.rotation.y=time*.7+phase;});}
 else if(t.shape==='sphere'){cyl(p,0,0,0,.3,.28,trim);ball(p,0,.8,0,.57,material('#e5edf5',.52,.2),40);ring(p,0,.83,0,.572,.006,material('#aebbd0',.55));}
@@ -3395,8 +3448,8 @@ function outsideSpaceLabel(space,index,r){
 
 SPACES.forEach((s,i)=>{const r=spaceLayout(i),tile=box(world,r.x,.15,r.z,r.w-.035,.14,r.d-.035,porcelain,.025);tile.userData.space=i;tileMeshes.push(tile);spaces.push(r);
 const banner=box(world,r.x,.299,r.z,r.w*.86,.018,r.d*.86,material(colors[r.side],.12,.25),.005);banner.visible=true;
-const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia','mansion','cards','pin','magic'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
-if(['monorail','mainstreet','trivia','mansion','cards','pin','magic'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
+const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
+if(['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
 if(r.side%2)model.rotation.y=Math.PI/2;
 outsideSpaceLabel(s,i,r);
 const flag=cyl(world,r.x,.307,r.z,.095,.07,gold);flag.visible=false;ownerFlags.push(flag);
@@ -3564,7 +3617,7 @@ const rotations={1:[0,0,0],2:[-Math.PI/2,0,0],3:[0,0,Math.PI/2],4:[0,0,-Math.PI/
 let diceValues=[1,1],diceStart=0,raf=0,last=0,width=0,height=0,selected=players[currentPlayer].pos,angle=.24,targetAngle=.24,mode='free',zoom=1,distance=44,targetDistance=44,look=new THREE.Vector3(),target=new THREE.Vector3(),drag=null,flat=false,showSpaceNames=false,dragMode='pan',wasMoving=false,autoFollow=false,followIndex=currentPlayer;
 const pointers=new Map();let pinch=null;
 const ray=new THREE.Raycaster(),resizeObserver=new ResizeObserver(resize);
-function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(['trivia','magic','pin'].includes(SPACES[player.pos].type)||SPACES[player.pos].name==='Pixie Dust'){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/haunted mansion/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.91)};if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
+function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(['trivia','magic','pin'].includes(SPACES[player.pos].type)||SPACES[player.pos].name==='Pixie Dust'){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/pirates of the caribbean/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/haunted mansion/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.91)};if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
 function info(index){selected=index;const s=SPACES[index],owner=owners[index],r=spaces[index];highlight.position.set(r.x,.34,r.z);const price=s.type==='property'?' · '+(owner===undefined?'Buy $'+s.cost:'Rent $'+rentForSpace(index)):'';document.getElementById('board3dInfo').style.setProperty('--park-color',colors[r.side]);document.getElementById('board3dInfo').innerHTML='<strong>'+esc(s.icon+' '+s.name)+'</strong><span>Space '+(index+1)+' / 80 · '+esc(s.park||['Magic Kingdom','EPCOT','Hollywood Studios','Animal Kingdom'][r.side])+price+(owner===undefined?'': ' · Owned by '+esc(players[owner].name))+'</span><div class="space-browser"><button class="secondary" data-space-step="-1" aria-label="Previous board space">←</button><button class="secondary" data-space-step="1" aria-label="Next board space">→</button></div>';drawRequest();}
 function updateCameraButtons(){host.querySelectorAll('[data-camera="free"],[data-camera="board"],[data-camera="follow"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.camera===mode)));}
 function freeCamera(){mode='free';autoFollow=false;updateCameraButtons();}
