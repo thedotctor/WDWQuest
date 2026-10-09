@@ -4754,9 +4754,30 @@ function tokenPawn(player,i){
   cyl(figure,0,.27,-.025,.042,.19,stone,.033,12);cone(figure,0,.46,-.025,.05,.16,roof);ball(figure,0,.63,-.025,.008,gold,8);break;
  }
  case 'monorail':{
-  box(figure,0,.13,0,.44,.045,.075,metal,.007);
-  for(const x of [-.115,.115]){box(figure,x,.175,0,.216,.17,.13,ivory,.019);box(figure,x,.35,0,.21,.025,.135,ivory,.009);for(const side of [-1,1]){box(figure,x,.206,side*.068,.21,.021,.007,material('#ce4e55'),.002);for(const dx of [-.065,0,.065])box(figure,x+dx,.263,side*.069,.041,.048,.006,ink,.003);}}
-  box(figure,-.228,.255,0,.008,.066,.087,ink,.003);box(figure,.228,.255,0,.008,.066,.087,ink,.003);break;
+  const stripe=material('#cf4651'),rubber=material('#4a5360');
+  for(const x of [-.105,.105])box(figure,x,.11,0,.025,.072,.052,metal,.004);
+  box(figure,0,.165,0,.49,.033,.065,metal,.005);
+  for(const x of [-.105,.105]){
+   box(figure,x,.195,0,.18,.15,.13,ivory,.013);box(figure,x,.346,0,.175,.023,.135,ivory,.007);box(figure,x,.372,0,.067,.012,.064,metal,.003);
+   box(figure,x,.193,0,.146,.016,.09,rubber,.003);
+   for(const side of [-1,1]){
+    box(figure,x,.223,side*.068,.182,.014,.007,stripe,.002);
+    for(const dx of [-.056,.056])box(figure,x+dx,.276,side*.069,.040,.041,.006,ink,.003);
+    box(figure,x,.239,side*.070,.038,.099,.006,metal,.002);box(figure,x,.242,side*.074,.032,.092,.004,ivory,.002);
+    box(figure,x,.278,side*.077,.026,.043,.004,ink,.002);box(figure,x,.242,side*.078,.002,.092,.004,rubber,.001);
+    box(figure,x,.223,side*.078,.034,.014,.004,stripe,.001);
+   }
+  }
+  // Accordion coupling between the two cars.
+  for(const x of [-.009,0,.009])box(figure,x,.217,0,.005,.109,.107,rubber,.002);
+  for(const side of [-1,1]){
+   const nose=new THREE.Shape();nose.moveTo(side*.19,.197);nose.lineTo(side*.276,.211);nose.lineTo(side*.250,.342);nose.lineTo(side*.19,.346);nose.closePath();
+   mesh(figure,new THREE.ExtrudeGeometry(nose,{depth:.128,bevelEnabled:false}),ivory,0,0,-.064);
+   const windshield=mesh(figure,new THREE.BoxGeometry(.007,.060,.089),ink,side*.257,.284,0);windshield.rotation.z=side*.195;
+   box(figure,side*.259,.242,0,.009,.018,.120,stripe,.002);
+   for(const z of [-.044,.044]){const lamp=ball(figure,side*.276,.217,z,.008,new THREE.MeshBasicMaterial({color:'#ffe4a7'}),8);lamp.scale.x=.45;}
+  }
+  break;
  }
  case 'epcot':{
   for(let j=0;j<3;j++){const a=j*Math.PI*2/3;rod(figure,[Math.sin(a)*.10,.11,Math.cos(a)*.10],[Math.sin(a)*.05,.27,Math.cos(a)*.05],.012,metal);}
