@@ -148,3 +148,5 @@ button:disabled{cursor:not-allowed}
 .game-layout:not(.with-3d)>.turn-panel{grid-column:2;grid-row:1;position:sticky;left:auto;top:20px;transform:none;width:100%;max-height:none}
 .game-layout:not(.with-3d)>.board-key,.game-layout:not(.with-3d)>.log{grid-column:1/-1}
 @media(max-width:900px){.game-layout:not(.with-3d){grid-template-columns:minmax(0,1fr)}.game-layout:not(.with-3d)>.turn-panel{grid-column:1;grid-row:2;position:static}.game-layout:not(.with-3d)>.board-wrap{max-width:100%}}
+.board3d-stage canvas:focus-visible{outline:2px solid #f1cb7b88;outline-offset:-3px}
+.board3d-toolbar [data-drag-mode]{border-style:dashed}
