@@ -3177,6 +3177,28 @@ function hauntedMansionSpot(p){
   box(p,side*.3,.15,.76,.2,.012,.012,dark,.001);
   for(const z of [-.9,.52]){box(p,side*.4,.05,z,.075,.115,.035,stone,.012);ball(p,side*.4,.163,z,.036,stone,8);}
  }
+ // Small sheet ghosts drift out of the conservatory, rise, and dissolve.
+ const silhouette=new THREE.Shape();silhouette.moveTo(-.11,.02);silhouette.lineTo(-.11,.19);
+ silhouette.bezierCurveTo(-.11,.34,.11,.34,.11,.19);silhouette.lineTo(.11,.02);
+ silhouette.quadraticCurveTo(.075,.075,.04,.02);silhouette.quadraticCurveTo(0,.075,-.04,.02);silhouette.quadraticCurveTo(-.075,.075,-.11,.02);silhouette.closePath();
+ const ghostGeometry=new THREE.ExtrudeGeometry(silhouette,{depth:.035,bevelEnabled:true,bevelSize:.006,bevelThickness:.006,bevelSegments:1,curveSegments:8});
+ const ghosts=[];
+ for(let i=0;i<3;i++){
+  const ghost=new THREE.Group();ghost.name='Mansion ghost '+(i+1);p.add(ghost);
+  const sheet=new THREE.MeshStandardMaterial({color:'#d5fff5',emissive:'#67cbbd',emissiveIntensity:.55,transparent:true,opacity:.65,depthWrite:false,roughness:.7,side:THREE.DoubleSide});
+  mesh(ghost,ghostGeometry,sheet,0,0,-.0175,false);
+  const face=new THREE.MeshBasicMaterial({color:'#264b58',transparent:true,opacity:.8,depthWrite:false});
+  for(const x of [-.037,.037]){const eye=ball(ghost,x,.215,.03,.014,face,8);eye.scale.y=1.4;eye.castShadow=false;}
+  const mouth=ball(ghost,0,.16,.03,.016,face,8);mouth.scale.set(.65,1.35,.5);mouth.castShadow=false;
+  ghosts.push({ghost,sheet,face,offset:i/3});
+ }
+ const drift=time=>ghosts.forEach(({ghost,sheet,face,offset},i)=>{
+  const progress=(time/4.8+offset)%1,fade=Math.sin(progress*Math.PI);
+  ghost.position.set(Math.sin(progress*5+i*2)*.22,.35+progress*1.4,.54+progress*.12);
+  ghost.rotation.y=Math.atan2(camera.position.x-p.position.x,camera.position.z-p.position.z);
+  ghost.scale.setScalar(.72+progress*.3);sheet.opacity=fade*.7;face.opacity=fade*.9;
+ });
+ drift(0);rideAnimations.push(drift);
 }
 function attraction(t){const p=new THREE.Group();p.position.set(t.x,.29,t.z-.17);world.add(p);const cream=material('#e6d6c1',.09,.3),mauve=material('#9c82b5',.13,.24),color=material(colors[t.park],.12,.23);
 if(t.shape==='monorail'){monorailSpot(p);}
