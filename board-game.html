@@ -4838,7 +4838,26 @@ function tokenPawn(player,i){
 }
 players.forEach((p,i)=>pawns.push(tokenPawn(p,i)));
 const dice=[];const pipLayout={1:[[0,0]],2:[[-1,-1],[1,1]],3:[[-1,-1],[0,0],[1,1]],4:[[-1,-1],[1,-1],[-1,1],[1,1]],5:[[-1,-1],[1,-1],[0,0],[-1,1],[1,1]],6:[[-1,-1],[1,-1],[-1,0],[1,0],[-1,1],[1,1]]};
-for(let i=0;i<2;i++){const g=new THREE.Group();world.add(g);box(g,0,-.45,0,.9,.9,.9,material('#fff4dd',.02,.34),.11);g.scale.setScalar(1.15);for(const [axis,sign,val]of [[1,1,1],[1,-1,6],[2,1,2],[2,-1,5],[0,1,3],[0,-1,4]])for(const [a,b]of pipLayout[val]){const xyz=axis===1?[a*.205,sign*.454,b*.205]:axis===2?[a*.205,b*.205,sign*.454]:[sign*.454,a*.205,b*.205];const pip=ball(g,...xyz,.066,material('#172237',0,.65),12);pip.scale[axis===0?'x':axis===1?'y':'z']=.14}dice.push(g);}
+// A centered rounded cube keeps every flat face at exactly +/- .45.
+// The general building bevel extends past its nominal side dimensions and can bury pips.
+const dieGeometry=new THREE.BoxGeometry(.9,.9,.9,renderer.software?4:8,renderer.software?4:8,renderer.software?4:8);
+const diePositions=dieGeometry.attributes.position,dieNormals=dieGeometry.attributes.normal;
+for(let vertex=0;vertex<diePositions.count;vertex++){
+ const point=new THREE.Vector3().fromBufferAttribute(diePositions,vertex),inner=point.clone().clampScalar(-.37,.37),normal=point.clone().sub(inner).normalize();
+ point.copy(inner).addScaledVector(normal,.08);diePositions.setXYZ(vertex,point.x,point.y,point.z);dieNormals.setXYZ(vertex,normal.x,normal.y,normal.z);
+}
+for(let i=0;i<2;i++){
+ const g=new THREE.Group();g.name='Game die '+(i+1);world.add(g);mesh(g,dieGeometry,material('#fff4dd',.02,.40),0,0,0);g.scale.setScalar(1.15);
+ for(const [axis,sign,value] of [[1,1,1],[1,-1,6],[2,1,2],[2,-1,5],[0,1,3],[0,-1,4]]){
+  const face=new THREE.Group();face.name='Die '+(i+1)+' face '+value;face.userData.dieValue=value;face.userData.pipAxis=axis;face.userData.pipSign=sign;g.add(face);
+  for(const [a,b] of pipLayout[value]){
+   const xyz=axis===1?[a*.205,sign*.462,b*.205]:axis===2?[a*.205,b*.205,sign*.462]:[sign*.462,a*.205,b*.205];
+   const pip=mesh(face,new THREE.CylinderGeometry(.071,.071,.008,16),material('#172237',0,.72),...xyz,false);
+   if(axis===0)pip.rotation.z=Math.PI/2;else if(axis===2)pip.rotation.x=Math.PI/2;
+  }
+ }
+ dice.push(g);
+}
 const rotations={1:[0,0,0],2:[-Math.PI/2,0,0],3:[0,0,Math.PI/2],4:[0,0,-Math.PI/2],5:[Math.PI/2,0,0],6:[Math.PI,0,0]};
 let diceValues=[1,1],diceStart=0,raf=0,last=0,width=0,height=0,selected=players[currentPlayer].pos,angle=.24,targetAngle=.24,mode='free',zoom=1,distance=44,targetDistance=44,look=new THREE.Vector3(),target=new THREE.Vector3(),drag=null,flat=false,showSpaceNames=false,dragMode='pan',wasMoving=false,autoFollow=false,followIndex=currentPlayer;
 const pointers=new Map();let pinch=null;

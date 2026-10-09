@@ -214,6 +214,37 @@ class BoardGameTests(unittest.TestCase):
         self.page.locator('[data-camera="board"]').click()
         self.page.wait_for_function("Math.abs(cameraSample.x) < .1 && Math.abs(cameraSample.z) < .1")
 
+    def test_dice_have_visible_pips_on_all_six_faces(self):
+        self.page.evaluate("""async () => {
+            const THREE=await import('./assets/vendor/three.module.js');window.diceReviewThree=THREE;
+            const add=THREE.Object3D.prototype.add;
+            THREE.Object3D.prototype.add=function(...objects){if(this.isScene)window.diceReviewScene=this;return add.apply(this,objects);};
+        }""")
+        self.start_game()
+        result=self.page.evaluate("""() => {
+            const issues=[];
+            for(let i=1;i<=2;i++){
+                const die=diceReviewScene.getObjectByName('Game die '+i);
+                if(!die){issues.push('Missing die '+i);continue;}
+                const cube=die.children.find(o=>o.isMesh);cube.geometry.computeBoundingBox();
+                const extent=cube.geometry.boundingBox;
+                for(let value=1;value<=6;value++){
+                    const face=die.getObjectByName('Die '+i+' face '+value);
+                    if(!face||face.children.length!==value){issues.push('Incorrect pip count '+value);continue;}
+                    const axis=['x','y','z'][face.userData.pipAxis],sign=face.userData.pipSign;
+                    const surface=sign>0?extent.max[axis]:-extent.min[axis];
+                    face.children.forEach(pip=>{
+                        pip.updateMatrix();const positions=pip.geometry.attributes.position;
+                        let inner=Infinity;
+                        for(let j=0;j<positions.count;j++)inner=Math.min(inner,sign*new diceReviewThree.Vector3().fromBufferAttribute(positions,j).applyMatrix4(pip.matrix)[axis]);
+                        if(inner<surface+.003)issues.push('Pip buried inside die '+i+' face '+value);
+                    });
+                }
+            }
+            return issues;
+        }""")
+        self.assertEqual(result,[])
+
     def test_all_twelve_tokens_use_solid_3d_pawns(self):
         self.page.evaluate("""async () => {
             const THREE=await import('./assets/vendor/three.module.js');
