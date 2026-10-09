@@ -2989,8 +2989,62 @@ function ring(p,x,y,z,r,t,mat){const m=mesh(p,new THREE.TorusGeometry(r,t,render
 function plaque(p,text,x,y,z,w,d,color='#263a56',rotation=0){const c=document.createElement('canvas');c.width=512;c.height=128;const ct=c.getContext('2d');ct.fillStyle=color;ct.textAlign='center';ct.textBaseline='middle';ct.font='500 44px system-ui';ct.fillText(text,256,64,480);const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;const m=mesh(p,new THREE.PlaneGeometry(w,d),new THREE.MeshBasicMaterial({map:tex,transparent:true,depthWrite:false}),x,y,z,false);m.rotation.set(-Math.PI/2,0,rotation);return m;}
 const floor=new THREE.Mesh(new THREE.PlaneGeometry(180,180),new THREE.ShadowMaterial({opacity:.18}));floor.rotation.x=-Math.PI/2;floor.position.y=-.69;floor.receiveShadow=true;scene.add(floor);
 function windows(p,x,y,z,w,h,count=3){for(let i=0;i<count;i++)box(p,x+(i-(count-1)/2)*w/(count+.5),y,z,w/(count+2),h,.035,glass,.016);}
-function tower(p,x,y,z,h,r){cyl(p,x,y,z,r,h,porcelain);cyl(p,x,y+h-.04,z,r+.06,.1,gold);cone(p,x,y+h+.06,z,r+.1,.6,blue);cyl(p,x,y+h+.64,z,.02,.25,gold);ball(p,x,y+h+.88,z,.045,gold);windows(p,x,y+h*.46,z+r,.14,.28,1);}
-function castle(){const p=new THREE.Group();world.add(p);box(p,0,.3,0,2.1,1.4,1.4,porcelain,.12);box(p,0,1.65,-.2,1.05,1.1,.85,porcelain,.08);tower(p,0,2.65,-.2,1,.36);for(const x of [-1.08,1.08])for(const z of [-.55,.55])tower(p,x,.3,z,z<0?2.15:1.55,.24);for(const x of [-.62,.62])tower(p,x,1.55,-.38,1.15,.17);box(p,0,.32,.73,.48,.8,.05,glass,.08);box(p,0,1.25,.74,.72,.075,.09,gold,.015);windows(p,0,1.48,.73,1.2,.23,3);for(const x of [-.52,.52])box(p,x,.3,.83,.2,.32,.35,trim);cyl(p,0,4.25,-.2,.02,.32,gold);const flag=mesh(p,new THREE.PlaneGeometry(.46,.23),material('#d8b98a',.45),.23,4.46,-.2);flag.material.side=THREE.DoubleSide;}
+// Magic Kingdom silhouette: gray stone lower walls, rose upper stories,
+// clustered blue conical roofs and the tall, tiered central spire.
+function castle(){
+ const p=new THREE.Group();p.name='Cinderella Castle';world.add(p);
+ const stone=material('#bbc5d3',.04,.6),rose=material('#e7b6c6',.04,.5),roseShade=material('#d39aae',.03,.56),roof=material('#285dab',.16,.38),roofEdge=material('#18427f',.1,.48),ivory=material('#f2e6d5',.04,.5),royalGold=material('#e2bb63',.65,.3);
+ const windowMat=new THREE.MeshStandardMaterial({color:'#243650',emissive:'#c58f4b',emissiveIntensity:.18,roughness:.5});
+ const archCache=new Map();
+ function archGeometry(w,h){const id=w+':'+h;if(archCache.has(id))return archCache.get(id);const shape=new THREE.Shape(),r=w/2;shape.moveTo(-r,0);shape.lineTo(r,0);shape.lineTo(r,h-r);shape.absarc(0,h-r,r,0,Math.PI,false);shape.closePath();const g=new THREE.ShapeGeometry(shape,12);archCache.set(id,g);return g;}
+ function windowAt(x,y,z,w=.16,h=.36){mesh(p,archGeometry(w+.045,h+.045),royalGold,x,y-.02,z,false);mesh(p,archGeometry(w,h),windowMat,x,y,z+.006,false);}
+ function finial(x,y,z,h=.35){cyl(p,x,y,z,.017,h,royalGold,.009,8);ball(p,x,y+h*.72,z,.038,royalGold,10);cone(p,x,y+h,z,.035,.1,royalGold);}
+ function spire(x,y,z,r,h){cyl(p,x,y,z,r*1.1,.09,royalGold,r*1.1,16);cone(p,x,y+.085,z,r*1.17,h,roof);for(let i=1;i<=3;i++)ring(p,x,y+.085+h*i/4,z,r*1.17*(1-i/4),.009,roofEdge);finial(x,y+.085+h,z,.25);}
+ function turret(x,z,base,h,r,roofH,upper=true){
+  cyl(p,x,base,z,r,h,upper?rose:stone,r,20);cyl(p,x,base,z,r*1.06,.12,ivory,r*1.06,20);
+  cyl(p,x,base+h-.15,z,r*1.06,.1,ivory,r*1.06,20);
+  for(const offset of [-.35,.35]){const angle=Math.PI/2+offset;windowAt(x+Math.cos(angle)*r,base+h*.47,z+Math.sin(angle)*r+.015,.13,Math.min(.4,h*.3));}
+  spire(x,base+h,z,r,roofH);
+ }
+ // Broad lower bastions and an actual open arch, rather than a dark door decal.
+ for(const x of [-1.03,1.03]){box(p,x,.3,.05,1.1,1.35,1.8,stone,.055);box(p,x,1.65,.05,1.16,.09,1.85,ivory,.02);for(let i=0;i<5;i++)box(p,x+(i-2)*.21,1.74,.97,.12,.18,.14,stone,.015);}
+ box(p,0,.3,-.78,2.6,1.3,.45,stone,.05);
+ const gate=new THREE.Shape(),w=1.05,h=1.5,r=.34,spring=.87;
+ gate.moveTo(-w/2,0);gate.lineTo(-w/2,h);gate.lineTo(w/2,h);gate.lineTo(w/2,0);gate.lineTo(r,0);gate.lineTo(r,spring);gate.absarc(0,spring,r,0,Math.PI,false);gate.lineTo(-r,0);gate.closePath();
+ mesh(p,new THREE.ExtrudeGeometry(gate,{depth:.25,bevelEnabled:false,curveSegments:16}),stone,0,.3,.89);
+ box(p,0,.3,.71,.67,1.13,.015,material('#263446',0,.85),.008);
+ // Individual stone voussoirs pick out the entrance arch.
+ for(let i=0;i<9;i++){const a=(i+.5)/9*Math.PI;const block=box(p,Math.cos(a)*.39,.3+spring+Math.sin(a)*.39,1.155,.11,.13,.07,ivory,.008);block.rotation.z=a-Math.PI/2;}
+ for(const x of [-.39,.39])box(p,x,.3,1.15,.1,.86,.07,ivory,.008);
+ // Rose keep with steep blue gables and the clock over the entrance.
+ box(p,0,1.8,-.12,1.6,1.1,1.3,rose,.045);box(p,0,2.87,-.12,1.7,.075,1.39,ivory,.02);
+ const gable=mesh(p,new THREE.ConeGeometry(1,1,4),roof,0,3.31,-.13);gable.rotation.y=Math.PI/4;gable.scale.set(.98,1,.72);
+ box(p,0,1.86,.75,.74,.82,.36,roseShade,.025);const clockRoof=mesh(p,new THREE.ConeGeometry(.6,.65,4),roof,0,3.005,.75);clockRoof.rotation.y=Math.PI/4;clockRoof.scale.z=.7;
+ const clock=mesh(p,new THREE.CircleGeometry(.16,32),ivory,0,2.37,.945,false);const bezel=mesh(p,new THREE.TorusGeometry(.17,.022,6,32),royalGold,0,2.37,.95,false);
+ for(let i=0;i<12;i++){const a=i/12*Math.PI*2;const tick=box(p,Math.sin(a)*.128,2.37+Math.cos(a)*.128,.954,.013,.027,.012,royalGold,.003);tick.rotation.z=-a;}
+ box(p,0,2.42,.97,.013,.09,.012,roofEdge,.003);const hand=box(p,.035,2.365,.971,.09,.012,.012,roofEdge,.003);hand.rotation.z=-.3;
+ // Unequal heights and offsets recreate the real castle's layered skyline.
+ turret(-1.55,.65,.3,2.25,.3,1.04,false);turret(1.55,.65,.3,2.55,.3,1.13,false);
+ turret(-1.3,-.73,1.25,2.15,.24,1.2);turret(1.24,-.66,1.2,1.83,.25,.93);
+ turret(-.79,.18,2.63,1.28,.18,.86);turret(.78,.12,2.65,1.08,.18,.78);
+ turret(-.65,-.73,2.72,1.93,.2,1.18);turret(.58,-.78,2.71,1.53,.2,.96);
+ turret(-1.82,-.22,.3,1.26,.2,.66,false);turret(1.82,-.26,.3,1.41,.2,.71,false);
+ // The landmark's slender central tower rises above the smaller turrets.
+ cyl(p,0,2.93,-.35,.4,1.18,rose,.34,8);cyl(p,0,4.06,-.35,.42,.13,ivory,.42,8);
+ for(const x of [-.17,.17])windowAt(x,3.39,.002,.13,.5);
+ cyl(p,0,4.2,-.35,.29,.63,roseShade,.25,8);cyl(p,0,4.8,-.35,.3,.08,royalGold,.3,8);
+ spire(0,4.88,-.35,.31,1.51);
+ turret(-.36,-.35,3.96,.5,.105,.62);turret(.36,-.35,3.96,.5,.105,.62);
+ // Narrow blue-roofed turrets along the rear wings.
+ turret(-1.05,-1.06,1.68,.76,.14,.6);turret(1.0,-1.06,1.68,.83,.14,.63);
+ for(const x of [-1.04,1.04]){windowAt(x,.88,.963,.18,.45);windowAt(x,1.98,.718,.16,.38);}
+ // Stone bridge and gold fleur-like railing caps lead through the gate.
+ box(p,0,.32,1.82,.78,.14,1.55,ivory,.02);
+ for(const x of [-.45,.45]){box(p,x,.35,1.82,.09,.36,1.6,stone,.018);box(p,x,.71,1.82,.13,.06,1.68,ivory,.018);for(let i=0;i<4;i++)ball(p,x,.81,1.18+i*.42,.045,royalGold,10);}
+ // Fine masonry courses remain visible from a close camera view.
+ for(const x of [-1.03,1.03])for(let i=0;i<5;i++)box(p,x,.48+i*.23,.958,1.04,.011,.008,material('#929fb5',0,.65),.002);
+ return p;
+}
 function tree(p,x,y,z,size=1){cyl(p,x,y,z,.075*size,.45*size,material('#9c8268'));ball(p,x,y+.67*size,z,.29*size,material('#72a893',.07,.33));ball(p,x-.2*size,y+.48*size,z,.2*size,material('#85b29c',.07,.34));ball(p,x+.2*size,y+.54*size,z,.22*size,material('#8ab4a4',.07,.31));}
 const rideAnimations=[];let rideMotion=true,lastRideFrame=0;
 function coasterTrack(parent,mountain=false){
@@ -3025,7 +3079,7 @@ return p;}
 
 box(world,0,-.65,0,24.65,.48,24.65,material('#263954',.32,.2),.15);box(world,0,-.18,0,24.38,.07,24.38,gold,.02);box(world,0,-.1,0,24.15,.23,24.15,porcelain,.06);box(world,0,.16,0,19.1,.06,19.1,material('#607f82',.08,.48),.02);
 for(const a of [-1,1]){box(world,a*12.07,.155,0,.035,.018,24,gold,.004);box(world,0,.155,a*12.07,24,.018,.035,gold,.004);}
-ring(world,0,.28,0,3.05,.045,gold);ring(world,0,.28,0,2.82,.02,porcelain);box(world,0,.25,3.3,1.7,.025,3.8,material('#ded0b3',.15,.3),.005);castle();
+ring(world,0,.28,0,3.05,.045,gold);ring(world,0,.28,0,2.82,.02,porcelain);box(world,0,.25,3.3,1.7,.025,3.8,material('#ded0b3',.15,.3),.005);const castleModel=castle();
 plaque(world,'WDWQUEST',0,.245,-3.6,6.7,1.3,'#455878');plaque(world,'CINDERELLA CASTLE FINALE',0,.245,5.8,7.9,.7,'#455878');
 for(const x of [-6.8,6.8])for(const z of [-6.8,6.8])tree(world,x,.25,z,.8);
 const lanternMaterial=new THREE.MeshStandardMaterial({color:'#ffe5a1',emissive:'#ffc85a',emissiveIntensity:2.2,roughness:.3});
@@ -3080,7 +3134,7 @@ function parkNameplate(name,x,z,rotation,w){
  ['HOLLYWOOD STUDIOS',0,8.5,0,11.5],
  ['ANIMAL KINGDOM',-8.5,0,-Math.PI/2,10.5]
 ].forEach(([name,x,z,rotation,w])=>parkNameplate(name,x,z,rotation,w));
-const centerTargets=[];
+const centerTargets=[];castleModel.traverse(part=>{if(part.isMesh){part.userData.control='castleFinaleBtn';centerTargets.push(part);}});
 function parkGuest(shirt,skin='#d5a17d',hat=false){
  const p=new THREE.Group(),cloth=material(shirt,.05,.4),pants=material('#38465d',.02,.5),skinMat=material(skin,.02,.45);
  box(p,0,.35,0,.25,.32,.18,cloth,.03);ball(p,0,.82,0,.13,skinMat);
