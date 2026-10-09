@@ -2955,7 +2955,7 @@ function spaceLayout(i){const side=Math.floor(i/20),step=i%20,c=2.4,a=(24-2*c)/1
 if(!step)return {x:[-10.8,10.8,10.8,-10.8][side],z:[-10.8,-10.8,10.8,10.8][side],w:c,d:c,side};
 const offset=-12+c+(step-.5)*a;
 return side===0?{x:offset,z:-10.8,w:a,d:c,side}:side===1?{x:10.8,z:offset,w:c,d:a,side}:side===2?{x:-offset,z:10.8,w:a,d:c,side}:{x:-10.8,z:-offset,w:c,d:a,side};}
-function modelShape(s){if(s.type==='transport')return /monorail/i.test(s.name)?'monorail':/boat/i.test(s.name)?'boat':'station';if(/main street/i.test(s.name))return 'mainstreet';if(s.type==='pin')return 'pin';if(s.type==='trivia')return 'trivia';if(s.type==='magic')return 'cards';if(s.name==='Pixie Dust')return 'magic';if(s.name==='Snack Break')return 'food';if(s.show)return 'show';if(/tea party|dumbo|astro orbiter|magic carpets|carousel/i.test(s.name))return 'spinner';if(/spaceship earth/i.test(s.name))return 'sphere';if(/tree of life|safaris|gorilla/i.test(s.name))return 'tree';if(/tower of terror/i.test(s.name))return 'tower';if(/haunted mansion/i.test(s.name))return 'mansion';if(/mountain|everest|flight of passage/i.test(s.name))return 'mountain';if(/test track|tron|slinky|mine train|rock.*roller|cosmic/i.test(s.name))return 'coaster';if(/pirates of the caribbean/i.test(s.name))return 'pirates';if(/jungle cruise|frozen|navi|na'vi/i.test(s.name))return 'boat';return 'building';}
+function modelShape(s){if(s.type==='transport')return /monorail/i.test(s.name)?'monorail':/boat/i.test(s.name)?'boat':'station';if(/main street/i.test(s.name))return 'mainstreet';if(s.type==='pin')return 'pin';if(s.type==='trivia')return 'trivia';if(s.type==='magic')return 'cards';if(s.name==='Pixie Dust')return 'magic';if(s.name==='Snack Break')return 'food';if(s.show)return 'show';if(/tea party|dumbo|astro orbiter|magic carpets|carousel/i.test(s.name))return 'spinner';if(/spaceship earth/i.test(s.name))return 'sphere';if(/tree of life|safaris|gorilla/i.test(s.name))return 'tree';if(/tower of terror/i.test(s.name))return 'tower';if(/haunted mansion/i.test(s.name))return 'mansion';if(/mountain|everest|flight of passage/i.test(s.name))return 'mountain';if(/test track|tron|slinky|mine train|rock.*roller|cosmic/i.test(s.name))return 'coaster';if(/pirates of the caribbean/i.test(s.name))return 'pirates';if(/jungle cruise/i.test(s.name))return 'jungle';if(/frozen|navi|na'vi/i.test(s.name))return 'boat';return 'building';}
 async function mount(){const board=document.getElementById('board');if(!board||document.getElementById('board3dHost'))return;
 let THREE;try{THREE=await loadThree();}catch(e){console.warn('3D view unavailable; the original board remains playable.',e);return;}
 if(!board.isConnected||document.getElementById('board3dHost'))return;
@@ -3375,12 +3375,61 @@ function pirateShipSpot(p){
  };
  sailAway(0);rideAnimations.push(sailAway);
 }
+// A canopy launch circles behind a miniature Schweitzer Falls curtain.
+function jungleCruiseSpot(p){
+ p.name='Jungle Cruise';
+ const river=material('#4b9b9a',.12,.55),rock=material('#9b9280',.02,.85),moss=material('#57795a',.01,.85),ivory=material('#f0deb5',.02,.7),red=material('#aa4d43',.03,.65),wood=material('#8a6646',.02,.8),green=material('#477959',.01,.8);
+ box(p,0,.01,0,.94,.055,2.2,river,.01);
+ plaque(p,'BACK SIDE OF WATER',0,.079,.68,.86,.17,'#f4f1d5');
+ // Rock walls and an overhead ledge leave an open passage for the boat.
+ for(const side of [-1,1]){
+  for(let j=0;j<4;j++){const b=ball(p,side*.385,.17+j*.22,-.12,.095,rock,10);b.scale.set(.9,1.45,1.6);}
+  for(const z of [-.86,.44]){const b=ball(p,side*.395,.095,z,.07,moss,10);b.scale.set(1,.7,1.5);}
+ }
+ for(let j=0;j<7;j++){const b=ball(p,(j-3)*.108,1.02,-.12,.09,rock,10);b.scale.set(1.25,.65,1.6);}
+ box(p,0,1.045,-.12,.73,.035,.22,moss,.009);
+ // A translucent moving curtain lets the boat remain visible behind the water.
+ const canvas=document.createElement('canvas');canvas.width=128;canvas.height=256;const ctx=canvas.getContext('2d');
+ ctx.fillStyle='#81d4d9';ctx.fillRect(0,0,128,256);
+ for(let j=0;j<14;j++){ctx.fillStyle=j%3?'#b8edf0':'#e9ffff';ctx.fillRect(j*9,((j*47)%256),j%3?2:3,75);ctx.fillRect(j*9,((j*47)%256)-256,j%3?2:3,75);}
+ const flowing=new THREE.CanvasTexture(canvas);flowing.colorSpace=THREE.SRGBColorSpace;flowing.wrapS=flowing.wrapT=THREE.RepeatWrapping;
+ const curtain=mesh(p,new THREE.PlaneGeometry(.64,.87),new THREE.MeshBasicMaterial({map:flowing,transparent:true,opacity:.43,depthWrite:false,side:THREE.DoubleSide}),0,.555,.012,false);curtain.name='Back side of water';
+ const foam=material('#d3f5ef',.02,.6),ripples=[];
+ for(let j=0;j<8;j++){const f=ball(p,(j-3.5)*.076,.075,.012,.036,foam,10);f.scale.y=.3;ripples.push(f);}
+ // Familiar beige launch, open benches, brass rails, and striped canopy.
+ const boat=new THREE.Group();boat.name='Jungle Cruise launch';p.add(boat);
+ const hull=new THREE.Shape();hull.moveTo(-.115,-.23);hull.lineTo(.115,-.23);hull.lineTo(.115,.17);hull.quadraticCurveTo(.11,.26,0,.3);hull.quadraticCurveTo(-.11,.26,-.115,.17);hull.closePath();
+ const geometry=new THREE.ExtrudeGeometry(hull,{depth:.095,bevelEnabled:false,curveSegments:8});geometry.rotateX(-Math.PI/2);mesh(boat,geometry,ivory,0,.075,0);
+ box(boat,0,.17,.025,.215,.016,.37,wood,.003);
+ for(const side of [-1,1]){
+  box(boat,side*.118,.125,-.015,.012,.018,.42,red,.002);box(boat,side*.107,.18,-.015,.009,.042,.36,ivory,.002);
+  for(const z of [-.15,.15])cyl(boat,side*.11,.18,z,.006,.23,gold,.006,8);
+ }
+ for(const z of [-.08,.07])box(boat,0,.18,z,.18,.045,.045,wood,.003);
+ for(let j=0;j<6;j++){const roof=box(boat,(j-2.5)*.046,.42,0,.045,.019,.39,j%2?ivory:red,.002);roof.rotation.z=(j<3?1:-1)*.12;}
+ box(boat,0,.402,-.202,.285,.046,.015,ivory,.002);
+ // The skipper's safari hat peeks out from the front of the canopy.
+ cyl(boat,0,.18,-.17,.022,.06,ivory,.022,8);ball(boat,0,.278,-.17,.029,material('#dfb086',.02,.7),10);cyl(boat,0,.302,-.17,.042,.009,ivory,.042,10);cyl(boat,0,.31,-.17,.025,.025,ivory,.023,10);
+ for(const side of [-1,1]){
+  cyl(p,side*.4,.1,-.78,.012,.35,wood,.012,8);
+  for(let j=0;j<3;j++){const leaf=ball(p,side*.4+(j-1)*.024,.45+j*.02,-.78,.045,green,10);leaf.scale.set(.8,.35,2.2);leaf.rotation.y=(j-1)*.6;}
+ }
+ const cruise=time=>{
+  const a=time*Math.PI*2/12;
+  boat.position.set(Math.sin(a)*.11,.012+Math.sin(time*1.5)*.006,-.23+Math.cos(a)*.45);
+  boat.rotation.set(0,Math.atan2(-Math.cos(a)*.11,Math.sin(a)*.45),Math.sin(time*1.3)*.02);
+  flowing.offset.y=renderer.software?0:-time*.6;
+  ripples.forEach((f,i)=>{f.scale.set(1+Math.sin(time*3+i)*.15,.3,1+Math.cos(time*2+i)*.22);});
+ };
+ cruise(0);rideAnimations.push(cruise);
+}
 function attraction(t){const p=new THREE.Group();p.position.set(t.x,.29,t.z-.17);world.add(p);const cream=material('#e6d6c1',.09,.3),mauve=material('#9c82b5',.13,.24),color=material(colors[t.park],.12,.23);
 if(t.shape==='monorail'){monorailSpot(p);}
 else if(t.shape==='mainstreet'){mainStreetSpot(p);}
 else if(t.shape==='cards'){magicDeckSpot(p);}
 else if(t.shape==='magic'){pixieDustSpot(p);}
 else if(t.shape==='pirates'){pirateShipSpot(p);}
+else if(t.shape==='jungle'){jungleCruiseSpot(p);}
 else if(t.shape==='mountain'){const m=mesh(p,new THREE.ConeGeometry(.58,1.06,renderer.software?8:12),porcelain,0,.63,0);m.geometry.scale(1,1,.85);cone(p,-.3,.03,.1,.31,.62,material('#b6bad2',.09,.26));cyl(p,0,.04,0,.64,.04,blue);if(/space mountain|big thunder|everest/i.test(t.name||''))coasterTrack(p,true);for(let i=0;i<10;i++){const a=i/10*Math.PI*2;box(p,.48*Math.cos(a),.1,.48*Math.sin(a),.035,.37,.035,gold,.008)}}
 else if(t.shape==='spinner'){cyl(p,0,0,0,.62,.06,cream);const spin=new THREE.Group();p.add(spin);cyl(spin,0,.08,0,.075,.5,gold);for(let i=0;i<5;i++){const a=i/5*Math.PI*2;box(spin,.24*Math.cos(a),.2,.24*Math.sin(a),.42,.035,.05,gold,.008);const cup=cyl(spin,.43*Math.cos(a),.1,.43*Math.sin(a),.14,.16,i%2?mauve:blue,.17,12);cup.rotation.y=a;}const phase=rideAnimations.length*.4;rideAnimations.push(time=>{spin.rotation.y=time*.7+phase;});}
 else if(t.shape==='sphere'){cyl(p,0,0,0,.3,.28,trim);ball(p,0,.8,0,.57,material('#e5edf5',.52,.2),40);ring(p,0,.83,0,.572,.006,material('#aebbd0',.55));}
@@ -3448,8 +3497,8 @@ function outsideSpaceLabel(space,index,r){
 
 SPACES.forEach((s,i)=>{const r=spaceLayout(i),tile=box(world,r.x,.15,r.z,r.w-.035,.14,r.d-.035,porcelain,.025);tile.userData.space=i;tileMeshes.push(tile);spaces.push(r);
 const banner=box(world,r.x,.299,r.z,r.w*.86,.018,r.d*.86,material(colors[r.side],.12,.25),.005);banner.visible=true;
-const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
-if(['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
+const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates','jungle'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
+if(['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates','jungle'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
 if(r.side%2)model.rotation.y=Math.PI/2;
 outsideSpaceLabel(s,i,r);
 const flag=cyl(world,r.x,.307,r.z,.095,.07,gold);flag.visible=false;ownerFlags.push(flag);
@@ -3617,7 +3666,7 @@ const rotations={1:[0,0,0],2:[-Math.PI/2,0,0],3:[0,0,Math.PI/2],4:[0,0,-Math.PI/
 let diceValues=[1,1],diceStart=0,raf=0,last=0,width=0,height=0,selected=players[currentPlayer].pos,angle=.24,targetAngle=.24,mode='free',zoom=1,distance=44,targetDistance=44,look=new THREE.Vector3(),target=new THREE.Vector3(),drag=null,flat=false,showSpaceNames=false,dragMode='pan',wasMoving=false,autoFollow=false,followIndex=currentPlayer;
 const pointers=new Map();let pinch=null;
 const ray=new THREE.Raycaster(),resizeObserver=new ResizeObserver(resize);
-function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(['trivia','magic','pin'].includes(SPACES[player.pos].type)||SPACES[player.pos].name==='Pixie Dust'){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/pirates of the caribbean/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/haunted mansion/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.91)};if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
+function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(['trivia','magic','pin'].includes(SPACES[player.pos].type)||SPACES[player.pos].name==='Pixie Dust'){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/jungle cruise/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.93)};if(/pirates of the caribbean/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/haunted mansion/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.91)};if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
 function info(index){selected=index;const s=SPACES[index],owner=owners[index],r=spaces[index];highlight.position.set(r.x,.34,r.z);const price=s.type==='property'?' · '+(owner===undefined?'Buy $'+s.cost:'Rent $'+rentForSpace(index)):'';document.getElementById('board3dInfo').style.setProperty('--park-color',colors[r.side]);document.getElementById('board3dInfo').innerHTML='<strong>'+esc(s.icon+' '+s.name)+'</strong><span>Space '+(index+1)+' / 80 · '+esc(s.park||['Magic Kingdom','EPCOT','Hollywood Studios','Animal Kingdom'][r.side])+price+(owner===undefined?'': ' · Owned by '+esc(players[owner].name))+'</span><div class="space-browser"><button class="secondary" data-space-step="-1" aria-label="Previous board space">←</button><button class="secondary" data-space-step="1" aria-label="Next board space">→</button></div>';drawRequest();}
 function updateCameraButtons(){host.querySelectorAll('[data-camera="free"],[data-camera="board"],[data-camera="follow"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.camera===mode)));}
 function freeCamera(){mode='free';autoFollow=false;updateCameraButtons();}
