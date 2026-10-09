@@ -3914,22 +3914,28 @@ function luminousSpot(p){
 }
 // A suspended flying-theater gondola faces a changing scenic screen.
 function missionSpaceSpot(p){
- const hull=material('#ecf0f6',.4,.35),red=material('#e7684e',.2,.4),steel=material('#54657b',.55,.4),windowMat=material('#49caff',.35,.32);
+ const hull=material('#ecf0f6',.35,.4),edge=material('#29364b',.25,.45),steel=material('#54657b',.55,.4),windowMat=material('#49caff',.35,.32);
  box(p,0,.01,0,.94,.045,2.2,material('#182b47'),.008);
  cyl(p,0,.055,-.16,.39,.05,steel,.39,24);ring(p,0,.11,-.16,.32,.012,material('#72dafa'));
  const rocket=new THREE.Group();rocket.name='Mission SPACE rocket';rocket.position.set(0,0,-.16);p.add(rocket);
- cyl(rocket,0,.65,0,.125,.57,hull,.125,24);cyl(rocket,0,1.15,0,.13,.06,red,.13,24);
- cone(rocket,0,1.22,0,.125,.28,red);cyl(rocket,0,.62,0,.09,.06,steel,.12,20);
- const port=mesh(rocket,new THREE.TorusGeometry(.055,.011,6,20),steel,0,1.015,.124);mesh(rocket,new THREE.CircleGeometry(.045,20),windowMat,0,1.015,.129);
- for(let i=0;i<3;i++){
-  const fin=new THREE.Group();fin.rotation.y=i*Math.PI*2/3;rocket.add(fin);
-  const shape=new THREE.Shape();shape.moveTo(.1,.87);shape.lineTo(.255,.64);shape.lineTo(.255,.57);shape.lineTo(.11,.65);shape.closePath();
-  mesh(fin,new THREE.ExtrudeGeometry(shape,{depth:.025,bevelEnabled:false}),red,0,0,-.0125);
+ // A shuttle orbiter: tapered fuselage, dark nose, paired cockpit windows, and delta wings.
+ const body=cyl(rocket,0,.65,0,.145,.61,hull,.095,24);body.scale.z=.8;
+ const nose=cone(rocket,0,1.26,0,.095,.23,edge);nose.scale.z=.8;
+ const cockpit=ball(rocket,0,1.225,.066,.089,edge);cockpit.scale.set(1,.9,.5);
+ for(const side of [-1,1]){
+  const window=box(rocket,side*.039,1.202,.101,.059,.055,.01,windowMat,.004);window.rotation.z=-side*.18;
+  const shape=new THREE.Shape();shape.moveTo(side*.105,1.14);shape.lineTo(side*.405,.72);shape.lineTo(side*.405,.64);shape.lineTo(side*.11,.70);shape.closePath();
+  const wing=mesh(rocket,new THREE.ExtrudeGeometry(shape,{depth:.035,bevelEnabled:false}),hull,0,0,-.018);wing.name='Shuttle swept wing';
+  const stripe=box(rocket,side*.26,.675,.022,.27,.028,.015,edge,.003);stripe.rotation.z=side*.12;
+  box(rocket,side*.10,.74,.113,.035,.20,.012,material('#618fd1'),.003);
+  cyl(rocket,side*.075,.60,0,.047,.075,steel,.039,16);
  }
- const flames=new THREE.Group();flames.name='Mission SPACE animated exhaust';flames.position.y=.64;rocket.add(flames);
+ const tailShape=new THREE.Shape();tailShape.moveTo(.075,1.09);tailShape.lineTo(.29,.77);tailShape.lineTo(.29,.66);tailShape.lineTo(.075,.72);tailShape.closePath();
+ const tail=mesh(rocket,new THREE.ExtrudeGeometry(tailShape,{depth:.025,bevelEnabled:false}),edge,-.0125,0,0);tail.rotation.y=Math.PI/2;tail.name='Shuttle tail fin';
+ const flames=new THREE.Group();flames.name='Mission SPACE animated exhaust';flames.position.y=.61;rocket.add(flames);
  const jets=[];
- for(const [r,h,color,z] of [[.092,.47,'#ff6825',0],[.063,.37,'#ffbb35',.022],[.034,.25,'#fff2ad',.044]]){
-  const flame=mesh(flames,new THREE.ConeGeometry(r,h,12),new THREE.MeshBasicMaterial({color}),0,-h/2,z,false);flame.rotation.z=Math.PI;jets.push({flame,h});
+ for(const side of [-1,1])for(const [r,h,color,z] of [[.049,.43,'#ff6825',0],[.034,.34,'#ffbb35',.025],[.019,.23,'#fff2ad',.045]]){
+  const flame=mesh(flames,new THREE.ConeGeometry(r,h,12),new THREE.MeshBasicMaterial({color}),side*.075,-h/2,z,false);flame.rotation.z=Math.PI;jets.push({flame,h});
  }
  const sparks=[];
  for(let i=0;i<9;i++){const spark=ball(p,0,0,0,.011,new THREE.MeshBasicMaterial({color:i%2?'#ffd360':'#ff792e'}),8);sparks.push(spark);}
