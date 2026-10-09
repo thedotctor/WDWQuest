@@ -150,3 +150,11 @@ button:disabled{cursor:not-allowed}
 @media(max-width:900px){.game-layout:not(.with-3d){grid-template-columns:minmax(0,1fr)}.game-layout:not(.with-3d)>.turn-panel{grid-column:1;grid-row:2;position:static}.game-layout:not(.with-3d)>.board-wrap{max-width:100%}}
 .board3d-stage canvas:focus-visible{outline:2px solid #f1cb7b88;outline-offset:-3px}
 .board3d-toolbar [data-drag-mode]{border-style:dashed}
+/* Resin dice with true pip layouts instead of boxed Unicode dice glyphs. */
+.die-face,.with-3d .turn-panel .die-face{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);place-items:stretch;gap:11%;padding:18%;font-size:0;line-height:0;border:1px solid #e5dccb;border-radius:18%;background:linear-gradient(145deg,#fffdf5 0%,#f5f0e4 58%,#d9d4c9 100%);box-shadow:inset 2px 2px 3px #ffffffee,inset -2px -3px 5px #8b827744;backface-visibility:hidden}
+.die-pip{display:block;border-radius:50%;background:radial-gradient(circle at 65% 70%,#334256,#111a2b 75%);box-shadow:inset 1px 2px 2px #000a,0 1px 0 #fff;min-width:0;min-height:0}
+.with-3d .turn-panel .dice{perspective:600px;min-height:120px;background:radial-gradient(ellipse at 50% 75%,#0005,transparent 65%)}
+.with-3d .turn-panel .dice-pair{transform:rotateX(-15deg) rotateY(-18deg);transform-style:preserve-3d;gap:30px;filter:none}
+.with-3d .turn-panel .die-cube{--size:54px;--half:27px}
+.with-3d .turn-panel .dice-pair:after{content:"";position:absolute;inset:85% -8% -30%;background:#0003;filter:blur(10px);transform:translateZ(-40px);pointer-events:none}
+@media(max-width:600px){.with-3d .turn-panel .die-cube{--size:42px;--half:21px}.with-3d .turn-panel .dice-pair{gap:22px}.with-3d .turn-panel .dice{min-height:100px}}
