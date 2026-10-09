@@ -2955,7 +2955,7 @@ function spaceLayout(i){const side=Math.floor(i/20),step=i%20,c=2.4,a=(24-2*c)/1
 if(!step)return {x:[-10.8,10.8,10.8,-10.8][side],z:[-10.8,-10.8,10.8,10.8][side],w:c,d:c,side};
 const offset=-12+c+(step-.5)*a;
 return side===0?{x:offset,z:-10.8,w:a,d:c,side}:side===1?{x:10.8,z:offset,w:c,d:a,side}:side===2?{x:-offset,z:10.8,w:a,d:c,side}:{x:-10.8,z:-offset,w:c,d:a,side};}
-function modelShape(s){if(s.type==='transport')return /monorail/i.test(s.name)?'monorail':/boat/i.test(s.name)?'boat':'station';if(s.type==='pin')return 'pin';if(s.type==='trivia')return 'trivia';if(s.type==='magic'||s.name==='Pixie Dust')return 'magic';if(s.name==='Snack Break')return 'food';if(s.show)return 'show';if(/tea party|dumbo|astro orbiter|magic carpets|carousel/i.test(s.name))return 'spinner';if(/spaceship earth/i.test(s.name))return 'sphere';if(/tree of life|safaris|gorilla/i.test(s.name))return 'tree';if(/tower of terror/i.test(s.name))return 'tower';if(/haunted mansion/i.test(s.name))return 'mansion';if(/mountain|everest|flight of passage/i.test(s.name))return 'mountain';if(/test track|tron|slinky|mine train|rock.*roller|cosmic/i.test(s.name))return 'coaster';if(/pirates|jungle cruise|frozen|navi|na'vi/i.test(s.name))return 'boat';return 'building';}
+function modelShape(s){if(s.type==='transport')return /monorail/i.test(s.name)?'monorail':/boat/i.test(s.name)?'boat':'station';if(/main street/i.test(s.name))return 'mainstreet';if(s.type==='pin')return 'pin';if(s.type==='trivia')return 'trivia';if(s.type==='magic'||s.name==='Pixie Dust')return 'magic';if(s.name==='Snack Break')return 'food';if(s.show)return 'show';if(/tea party|dumbo|astro orbiter|magic carpets|carousel/i.test(s.name))return 'spinner';if(/spaceship earth/i.test(s.name))return 'sphere';if(/tree of life|safaris|gorilla/i.test(s.name))return 'tree';if(/tower of terror/i.test(s.name))return 'tower';if(/haunted mansion/i.test(s.name))return 'mansion';if(/mountain|everest|flight of passage/i.test(s.name))return 'mountain';if(/test track|tron|slinky|mine train|rock.*roller|cosmic/i.test(s.name))return 'coaster';if(/pirates|jungle cruise|frozen|navi|na'vi/i.test(s.name))return 'boat';return 'building';}
 async function mount(){const board=document.getElementById('board');if(!board||document.getElementById('board3dHost'))return;
 let THREE;try{THREE=await loadThree();}catch(e){console.warn('3D view unavailable; the original board remains playable.',e);return;}
 if(!board.isConnected||document.getElementById('board3dHost'))return;
@@ -3094,8 +3094,46 @@ function monorailSpot(p){
  cab(-1);cab(1);
  plaque(p,'MONORAIL',0,.083,.83,1.55,.27,'#27394c');
 }
+// A miniature Main Street streetscape fitted to the narrow property tile.
+function mainStreetSpot(p){
+ p.name='Main Street, U.S.A.';
+ const paving=material('#c9bca4',.02,.75),road=material('#806c60',.02,.8),ivory=material('#fff1d6',.04,.55),roof=material('#435363',.12,.55),window=material('#244559',.25,.25),rail=material('#b9b5a6',.5,.35);
+ box(p,0,0,0,.94,.055,2.22,paving,.012);
+ box(p,0,.056,0,.34,.012,2.2,road,.002);
+ for(const x of [-.19,.19])box(p,x,.064,0,.035,.025,2.18,ivory,.003);
+ for(const x of [-.085,.085])box(p,x,.071,0,.012,.008,2.17,rail,.001);
+ for(let z=-1;z<1.08;z+=.12)box(p,0,.068,z,.16,.005,.013,roof,.001);
+ const facades=['#d6a1a1','#e6d2a0','#9ab9b2','#c1afd0','#c99e7b','#adbfcd'];
+ for(const side of [-1,1])for(let j=0;j<3;j++){
+  const x=side*.335,z=-.68+j*.59,h=[.58,.74,.64][(j+(side>0?1:0))%3],wall=material(facades[j+(side>0?3:0)],.03,.6),accent=material(j===1?'#3d786d':'#b64b54',.03,.55);
+  box(p,x,.08,z,.235,h,.53,wall,.012);
+  box(p,x,h+.08,z,.26,.055,.55,ivory,.006);
+  box(p,x,h+.135,z,.23,.045,.51,roof,.005);
+  // Cornices, pilasters, shop doors, and upper windows face the street.
+  for(const end of [-1,1])box(p,side*.201,.09,z+end*.225,.017,h-.015,.022,ivory,.002);
+  for(const offset of [-.15,.15]){
+   box(p,side*.202,.43,z+offset,.012,.13,.095,ivory,.003);
+   box(p,side*.191,.447,z+offset,.012,.095,.066,window,.002);
+   box(p,side*.181,.445,z+offset,.012,.095,.006,ivory,.001);
+  }
+  box(p,side*.194,.1,z,.014,.2,.085,window,.003);
+  for(const offset of [-.145,.145])box(p,side*.195,.13,z+offset,.012,.15,.12,window,.003);
+  // Alternating canvas stripes on a projecting storefront awning.
+  for(let stripe=0;stripe<8;stripe++){
+   const canopy=box(p,side*.155,.32,z+(stripe-3.5)*.059,.12,.018,.057,stripe%2?ivory:accent,.002);canopy.rotation.z=side*.16;
+   box(p,side*.097,.275,z+(stripe-3.5)*.059,.014,.05,.057,stripe%2?ivory:accent,.002);
+  }
+  box(p,side*.192,.365,z,.017,.045,.31,accent,.002);
+  for(const offset of [-.095,0,.095])box(p,side*.18,.376,z+offset,.007,.013,.035,ivory,.001);
+  if(j===1){box(p,x,h+.18,z,.14,.15,.2,wall,.005);box(p,x,h+.33,z,.17,.03,.23,ivory,.004);}
+ }
+ // Victorian lamps and a crosswalk complete the open end of the street.
+ for(const side of [-1,1])for(const z of [-.98,.99]){cyl(p,side*.205,.09,z,.012,.27,roof,.012,8);ball(p,side*.205,.39,z,.032,ivory,8);}
+ for(let j=0;j<4;j++)box(p,0,.076,.78+j*.065,.31,.006,.03,ivory,.001);
+}
 function attraction(t){const p=new THREE.Group();p.position.set(t.x,.29,t.z-.17);world.add(p);const cream=material('#e6d6c1',.09,.3),mauve=material('#9c82b5',.13,.24),color=material(colors[t.park],.12,.23);
 if(t.shape==='monorail'){monorailSpot(p);}
+else if(t.shape==='mainstreet'){mainStreetSpot(p);}
 else if(t.shape==='mountain'){const m=mesh(p,new THREE.ConeGeometry(.58,1.06,renderer.software?8:12),porcelain,0,.63,0);m.geometry.scale(1,1,.85);cone(p,-.3,.03,.1,.31,.62,material('#b6bad2',.09,.26));cyl(p,0,.04,0,.64,.04,blue);if(/space mountain|big thunder|everest/i.test(t.name||''))coasterTrack(p,true);for(let i=0;i<10;i++){const a=i/10*Math.PI*2;box(p,.48*Math.cos(a),.1,.48*Math.sin(a),.035,.37,.035,gold,.008)}}
 else if(t.shape==='spinner'){cyl(p,0,0,0,.62,.06,cream);const spin=new THREE.Group();p.add(spin);cyl(spin,0,.08,0,.075,.5,gold);for(let i=0;i<5;i++){const a=i/5*Math.PI*2;box(spin,.24*Math.cos(a),.2,.24*Math.sin(a),.42,.035,.05,gold,.008);const cup=cyl(spin,.43*Math.cos(a),.1,.43*Math.sin(a),.14,.16,i%2?mauve:blue,.17,12);cup.rotation.y=a;}const phase=rideAnimations.length*.4;rideAnimations.push(time=>{spin.rotation.y=time*.7+phase;});}
 else if(t.shape==='sphere'){cyl(p,0,0,0,.3,.28,trim);ball(p,0,.8,0,.57,material('#e5edf5',.52,.2),40);ring(p,0,.83,0,.572,.006,material('#aebbd0',.55));}
@@ -3148,8 +3186,8 @@ function outsideSpaceLabel(space,index,r){
 
 SPACES.forEach((s,i)=>{const r=spaceLayout(i),tile=box(world,r.x,.15,r.z,r.w-.035,.14,r.d-.035,porcelain,.025);tile.userData.space=i;tileMeshes.push(tile);spaces.push(r);
 const banner=box(world,r.x,.299,r.z,r.w*.86,.018,r.d*.86,material(colors[r.side],.12,.25),.005);banner.visible=true;
-const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=t.shape==='monorail'?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
-if(t.shape==='monorail')model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
+const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
+if(['monorail','mainstreet'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
 if(r.side%2)model.rotation.y=Math.PI/2;
 outsideSpaceLabel(s,i,r);
 const flag=cyl(world,r.x,.307,r.z,.095,.07,gold);flag.visible=false;ownerFlags.push(flag);
@@ -3317,7 +3355,7 @@ const rotations={1:[0,0,0],2:[-Math.PI/2,0,0],3:[0,0,Math.PI/2],4:[0,0,-Math.PI/
 let diceValues=[1,1],diceStart=0,raf=0,last=0,width=0,height=0,selected=players[currentPlayer].pos,angle=.24,targetAngle=.24,mode='free',zoom=1,distance=44,targetDistance=44,look=new THREE.Vector3(),target=new THREE.Vector3(),drag=null,flat=false,showSpaceNames=false,dragMode='pan',wasMoving=false,autoFollow=false,followIndex=currentPlayer;
 const pointers=new Map();let pinch=null;
 const ray=new THREE.Raycaster(),resizeObserver=new ResizeObserver(resize);
-function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
+function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
 function info(index){selected=index;const s=SPACES[index],owner=owners[index],r=spaces[index];highlight.position.set(r.x,.34,r.z);const price=s.type==='property'?' · '+(owner===undefined?'Buy $'+s.cost:'Rent $'+rentForSpace(index)):'';document.getElementById('board3dInfo').style.setProperty('--park-color',colors[r.side]);document.getElementById('board3dInfo').innerHTML='<strong>'+esc(s.icon+' '+s.name)+'</strong><span>Space '+(index+1)+' / 80 · '+esc(s.park||['Magic Kingdom','EPCOT','Hollywood Studios','Animal Kingdom'][r.side])+price+(owner===undefined?'': ' · Owned by '+esc(players[owner].name))+'</span><div class="space-browser"><button class="secondary" data-space-step="-1" aria-label="Previous board space">←</button><button class="secondary" data-space-step="1" aria-label="Next board space">→</button></div>';drawRequest();}
 function updateCameraButtons(){host.querySelectorAll('[data-camera="free"],[data-camera="board"],[data-camera="follow"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.camera===mode)));}
 function freeCamera(){mode='free';autoFollow=false;updateCameraButtons();}
