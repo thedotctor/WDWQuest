@@ -214,6 +214,42 @@ class BoardGameTests(unittest.TestCase):
         self.page.locator('[data-camera="board"]').click()
         self.page.wait_for_function("Math.abs(cameraSample.x) < .1 && Math.abs(cameraSample.z) < .1")
 
+    def test_complete_board_scenes_fit_the_original_spaces(self):
+        self.page.evaluate("""async () => {
+            const THREE = await import('./assets/vendor/three.module.js');
+            window.reviewThree = THREE;
+            const add = THREE.Object3D.prototype.add;
+            THREE.Object3D.prototype.add = function(...objects) {
+                if (this.isScene) window.reviewScene = this;
+                return add.apply(this, objects);
+            };
+        }""")
+        self.start_game()
+        result = self.page.evaluate("""() => {
+            const roots=[]; reviewScene.traverse(o => {if(o.userData.boardSpace!==undefined) roots.push(o);});
+            const generic=['building','tree','mountain','boat','station','show','coaster'];
+            const remaining=['friendship','fantasmic','resistance','starTours','indiana','derby','safari','everest','naviRiver','banshee','awakenings','rapids','lionKing','birds','gorillas','nemoShow'];
+            window.remainingSceneBounds = () => {
+                reviewScene.updateMatrixWorld(true);
+                return roots.filter(r => remaining.includes(r.userData.shape)).map(root => {
+                    const inverse=root.matrixWorld.clone().invert(), bounds=new reviewThree.Box3();
+                    root.traverse(part => {
+                        if (!part.isMesh) return;
+                        const matrix=inverse.clone().multiply(part.matrixWorld), positions=part.geometry.attributes.position;
+                        for(let i=0;i<positions.count;i++) bounds.expandByPoint(new reviewThree.Vector3().fromBufferAttribute(positions,i).applyMatrix4(matrix));
+                    });
+                    const width=root.userData.shape==='friendship'?1.12:.47501;
+                    return {name:root.name, fits:bounds.min.x>=-width && bounds.max.x<=width && bounds.min.z>=-1.11 && bounds.max.z<=1.11,
+                            x:[bounds.min.x,bounds.max.x],z:[bounds.min.z,bounds.max.z]};
+                });
+            };
+            return {count:roots.length,generic:roots.filter(r=>generic.includes(r.userData.shape)).map(r=>r.name),bounds:remainingSceneBounds()};
+        }""")
+        self.assertEqual(result['count'], 80)
+        self.assertEqual(result['generic'], [], 'Every space should use a dedicated scene')
+        self.assertEqual(len(result['bounds']), 16)
+        self.assertEqual([b for b in result['bounds'] if not b['fits']], [], 'Scene extends beyond its existing tile')
+
     def test_phone_layout_and_classic_fallback(self):
         self.context.close()
         self.context = self.browser.new_context(viewport={"width":390,"height":844}, has_touch=True, reduced_motion="reduce")

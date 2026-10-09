@@ -2956,7 +2956,7 @@ function spaceLayout(i){const side=Math.floor(i/20),step=i%20,c=2.4,a=(24-2*c)/1
 if(!step)return {x:[-10.8,10.8,10.8,-10.8][side],z:[-10.8,-10.8,10.8,10.8][side],w:c,d:c,side};
 const offset=-12+c+(step-.5)*a;
 return side===0?{x:offset,z:-10.8,w:a,d:c,side}:side===1?{x:10.8,z:offset,w:c,d:a,side}:side===2?{x:-offset,z:10.8,w:a,d:c,side}:{x:-10.8,z:-offset,w:c,d:a,side};}
-function modelShape(s){if(s.type==='transport')return /monorail/i.test(s.name)?'monorail':/bus/i.test(s.name)?'bus':/skyliner/i.test(s.name)?'skyliner':/boat/i.test(s.name)?'boat':'station';if(/main street/i.test(s.name))return 'mainstreet';if(s.type==='pin')return 'pin';if(s.type==='trivia')return 'trivia';if(s.type==='magic')return 'cards';if(s.name==='Pixie Dust')return 'magic';if(s.name==='Snack Break')return 'food';if(/happily ever after/i.test(s.name))return 'castleShow';if(/luminous/i.test(s.name))return 'lagoonShow';if(s.show)return 'show';if(/tea party|dumbo|astro orbiter|magic carpets|carousel/i.test(s.name))return 'spinner';if(/spaceship earth/i.test(s.name))return 'sphere';if(/guardians|cosmic rewind/i.test(s.name))return 'cosmic';if(/mission.*space/i.test(s.name))return 'rocket';if(/soarin/i.test(s.name))return 'soarin';if(/journey into imagination/i.test(s.name))return 'imagination';if(/remy|ratatouille/i.test(s.name))return 'kitchen';if(/living with the land/i.test(s.name))return 'greenhouse';if(/tree of life|safaris|gorilla/i.test(s.name))return 'tree';if(/smugglers|millennium falcon/i.test(s.name))return 'falcon';if(/toy story mania/i.test(s.name))return 'mania';if(/slinky/i.test(s.name))return 'slinkyDog';if(/runaway railway/i.test(s.name))return 'railway';if(/tower of terror/i.test(s.name))return 'tower';if(/haunted mansion/i.test(s.name))return 'mansion';if(/space mountain/i.test(s.name))return 'spaceCoaster';if(/big thunder mountain/i.test(s.name))return 'thunder';if(/tiana/i.test(s.name))return 'flume';if(/mountain|everest|flight of passage/i.test(s.name))return 'mountain';if(/seven dwarfs/i.test(s.name))return 'dwarfs';if(/tron/i.test(s.name))return 'tron';if(/test track/i.test(s.name))return 'testtrack';if(/slinky|mine train|rock.*roller|cosmic/i.test(s.name))return 'coaster';if(/pirates of the caribbean/i.test(s.name))return 'pirates';if(/jungle cruise/i.test(s.name))return 'jungle';if(/frozen ever after/i.test(s.name))return 'frozen';if(/navi|na'vi/i.test(s.name))return 'boat';return 'building';}
+function modelShape(s){if(/friendship boat/i.test(s.name))return 'friendship';if(/fantasmic/i.test(s.name))return 'fantasmic';if(/rise of the resistance/i.test(s.name))return 'resistance';if(/star tours/i.test(s.name))return 'starTours';if(/indiana jones/i.test(s.name))return 'indiana';if(/brown derby/i.test(s.name))return 'derby';if(/kilimanjaro safaris/i.test(s.name))return 'safari';if(/expedition everest/i.test(s.name))return 'everest';if(/na.?vi river/i.test(s.name))return 'naviRiver';if(/flight of passage/i.test(s.name))return 'banshee';if(/tree of life awakenings/i.test(s.name))return 'awakenings';if(/kali river rapids/i.test(s.name))return 'rapids';if(/festival of the lion king/i.test(s.name))return 'lionKing';if(/feathered friends/i.test(s.name))return 'birds';if(/gorilla falls/i.test(s.name))return 'gorillas';if(/finding nemo/i.test(s.name))return 'nemoShow';if(s.type==='transport')return /monorail/i.test(s.name)?'monorail':/bus/i.test(s.name)?'bus':/skyliner/i.test(s.name)?'skyliner':/boat/i.test(s.name)?'boat':'station';if(/main street/i.test(s.name))return 'mainstreet';if(s.type==='pin')return 'pin';if(s.type==='trivia')return 'trivia';if(s.type==='magic')return 'cards';if(s.name==='Pixie Dust')return 'magic';if(s.name==='Snack Break')return 'food';if(/happily ever after/i.test(s.name))return 'castleShow';if(/luminous/i.test(s.name))return 'lagoonShow';if(s.show)return 'show';if(/tea party|dumbo|astro orbiter|magic carpets|carousel/i.test(s.name))return 'spinner';if(/spaceship earth/i.test(s.name))return 'sphere';if(/guardians|cosmic rewind/i.test(s.name))return 'cosmic';if(/mission.*space/i.test(s.name))return 'rocket';if(/soarin/i.test(s.name))return 'soarin';if(/journey into imagination/i.test(s.name))return 'imagination';if(/remy|ratatouille/i.test(s.name))return 'kitchen';if(/living with the land/i.test(s.name))return 'greenhouse';if(/tree of life|safaris|gorilla/i.test(s.name))return 'tree';if(/smugglers|millennium falcon/i.test(s.name))return 'falcon';if(/toy story mania/i.test(s.name))return 'mania';if(/slinky/i.test(s.name))return 'slinkyDog';if(/runaway railway/i.test(s.name))return 'railway';if(/tower of terror/i.test(s.name))return 'tower';if(/haunted mansion/i.test(s.name))return 'mansion';if(/space mountain/i.test(s.name))return 'spaceCoaster';if(/big thunder mountain/i.test(s.name))return 'thunder';if(/tiana/i.test(s.name))return 'flume';if(/mountain|everest|flight of passage/i.test(s.name))return 'mountain';if(/seven dwarfs/i.test(s.name))return 'dwarfs';if(/tron/i.test(s.name))return 'tron';if(/test track/i.test(s.name))return 'testtrack';if(/slinky|mine train|rock.*roller|cosmic/i.test(s.name))return 'coaster';if(/pirates of the caribbean/i.test(s.name))return 'pirates';if(/jungle cruise/i.test(s.name))return 'jungle';if(/frozen ever after/i.test(s.name))return 'frozen';if(/navi|na'vi/i.test(s.name))return 'boat';return 'building';}
 async function mount(){const board=document.getElementById('board');if(!board||document.getElementById('board3dHost'))return;
 let THREE;try{THREE=await loadThree();}catch(e){console.warn('3D view unavailable; the original board remains playable.',e);return;}
 if(!board.isConnected||document.getElementById('board3dHost'))return;
@@ -3913,6 +3913,180 @@ function luminousSpot(p){
  plaque(p,'LUMINOUS',0,.058,.45,.84,.18,'#cceaf0');
 }
 // A suspended flying-theater gondola faces a changing scenic screen.
+// Shared primitives for the remaining park miniatures. All narrow scenes use the original .94 x 2.2 footprint.
+function spotBase(p,color='#35566a',corner=false){box(p,0,.01,0,corner?2.22:.94,.045,2.2,material(color),.008);}
+function uprightSign(p,text,x,y,z,w=.8,h=.17,bg='#34425b',fg='#fff0c9'){
+ const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle=bg;ctx.fillRect(0,0,512,128);ctx.strokeStyle=fg;ctx.lineWidth=5;ctx.strokeRect(4,4,504,120);ctx.fillStyle=fg;ctx.font='bold 45px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,256,66,478);
+ const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;return mesh(p,new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}),x,y,z,false);
+}
+function miniatureGuest(p,x,y,z,color,scale=.12){const guest=parkGuest(color);guest.position.set(x,y,z);guest.scale.setScalar(scale);p.add(guest);return guest;}
+function ovalRoute(rx,rz,y=()=>.12,cz=0){const points=[];for(let i=0;i<=64;i++){const a=i/64*Math.PI*2;points.push(new THREE.Vector3(rx*Math.cos(a),y(a),cz+rz*Math.sin(a)));}return new THREE.CatmullRomCurve3(points);}
+function followRoute(object,curve,u){const point=curve.getPointAt(u),t=curve.getTangentAt(u);object.position.copy(point);object.rotation.set(-Math.atan2(t.y,Math.hypot(t.x,t.z)),Math.atan2(t.x,t.z),0);}
+function miniatureBoat(p,color='#d4b876',width=.18,length=.32){const boat=new THREE.Group();p.add(boat);box(boat,0,0,0,width,.05,length,material(color),.015);for(const z of [-.07,.035])box(boat,0,.05,z,width*.8,.02,.055,material('#574c47'),.004);return boat;}
+function sparkleShow(p,origins,colors){const beads=[];origins.forEach((origin,j)=>{for(let i=0;i<12;i++){const a=i/12*Math.PI*2,m=new THREE.MeshBasicMaterial({color:colors[j%colors.length]});const bead=ball(p,0,0,0,.012,m,8);beads.push({bead,origin,a,j});}});return time=>beads.forEach(({bead,origin,a,j})=>{const k=(time*.24+j*.33)%1;bead.position.set(origin[0]+Math.cos(a)*k*.21,origin[1]+Math.sin(a)*k*.24-k*k*.12,origin[2]);bead.scale.setScalar(k<.12?k*7:1-k);});}
+function friendshipBoatSpot(p){
+ spotBase(p,'#71b7c5',true);const cream=material('#f0e6c9'),blueMat=material('#537eab'),red=material('#c7685c'),dark=material('#29425b');
+ box(p,0,.065,-.80,1.9,.07,.39,cream,.01);for(const x of [-.81,.81])cyl(p,x,.13,-.83,.025,.46,material('#ac9170'),.025,10);box(p,0,.58,-.83,1.85,.055,.34,blueMat,.01);
+ for(let i=0;i<7;i++)box(p,-.81+i*.27,.11,-.56,.065,.04,.065,red,.004);
+ const boat=new THREE.Group();boat.name='Friendship Boat cruising ferry';p.add(boat);
+ box(boat,0,0,0,.37,.13,.77,cream,.045);box(boat,0,.13,0,.34,.20,.64,red,.025);box(boat,0,.33,0,.40,.035,.70,cream,.012);
+ for(const x of [-.175,.175])for(const z of [-.20,0,.20])box(boat,x,.17,z,.012,.115,.14,dark,.003);box(boat,0,.17,.32,.25,.115,.012,dark,.003);
+ const wake=[];for(let i=0;i<3;i++){const r=ring(p,0,.072,0,.12,.009,material('#c2eced'));r.scale.set(.9,1,1.5);wake.push(r);}
+ const cruise=time=>{boat.position.set(Math.sin(time*.32)*.46,.11+Math.sin(time*1.1)*.01,.16+Math.cos(time*.32)*.19);boat.rotation.y=Math.cos(time*.32)*.32;wake.forEach((w,i)=>{const k=(time*.4+i/3)%1;w.position.set(boat.position.x,.075,boat.position.z-.42-k*.2);w.scale.set(.65+k*.5,.65+k*.5,1+k*.4);});};cruise(0);rideAnimations.push(cruise);plaque(p,'FRIENDSHIP BOATS',0,.068,.96,1.66,.14,'#234862');
+}
+function fantasmicSpot(p){
+ spotBase(p,'#255d80');const stone=material('#685c73'),blueMat=material('#466aba'),black=material('#272539');
+ cone(p,0,.07,-.30,.29,.46,stone);cone(p,-.18,.07,-.53,.17,.31,stone);cone(p,.18,.07,-.54,.15,.37,stone);
+ const mickey=new THREE.Group();mickey.name='Fantasmic sorcerer Mickey';mickey.position.set(0,.47,-.30);p.add(mickey);
+ cone(mickey,0,0,0,.05,.14,blueMat);ball(mickey,0,.18,0,.055,black);for(const x of [-.048,.048])ball(mickey,x,.22,0,.030,black,10);cone(mickey,0,.228,0,.042,.12,blueMat);ball(mickey,.078,.13,.016,.023,material('#fff4d8'),10);
+ const jets=[];for(const x of [-.34,-.22,.22,.34]){const points=[new THREE.Vector3(x,.08,.16),new THREE.Vector3(x*.75,.42,.04),new THREE.Vector3(x*.60,.11,-.09)];const jet=mesh(p,new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),16,.012,5,false),material('#99e5f4'),0,0,0,false);jets.push(jet);}
+ const boat=miniatureBoat(p,'#e6dbc1',.20,.36);box(boat,0,.05,0,.18,.10,.19,material('#faf1d2'),.005);box(boat,0,.15,0,.23,.022,.26,material('#ba655e'),.004);cyl(boat,0,.17,-.045,.02,.09,black,.02,10);
+ const burst=sparkleShow(p,[[-.20,.87,-.54],[.21,.96,-.57]],['#f1c561','#a486f2']);
+ const show=time=>{jets.forEach((jet,i)=>jet.scale.y=.65+(Math.sin(time*1.5+i)+1)*.25);boat.position.set(Math.sin(time*.45)*.22,.075,.57);boat.rotation.y=Math.PI/2+Math.sin(time*.45)*.12;mickey.rotation.y=Math.sin(time*.8)*.15;burst(time);};show(0);rideAnimations.push(show);plaque(p,'FANTASMIC!',0,.068,.94,.80,.15,'#f2d18b');
+}
+function riseResistanceSpot(p){
+ spotBase(p,'#424c59');const gray=material('#9ea8b4'),dark=material('#2d3546'),white=material('#f0eee4');
+ box(p,0,.06,-.67,.49,.065,.52,dark,.003);
+ const walker=new THREE.Group();walker.name='Rise of the Resistance AT-AT';walker.position.set(0,0,-.54);p.add(walker);
+ for(const x of [-.17,.17])for(const z of [-.12,.12]){box(walker,x,.10,z,.035,.51,.045,gray,.005);ball(walker,x,.33,z,.035,dark,10);box(walker,x,.07,z+.02,.075,.04,.12,gray,.006);}
+ box(walker,0,.60,0,.43,.19,.30,gray,.012);box(walker,0,.62,.235,.18,.13,.15,gray,.006);box(walker,0,.67,.315,.14,.033,.012,dark,.003);for(const x of [-.07,.07])box(walker,x,.60,.33,.015,.015,.10,dark,.002);
+ const route=ovalRoute(.25,.34,()=>.11,.32);mesh(p,new THREE.TubeGeometry(route,48,.008,5,true),material('#708291'),0,0,0);
+ const car=new THREE.Group();car.name='Resistance droid transport';p.add(car);box(car,0,0,0,.17,.065,.24,dark,.012);for(const z of [-.04,.055])box(car,0,.065,z,.14,.028,.075,gray,.004);cyl(car,0,.068,.086,.025,.04,white,.025,10);ball(car,0,.116,.086,.025,white,10);
+ for(const x of [-.34,.34]){const trooper=miniatureGuest(p,x,.06,-.13,'#eeeeeb',.15);trooper.rotation.y=x>0?-.35:.35;}
+ const laser=box(p,0,.63,-.12,.012,.012,.32,new THREE.MeshBasicMaterial({color:'#ff6654'}),.002);
+ const battle=time=>{followRoute(car,route,(time/10)%1);laser.visible=time%3<.22;walker.rotation.y=Math.sin(time*.4)*.06;};battle(0);rideAnimations.push(battle);plaque(p,'RISE OF THE RESISTANCE',0,.069,.96,.88,.13,'#d1e2ed');
+}
+function starToursSpot(p){
+ spotBase(p,'#233f5c');const cream=material('#ebdec3'),blueMat=material('#5b8dcc'),dark=material('#263246');
+ for(const x of [-.30,.30])box(p,x,.06,-.12,.05,.32,.12,dark,.008);
+ const shuttle=new THREE.Group();shuttle.name='Star Tours rocking Starspeeder';shuttle.position.set(0,.39,-.10);p.add(shuttle);
+ box(shuttle,0,-.07,0,.52,.22,.70,cream,.025);box(shuttle,0,.15,-.08,.43,.08,.45,cream,.012);box(shuttle,0,.045,.356,.36,.085,.013,dark,.005);
+ for(const x of [-.265,.265]){box(shuttle,x,.017,-.015,.012,.095,.48,blueMat,.004);for(const z of [-.16,.03,.22])box(shuttle,x,.06,z,.014,.055,.11,dark,.003);}
+ box(shuttle,0,-.034,.368,.30,.022,.015,blueMat,.003);
+ const droid=new THREE.Group();droid.name='Star Tours astromech';droid.position.set(-.25,.06,.60);p.add(droid);cyl(droid,0,0,0,.05,.11,cream,.05,12);ball(droid,0,.11,0,.049,blueMat,12);for(const x of [-.065,.065])box(droid,x,0,0,.025,.10,.045,cream,.004);
+ const stars=[];for(let i=0;i<9;i++)stars.push(ball(p,(i%3-1)*.27,.43+(i%4)*.10,-.83,.01,new THREE.MeshBasicMaterial({color:'#b7e5ff'}),8));
+ const flight=time=>{shuttle.rotation.set(Math.sin(time*1.1)*.12,Math.sin(time*.8)*.08,Math.sin(time*1.3)*.11);shuttle.position.y=.39+Math.sin(time*1.4)*.025;stars.forEach((star,i)=>star.scale.setScalar(.5+(Math.sin(time*2+i)+1)*.4));droid.rotation.y=Math.sin(time*.65)*.25;};flight(0);rideAnimations.push(flight);plaque(p,'STAR TOURS',0,.069,.96,.84,.14,'#c7dcf3');
+}
+function indianaJonesSpot(p){
+ spotBase(p,'#c1a773');const stone=material('#9e8766'),dark=material('#62533f'),goldMat=material('#e4bb52');
+ for(const x of [-.31,.31]){box(p,x,.06,-.67,.15,.48,.20,stone,.008);box(p,x,.54,-.67,.19,.045,.24,dark,.005);}box(p,0,.58,-.67,.83,.08,.25,stone,.009);
+ box(p,0,.06,-.57,.46,.075,.28,dark,.005);cyl(p,0,.14,-.55,.028,.09,goldMat,.017,10);ball(p,0,.247,-.55,.027,goldMat,10);
+ const ramp=box(p,0,.075,.05,.32,.055,1.10,stone,.006);ramp.rotation.x=-.08;
+ const boulder=ball(p,0,.28,-.32,.15,stone,16);boulder.name='Indiana Jones rolling boulder';
+ const indy=miniatureGuest(p,.27,.065,.59,'#95754e',.18);cyl(indy,0,.94,0,.16,.07,dark,.16,12);cyl(indy,0,1.00,0,.10,.09,dark,.10,12);
+ const whipPoints=[new THREE.Vector3(.25,.16,.60),new THREE.Vector3(.37,.14,.47),new THREE.Vector3(.35,.09,.30)];mesh(p,new THREE.TubeGeometry(new THREE.CatmullRomCurve3(whipPoints),12,.004,4,false),dark,0,0,0);
+ const stunt=time=>{const k=(time/6)%1;boulder.position.set(0,.27-.045*k,-.40+k*1.04);boulder.rotation.x=time*2;indy.rotation.y=Math.sin(time*.8)*.12;};stunt(0);rideAnimations.push(stunt);plaque(p,'INDIANA JONES',0,.069,.96,.86,.14,'#563d2b');
+}
+function brownDerbySpot(p){
+ spotBase(p,'#bc9f88');const wall=material('#cdbb9b'),roof=material('#825c4b'),green=material('#446c5d'),cream=material('#f4e5c4');
+ box(p,0,.065,-.33,.79,.41,.54,wall,.015);box(p,0,.48,-.33,.85,.06,.60,roof,.012);
+ for(const x of [-.25,.25]){box(p,x,.19,-.05,.12,.18,.018,green,.004);box(p,x,.37,-.01,.17,.025,.085,cream,.005);}box(p,0,.065,-.045,.12,.27,.03,roof,.004);
+ uprightSign(p,'HOLLYWOOD BROWN DERBY',0,.43,-.015,.68,.08,'#573d31');
+ const hat=new THREE.Group();hat.name='Brown Derby bowler hat sign';hat.position.set(0,.58,-.32);p.add(hat);const dome=ball(hat,0,.045,0,.14,roof);dome.scale.y=.60;cyl(hat,0,0,0,.20,.015,roof,.16,20);ring(hat,0,.026,0,.13,.008,green);
+ for(const [x,z] of [[-.24,.37],[.24,.37]]){cyl(p,x,.07,z,.009,.15,green,.009,8);cyl(p,x,.22,z,.10,.014,cream,.10,16);for(const dx of [-.11,.11])box(p,x+dx,.08,z,.045,.04,.06,roof,.004);ball(p,x,.25,z,.018,material('#e0a267'),10);}
+ const dine=time=>{hat.rotation.y=Math.sin(time*.5)*.06;hat.position.y=.58+Math.sin(time*1.1)*.008;};dine(0);rideAnimations.push(dine);plaque(p,'THE BROWN DERBY',0,.069,.96,.86,.14,'#614532');
+}
+function safariAnimal(p,x,z,type){
+ const animal=new THREE.Group();animal.position.set(x,.065,z);p.add(animal);const coat=material(type==='giraffe'?'#ddb663':type==='zebra'?'#eee7da':'#9e958c'),dark=material(type==='zebra'?'#35323a':'#886449');
+ const body=ball(animal,0,.115,0,.075,coat,12);body.scale.set(.7,.8,1.5);for(const sx of [-.037,.037])for(const sz of [-.058,.058])cyl(animal,sx,0,sz,.01,.10,coat,.01,8);
+ if(type==='giraffe'){const neck=cyl(animal,0,.13,.08,.021,.28,coat,.018,10);neck.rotation.x=.10;const head=ball(animal,0,.42,.11,.032,coat,10);head.scale.z=1.6;for(const sx of [-.019,.019])cyl(animal,sx,.442,.095,.003,.035,dark,.003,6);for(const y of [.19,.26,.33])ball(animal,.019,y,.098,.009,dark,8);}
+ else{const head=ball(animal,0,.17,.12,type==='elephant'?.045:.032,coat,12);head.scale.z=1.3;if(type==='elephant'){for(const sx of [-.04,.04]){const ear=ball(animal,sx,.175,.103,.038,coat,10);ear.scale.z=.3;}const trunk=new THREE.CatmullRomCurve3([new THREE.Vector3(0,.15,.16),new THREE.Vector3(0,.06,.19),new THREE.Vector3(0,.045,.22)]);mesh(animal,new THREE.TubeGeometry(trunk,12,.014,6,false),coat,0,0,0);}else for(let i=0;i<4;i++){const stripe=box(animal,0,.13,-.075+i*.047,.108,.009,.017,dark,.002);stripe.rotation.z=.2;}}
+ return animal;
+}
+function safariSpot(p){
+ spotBase(p,'#c3b47b');const route=ovalRoute(.20,.57,()=>.09);mesh(p,new THREE.TubeGeometry(route,48,.042,6,true),material('#c7976a'),0,0,0);
+ const truck=new THREE.Group();truck.name='Kilimanjaro Safaris moving truck';p.add(truck);box(truck,0,.025,0,.18,.10,.31,material('#8c9b5c'),.012);box(truck,0,.128,-.04,.19,.025,.23,material('#d3c7a0'),.008);box(truck,0,.125,.10,.145,.09,.055,material('#546765'),.006);
+ for(const x of [-.081,.081])for(const z of [-.11,.04])cyl(truck,x,.115,z,.005,.16,material('#675e43'),.005,6);box(truck,0,.27,-.035,.22,.025,.24,material('#d7c59d'),.008);
+ for(const x of [-.103,.103])for(const z of [-.10,.10]){const tire=mesh(truck,new THREE.CylinderGeometry(.029,.029,.018,10),material('#38372e'),x,.035,z);tire.rotation.z=Math.PI/2;}
+ const animals=[safariAnimal(p,-.35,-.60,'giraffe'),safariAnimal(p,.33,-.40,'elephant'),safariAnimal(p,-.34,.20,'zebra')];
+ tree(p,.32,.06,.56,.23);tree(p,-.32,.06,-.29,.22);
+ const safari=time=>{followRoute(truck,route,(time/17)%1);animals.forEach((animal,i)=>animal.rotation.y=Math.sin(time*.5+i)*.13);};safari(0);rideAnimations.push(safari);plaque(p,'KILIMANJARO SAFARIS',0,.069,.96,.88,.13,'#604c2f');
+}
+function everestSpot(p){
+ spotBase(p,'#b4bec9');const rock=material('#777f92'),snow=material('#f1f4ed'),red=material('#bc5352');
+ const mountain=cone(p,0,.06,-.35,.32,1.00,rock);mountain.scale.z=1.30;const cap=cone(p,0,.76,-.35,.10,.30,snow);cap.scale.z=1.3;cone(p,-.22,.06,-.60,.17,.58,rock);cone(p,.20,.06,-.54,.16,.65,rock);
+ box(p,0,.11,-.74,.15,.18,.016,material('#28353c'),.004);
+ const route=ovalRoute(.29,.66,a=>.17+.31*(1-Math.sin(a))/2);mesh(p,new THREE.TubeGeometry(route,80,.015,6,true),material('#755848'),0,0,0);
+ for(let i=0;i<9;i++){const at=route.getPointAt(i/9);cyl(p,at.x,.06,at.z,.012,at.y-.06,material('#a4a9ad'),.012,8);}
+ const cars=[];for(let i=0;i<2;i++){const car=new THREE.Group();car.name='Everest reversing train '+i;p.add(car);box(car,0,0,0,.14,.055,.17,red,.008);box(car,0,.055,.045,.11,.06,.013,material('#a38c67'),.003);cars.push(car);}
+ const climb=time=>{const u=.10+.80*(.5-.5*Math.cos(time*.52));cars.forEach((car,i)=>followRoute(car,route,u-i*.07));};climb(0);rideAnimations.push(climb);plaque(p,'EXPEDITION EVEREST',0,.069,.97,.88,.13,'#42495f');
+}
+function naviRiverSpot(p){
+ spotBase(p,'#215364');const route=ovalRoute(.19,.49,()=>.08,.13);const boat=miniatureBoat(p,'#725b85',.17,.29);boat.name='Na’vi River Journey glowing boat';
+ const plants=[];for(let i=0;i<10;i++){const x=(i%2?1:-1)*.36,z=-.70+Math.floor(i/2)*.33;const stem=cyl(p,x,.06,z,.008,.16,material('#6866b0'),.006,8);const flower=ball(p,x,.25,z,.052,new THREE.MeshBasicMaterial({color:i%3?'#ad76ed':'#70dfd6'}),12);flower.scale.y=.55;plants.push(flower);}
+ const shaman=new THREE.Group();shaman.name='Na’vi river shaman';shaman.position.set(0,.065,-.74);p.add(shaman);cone(shaman,0,0,0,.052,.24,material('#5589b7'));ball(shaman,0,.31,0,.039,material('#78b5d1'),12);
+ for(const side of [-1,1]){const arm=box(shaman,side*.09,.18,0,.15,.02,.025,material('#5589b7'),.003);arm.rotation.z=side*.3;ball(shaman,side*.16,.21,0,.016,new THREE.MeshBasicMaterial({color:'#98f3e7'}),8);}
+ const drift=time=>{followRoute(boat,route,(time/20)%1);plants.forEach((flower,i)=>flower.scale.y=.50+(Math.sin(time*1.1+i)+1)*.08);shaman.rotation.y=Math.sin(time*.6)*.16;};drift(0);rideAnimations.push(drift);plaque(p,'NA’VI RIVER JOURNEY',0,.069,.97,.88,.13,'#b3e8e7');
+}
+function flightPassageSpot(p){
+ spotBase(p,'#6a9d8c');const stone=material('#637e85'),green=material('#71a46e'),teal=material('#48a8bc');
+ for(const [x,z,h,r] of [[-.17,-.54,.51,.20],[.18,-.38,.66,.20]]){const mountain=mesh(p,new THREE.ConeGeometry(r,h,7),stone,x,.20+h/2,z);mountain.rotation.z=Math.PI;cyl(p,x,.20+h,z,r,.025,green,r,12);}
+ const banshee=new THREE.Group();banshee.name='Flight of Passage flying banshee';banshee.position.set(0,.93,.22);p.add(banshee);
+ const body=ball(banshee,0,0,0,.065,teal);body.scale.set(.7,.65,1.7);const head=ball(banshee,0,.025,.13,.039,teal,12);head.scale.z=1.3;ball(banshee,0,.035,.177,.009,material('#fff0bf'),8);
+ const tail=new THREE.CatmullRomCurve3([new THREE.Vector3(0,0,-.09),new THREE.Vector3(.02,-.025,-.19),new THREE.Vector3(.025,0,-.25)]);mesh(banshee,new THREE.TubeGeometry(tail,12,.009,5,false),teal,0,0,0);
+ const wings=[];for(const side of [-1,1]){const wing=new THREE.Group();wing.position.x=side*.04;banshee.add(wing);const shape=new THREE.Shape();shape.moveTo(0,.05);shape.lineTo(side*.32,.14);shape.lineTo(side*.25,-.10);shape.lineTo(side*.09,-.05);shape.closePath();const skin=mesh(wing,new THREE.ExtrudeGeometry(shape,{depth:.008,bevelEnabled:false}),teal,0,0,0);skin.rotation.x=Math.PI/2;wings.push({wing,side});}
+ const fly=time=>{banshee.position.y=.93+Math.sin(time*1.2)*.055;banshee.rotation.set(Math.sin(time*.7)*.08,Math.sin(time*.55)*.13,Math.sin(time*.9)*.08);wings.forEach(({wing,side})=>wing.rotation.z=side*Math.sin(time*2.1)*.24);};fly(0);rideAnimations.push(fly);plaque(p,'FLIGHT OF PASSAGE',0,.069,.96,.88,.13,'#25465c');
+}
+function treeAwakeningsSpot(p){
+ spotBase(p,'#304c45');const trunk=material('#917957'),leaves=material('#759b63');
+ cyl(p,0,.06,-.13,.11,.59,trunk,.075,12);for(let i=0;i<7;i++){const a=i*Math.PI*2/7;const root=box(p,Math.sin(a)*.09,.063,-.13+Math.cos(a)*.09,.035,.025,.27,trunk,.005);root.rotation.y=a;}
+ const branches=[];for(const [x,y,z,r] of [[0,.83,-.13,.22],[-.19,.75,-.13,.19],[.19,.76,-.13,.19],[0,.75,-.34,.18],[0,.74,.07,.18]])branches.push(ball(p,x,y,z,r,leaves,16));
+ const lights=[];for(let i=0;i<15;i++){const a=i*2.4;lights.push(ball(p,Math.sin(a)*.075,.16+(i%6)*.075,-.13+Math.cos(a)*.103,.014,new THREE.MeshBasicMaterial({color:'#9bd9df'}),8));}
+ const show=time=>{const colors=['#7bdaff','#d990ed','#f4bc6a'];lights.forEach((lamp,i)=>{lamp.material.color.set(colors[(Math.floor(time/4)+i)%3]);lamp.scale.setScalar(.60+(Math.sin(time*1.4+i)+1)*.30);});branches.forEach((branch,i)=>branch.scale.y=1+Math.sin(time*.65+i)*.015);};show(0);rideAnimations.push(show);plaque(p,'TREE OF LIFE AWAKENINGS',0,.069,.97,.89,.13,'#d7e8a4');
+}
+function kaliRapidsSpot(p){
+ spotBase(p,'#4fabc2');const route=ovalRoute(.24,.61,a=>.09+.025*Math.sin(a*3));mesh(p,new THREE.TubeGeometry(route,64,.10,8,true),material('#6ac4d5'),0,0,0);
+ for(const [x,z] of [[-.35,-.64],[.35,-.23],[-.35,.25],[.35,.64]]){const rock=ball(p,x,.105,z,.078,material('#808b7b'),12);rock.scale.set(.9,1.25,1.3);}
+ const carrier=new THREE.Group();carrier.name='Kali River Rapids moving raft';p.add(carrier);const raft=new THREE.Group();raft.name='Kali River Rapids spinning seats';carrier.add(raft);
+ cyl(raft,0,0,0,.12,.033,material('#4b4643'),.12,20);ring(raft,0,.045,0,.10,.021,material('#c49158'));cyl(raft,0,.035,0,.025,.07,material('#c49158'),.025,10);
+ for(let i=0;i<6;i++){const a=i*Math.PI/3;const seat=box(raft,Math.sin(a)*.073,.042,Math.cos(a)*.073,.042,.043,.025,material('#dca751'),.003);seat.rotation.y=a;}
+ const spray=[];for(let i=0;i<8;i++)spray.push(ball(p,0,0,0,.012,material('#c7f0ef'),8));
+ const rapids=time=>{followRoute(carrier,route,(time/11)%1);raft.rotation.y=time*.8;raft.rotation.z=Math.sin(time*3)*.035;spray.forEach((drop,i)=>{const k=(time*.8+i/8)%1;drop.position.set(carrier.position.x+Math.sin(i*2.4)*.14,carrier.position.y+.03+Math.sin(k*Math.PI)*.12,carrier.position.z+Math.cos(i*2.4)*.14);drop.scale.setScalar(1-k*.7);});};rapids(0);rideAnimations.push(rapids);plaque(p,'KALI RIVER RAPIDS',0,.069,.97,.86,.13,'#244e68');
+}
+function lionKingSpot(p){
+ spotBase(p,'#c99565');const goldMat=material('#dfaa4e'),brown=material('#9d6541'),dark=material('#4a3530');
+ const stage=cyl(p,0,.06,0,.37,.04,brown,.37,24);stage.scale.z=1.8;
+ box(p,0,.10,-.52,.38,.13,.30,goldMat,.012);const lion=new THREE.Group();lion.name='Lion King Simba festival float';lion.position.set(0,.23,-.52);p.add(lion);
+ const body=ball(lion,0,.11,0,.10,goldMat);body.scale.set(.8,.9,1.35);for(const x of [-.06,.06])for(const z of [-.08,.08])box(lion,x,0,z,.035,.09,.045,goldMat,.005);
+ ball(lion,0,.23,.115,.083,brown,16);ball(lion,0,.24,.163,.054,goldMat,12);for(const x of [-.025,.025])ball(lion,x,.255,.208,.007,dark,8);ball(lion,0,.23,.217,.010,dark,8);
+ const drums=[];for(const x of [-.23,.23]){cyl(p,x,.10,.22,.045,.09,brown,.055,12);cyl(p,x,.195,.22,.052,.01,goldMat,.052,12);const performer=miniatureGuest(p,x,.10,.36,x<0?'#8ba673':'#d49565',.16);performer.rotation.y=Math.PI;drums.push(performer);}
+ const hoop=mesh(p,new THREE.TorusGeometry(.13,.012,6,24),goldMat,0,.39,.55);const flames=[];for(let i=0;i<8;i++){const a=i*Math.PI/4;flames.push(ball(p,Math.cos(a)*.14,.39+Math.sin(a)*.14,.55,.019,new THREE.MeshBasicMaterial({color:'#ffb74f'}),8));}
+ const dance=time=>{drums.forEach((guest,i)=>guest.userData.arms.forEach((arm,j)=>arm.rotation.x=-.55+Math.sin(time*3.5+i+j)*.42));flames.forEach((flame,i)=>flame.scale.setScalar(.65+(Math.sin(time*4+i)+1)*.3));lion.rotation.y=Math.sin(time*.6)*.05;};dance(0);rideAnimations.push(dance);plaque(p,'FESTIVAL OF THE LION KING',0,.069,.97,.89,.13,'#543526');
+}
+function featheredFriendsSpot(p){
+ spotBase(p,'#a9c898');const wood=material('#977654');for(const [x,z,h] of [[-.29,-.50,.36],[.28,.29,.30]]){cyl(p,x,.06,z,.012,h,wood,.012,8);box(p,x,.06+h,z,.18,.014,.028,wood,.003);}
+ uprightSign(p,'FEATHERED FRIENDS',0,.26,-.82,.78,.13,'#42675b');
+ const birds=[];for(const [i,color] of ['#e96556','#66a5d9','#e1b749'].entries()){
+  const bird=new THREE.Group();bird.name='Feathered Friends flying bird '+i;p.add(bird);const paint=material(color),body=ball(bird,0,0,0,.033,paint,12);body.scale.z=1.6;ball(bird,0,.027,.048,.023,paint,10);const beak=cone(bird,0,.025,.071,.012,.025,material('#ecc26a'));beak.rotation.x=Math.PI/2;
+  const wings=[];for(const side of [-1,1]){const wing=new THREE.Group();wing.position.x=side*.02;bird.add(wing);const feather=ball(wing,side*.055,0,0,.040,paint,10);feather.scale.set(1.65,.25,.75);wings.push({wing,side});}birds.push({bird,wings,i});
+ }
+ const fly=time=>{birds.forEach(({bird,wings,i})=>{const a=time*.55+i*Math.PI*2/3;bird.position.set(Math.sin(a)*.23,.49+i*.10+Math.sin(time*.9+i)*.05,Math.cos(a)*.52-.06);bird.rotation.y=Math.atan2(Math.cos(a)*.23,-Math.sin(a)*.52);wings.forEach(({wing,side})=>wing.rotation.z=side*Math.sin(time*6+i)*.65);});};fly(0);rideAnimations.push(fly);plaque(p,'FRIENDS IN FLIGHT',0,.069,.97,.88,.13,'#375841');
+}
+function gorillaFallsSpot(p){
+ spotBase(p,'#7b9e79');const rock=material('#82968c'),water=material('#87d7de'),fur=material('#454c53'),face=material('#899291');
+ for(const x of [-.21,.21])cone(p,x,.06,-.67,.16,.55,rock);box(p,0,.08,-.67,.15,.43,.025,water,.003);box(p,0,.055,-.57,.32,.03,.30,material('#68b9c2'),.012);
+ const streaks=[];for(let i=0;i<4;i++)streaks.push(box(p,(i-1.5)*.032,.12+i*.075,-.652,.007,.08,.004,material('#d4f3ed'),.002));
+ const gorillas=[];for(const [i,x,z,scale] of [[0,-.17,.04,1],[1,.21,.30,.65]]){
+  const gorilla=new THREE.Group();gorilla.name='Gorilla Falls gorilla '+i;gorilla.position.set(x,.07,z);gorilla.scale.setScalar(scale);p.add(gorilla);
+  const body=ball(gorilla,0,.18,0,.09,fur);body.scale.set(1,1.35,.8);ball(gorilla,0,.30,.025,.065,fur);const mask=ball(gorilla,0,.29,.073,.041,face);mask.scale.z=.45;
+  for(const x of [-.018,.018])ball(gorilla,x,.306,.09,.006,material('#212b32'),8);
+  const arms=[];for(const side of [-1,1]){const arm=new THREE.Group();arm.position.set(side*.074,.23,.012);gorilla.add(arm);const forearm=ball(arm,side*.020,-.07,.03,.036,fur);forearm.scale.y=2;ball(arm,side*.020,-.143,.04,.028,fur,10);arms.push(arm);const foot=ball(gorilla,side*.046,.045,.028,.037,fur);foot.scale.z=1.5;}gorillas.push({gorilla,arms,i});
+ }
+ tree(p,.31,.06,.58,.24);const explore=time=>{streaks.forEach((streak,i)=>streak.position.y=.12+((time*.12+i*.09)%.31));gorillas.forEach(({gorilla,arms,i})=>{gorilla.rotation.y=Math.sin(time*.5+i)*.16;arms[0].rotation.x=Math.sin(time*.7+i)*.15;arms[1].rotation.x=-.08+Math.sin(time*.8+i)*.18;});};explore(0);rideAnimations.push(explore);plaque(p,'GORILLA FALLS TRAIL',0,.069,.97,.88,.13,'#314c3b');
+}
+function nemoShowSpot(p){
+ spotBase(p,'#277c9a');const orange=material('#f39a43'),white=material('#fff4dc'),blueMat=material('#529bd4'),dark=material('#30475c');
+ for(let i=0;i<7;i++){const x=(i%2?1:-1)*(.27+i%3*.055),z=-.65+Math.floor(i/2)*.37;const color=material(['#dd86c7','#edab72','#99c994'][i%3]);cyl(p,x,.06,z,.012,.11+i%3*.03,color,.008,8);ball(p,x,.19+i%3*.03,z,.032,color,10);}
+ const fish=[];for(const [i,paint,size] of [[0,orange,1],[1,blueMat,.85]]){
+  const swimmer=new THREE.Group();swimmer.name=i===0?'Finding Nemo swimming clownfish':'Finding Nemo swimming blue tang';swimmer.scale.setScalar(size);p.add(swimmer);
+  const body=ball(swimmer,0,0,0,.053,paint,12);body.scale.set(1.65,1,.60);
+  if(i===0)for(const x of [-.045,.025]){const stripe=mesh(swimmer,new THREE.TorusGeometry(.045,.007,5,20),white,x,0,0);stripe.rotation.y=Math.PI/2;stripe.scale.x=.64;}
+  const tail=mesh(swimmer,new THREE.ConeGeometry(.043,.055,3),i===0?orange:material('#e9cf54'),-.102,0,0);tail.rotation.z=Math.PI/2;tail.scale.z=.30;
+  ball(swimmer,.061,.018,.031,.015,white,10);ball(swimmer,.065,.019,.043,.007,dark,8);fish.push({swimmer,tail,i});
+ }
+ uprightSign(p,'THE BIG BLUE… AND BEYOND',0,.23,-.85,.83,.14,'#235677');
+ const swim=time=>{fish.forEach(({swimmer,tail,i})=>{const a=time*.55+i*Math.PI;swimmer.position.set(Math.sin(a)*.20,.35+i*.12+Math.sin(time*1.2+i)*.04,Math.cos(a)*.48);swimmer.rotation.y=Math.atan2(Math.sin(a)*.48,Math.cos(a)*.20);tail.rotation.y=Math.sin(time*5+i)*.20;});};swim(0);rideAnimations.push(swim);plaque(p,'FINDING NEMO',0,.069,.97,.86,.13,'#c6eef4');
+}
 function smugglersRunSpot(p){
  const hull=material('#b9b8ae',.3,.6),panel=material('#858c91',.25,.6),dark=material('#303e49',.2,.5),red=material('#98665f',.15,.65);
  box(p,0,.01,0,.94,.05,2.2,material('#34454d'),.008);cyl(p,0,.06,-.10,.32,.025,panel,.32,24);
@@ -4296,7 +4470,7 @@ function soarinSpot(p){
  };
  flight(0);rideAnimations.push(flight);plaque(p,'SOARIN',0,.058,.5,.8,.17,'#d3e7ed');
 }
-function attraction(t){const p=new THREE.Group();p.position.set(t.x,.29,t.z-.17);world.add(p);const cream=material('#e6d6c1',.09,.3),mauve=material('#9c82b5',.13,.24),color=material(colors[t.park],.12,.23);
+function attraction(t){const p=new THREE.Group();p.position.set(t.x,.29,t.z-.17);p.name='Attraction: '+t.name;p.userData.shape=t.shape;world.add(p);const cream=material('#e6d6c1',.09,.3),mauve=material('#9c82b5',.13,.24),color=material(colors[t.park],.12,.23);
 if(t.shape==='monorail'){monorailSpot(p);}
 else if(t.shape==='bus'){busTransportSpot(p);}
 else if(t.shape==='skyliner'){skylinerSpot(p);}
@@ -4328,6 +4502,22 @@ else if(t.shape==='railway'){runawayRailwaySpot(p);}
 else if(t.shape==='slinkyDog'){slinkyDogSpot(p);}
 else if(t.shape==='mania'){toyStoryManiaSpot(p);}
 else if(t.shape==='falcon'){smugglersRunSpot(p);}
+else if(t.shape==='friendship'){friendshipBoatSpot(p);}
+else if(t.shape==='fantasmic'){fantasmicSpot(p);}
+else if(t.shape==='resistance'){riseResistanceSpot(p);}
+else if(t.shape==='starTours'){starToursSpot(p);}
+else if(t.shape==='indiana'){indianaJonesSpot(p);}
+else if(t.shape==='derby'){brownDerbySpot(p);}
+else if(t.shape==='safari'){safariSpot(p);}
+else if(t.shape==='everest'){everestSpot(p);}
+else if(t.shape==='naviRiver'){naviRiverSpot(p);}
+else if(t.shape==='banshee'){flightPassageSpot(p);}
+else if(t.shape==='awakenings'){treeAwakeningsSpot(p);}
+else if(t.shape==='rapids'){kaliRapidsSpot(p);}
+else if(t.shape==='lionKing'){lionKingSpot(p);}
+else if(t.shape==='birds'){featheredFriendsSpot(p);}
+else if(t.shape==='gorillas'){gorillaFallsSpot(p);}
+else if(t.shape==='nemoShow'){nemoShowSpot(p);}
 else if(t.shape==='coaster'){coasterTrack(p);}
 else if(t.shape==='mansion'){hauntedMansionSpot(p);}
 else if(t.shape==='tree'){tree(p,0,0,0,1.45);}
@@ -4391,8 +4581,8 @@ function outsideSpaceLabel(space,index,r){
 
 SPACES.forEach((s,i)=>{const r=spaceLayout(i),tile=box(world,r.x,.15,r.z,r.w-.035,.14,r.d-.035,porcelain,.025);tile.userData.space=i;tileMeshes.push(tile);spaces.push(r);
 const banner=box(world,r.x,.299,r.z,r.w*.86,.018,r.d*.86,material(colors[r.side],.12,.25),.005);banner.visible=true;
-const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;const scale=['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates','jungle','castleShow','spaceCoaster','food','thunder','dwarfs','flume','tron','bus','sphere','greenhouse','frozen','kitchen','testtrack','lagoonShow','soarin','imagination','rocket','cosmic','skyliner','tower','railway','slinkyDog','mania','falcon'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
-if(['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates','jungle','castleShow','spaceCoaster','food','thunder','dwarfs','flume','tron','bus','sphere','greenhouse','frozen','kitchen','testtrack','lagoonShow','soarin','imagination','rocket','cosmic','skyliner','tower','railway','slinkyDog','mania','falcon'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
+const t={x:r.x,z:r.z,park:r.side,name:s.name,shape:modelShape(s)},model=attraction(t);model.position.z=r.z;model.userData.boardSpace=i;const scale=['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates','jungle','castleShow','spaceCoaster','food','thunder','dwarfs','flume','tron','bus','sphere','greenhouse','frozen','kitchen','testtrack','lagoonShow','soarin','imagination','rocket','cosmic','skyliner','tower','railway','slinkyDog','mania','falcon','friendship','fantasmic','resistance','starTours','indiana','derby','safari','everest','naviRiver','banshee','awakenings','rapids','lionKing','birds','gorillas','nemoShow'].includes(t.shape)?1:.54;model.scale.set(scale,scale,scale);model.position.y=.31;
+if(['monorail','mainstreet','trivia','mansion','cards','pin','magic','pirates','jungle','castleShow','spaceCoaster','food','thunder','dwarfs','flume','tron','bus','sphere','greenhouse','frozen','kitchen','testtrack','lagoonShow','soarin','imagination','rocket','cosmic','skyliner','tower','railway','slinkyDog','mania','falcon','friendship','fantasmic','resistance','starTours','indiana','derby','safari','everest','naviRiver','banshee','awakenings','rapids','lionKing','birds','gorillas','nemoShow'].includes(t.shape))model.traverse(part=>{if(part.isMesh){part.userData.space=i;tileMeshes.push(part);}});
 if(r.side%2)model.rotation.y=Math.PI/2;
 outsideSpaceLabel(s,i,r);
 const flag=cyl(world,r.x,.307,r.z,.095,.07,gold);flag.visible=false;ownerFlags.push(flag);
@@ -4560,7 +4750,7 @@ const rotations={1:[0,0,0],2:[-Math.PI/2,0,0],3:[0,0,Math.PI/2],4:[0,0,-Math.PI/
 let diceValues=[1,1],diceStart=0,raf=0,last=0,width=0,height=0,selected=players[currentPlayer].pos,angle=.24,targetAngle=.24,mode='free',zoom=1,distance=44,targetDistance=44,look=new THREE.Vector3(),target=new THREE.Vector3(),drag=null,flat=false,showSpaceNames=false,dragMode='pan',wasMoving=false,autoFollow=false,followIndex=currentPlayer;
 const pointers=new Map();let pinch=null;
 const ray=new THREE.Raycaster(),resizeObserver=new ResizeObserver(resize);
-function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(['trivia','magic','pin'].includes(SPACES[player.pos].type)||['Pixie Dust','Snack Break'].includes(SPACES[player.pos].name)){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/smugglers|millennium falcon/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.85:1.0)};if(/toy story mania/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.88:1.02)};if(/slinky/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.95:1.02)};if(/runaway railway/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1.01:.93)};if(/tower of terror/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.91:1.02)};if(/skyliner/i.test(SPACES[player.pos].name)){const sideways=r.side%2;return {x:r.x+(sideways?.96:(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:.96)};}if(/guardians|cosmic rewind/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.91:1.02),z:r.z+(i%4-1.5)*.09};if(/mission.*space/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.82:1.0),z:r.z+(i%4-1.5)*.09};if(/journey into imagination/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.85:1.0),z:r.z+(i%4-1.5)*.09};if(/soarin/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.84:1.0),z:r.z+(i%4-1.5)*.09};if(/luminous/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.81:1.0),z:r.z+(i%4-1.5)*.09};if(/test track/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.94:1.02),z:r.z+(i%4-1.5)*.09};if(/remy|ratatouille/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.87:1.0),z:r.z+(i%4-1.5)*.09};if(/frozen ever after/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.88:1.0),z:r.z+(i%4-1.5)*.09};if(/living with the land/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.88:1.02),z:r.z+(i%4-1.5)*.09};if(/spaceship earth/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.72:.96),z:r.z+(i%4-1.5)*.09};if(/bus/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.55:.78),z:r.z+.05+(3-i%4)*.2};if(/tron/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.98:.83)};if(/tiana/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.98:.83)};if(/seven dwarfs/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.98:.83)};if(/big thunder mountain/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.98:.83)};if(/space mountain/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.98:.82)};if(/happily ever after/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/jungle cruise/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.93)};if(/pirates of the caribbean/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/haunted mansion/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.91)};if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
+function pawnPoint(player,i){if(player.inSecurity)return {x:5.2+(i%4-1.5)*.2,z:3.92-(i<4?0:.25)};const r=spaces[player.pos];if(['trivia','magic','pin'].includes(SPACES[player.pos].type)||['Pixie Dust','Snack Break'].includes(SPACES[player.pos].name)){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.7:.45):(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:(i<4?.7:.45))};}if(/fantasmic|rise of the resistance|star tours|indiana jones|brown derby|kilimanjaro safaris|expedition everest|na.?vi river|flight of passage|tree of life awakenings|kali river rapids|festival of the lion king|feathered friends|gorilla falls|finding nemo/i.test(SPACES[player.pos].name)){const sideways=r.side%2;return {x:r.x+(sideways?(i<4?.96:1.04):(i%4-1.5)*.09),z:r.z+(sideways?(i%4-1.5)*.09:(i<4?.96:1.04))};}if(/friendship boat/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.19,z:r.z+.98};if(/smugglers|millennium falcon/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.85:1.0)};if(/toy story mania/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.88:1.02)};if(/slinky/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.95:1.02)};if(/runaway railway/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1.01:.93)};if(/tower of terror/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.91:1.02)};if(/skyliner/i.test(SPACES[player.pos].name)){const sideways=r.side%2;return {x:r.x+(sideways?.96:(i%4-1.5)*.19),z:r.z+(sideways?(i%4-1.5)*.19:.96)};}if(/guardians|cosmic rewind/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.91:1.02),z:r.z+(i%4-1.5)*.09};if(/mission.*space/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.82:1.0),z:r.z+(i%4-1.5)*.09};if(/journey into imagination/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.85:1.0),z:r.z+(i%4-1.5)*.09};if(/soarin/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.84:1.0),z:r.z+(i%4-1.5)*.09};if(/luminous/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.81:1.0),z:r.z+(i%4-1.5)*.09};if(/test track/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.94:1.02),z:r.z+(i%4-1.5)*.09};if(/remy|ratatouille/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.87:1.0),z:r.z+(i%4-1.5)*.09};if(/frozen ever after/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.88:1.0),z:r.z+(i%4-1.5)*.09};if(/living with the land/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.88:1.02),z:r.z+(i%4-1.5)*.09};if(/spaceship earth/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.72:.96),z:r.z+(i%4-1.5)*.09};if(/bus/i.test(SPACES[player.pos].name))return {x:r.x+(i<4?.55:.78),z:r.z+.05+(3-i%4)*.2};if(/tron/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.98:.83)};if(/tiana/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.98:.83)};if(/seven dwarfs/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.98:.83)};if(/big thunder mountain/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.98:.83)};if(/space mountain/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.98:.82)};if(/happily ever after/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/jungle cruise/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.93)};if(/pirates of the caribbean/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/haunted mansion/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?1:.91)};if(/main street/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.09,z:r.z+(i<4?.96:.76)};if(/monorail/i.test(SPACES[player.pos].name))return {x:r.x+(i%4-1.5)*.26,z:r.z+(i<4?.82:.54)};return {x:r.x+(i%4-1.5)*.19,z:r.z+(i<4?-.25:.25)};}
 function info(index){selected=index;const s=SPACES[index],owner=owners[index],r=spaces[index];highlight.position.set(r.x,.34,r.z);const price=s.type==='property'?' · '+(owner===undefined?'Buy $'+s.cost:'Rent $'+rentForSpace(index)):'';document.getElementById('board3dInfo').style.setProperty('--park-color',colors[r.side]);document.getElementById('board3dInfo').innerHTML='<strong>'+esc(s.icon+' '+s.name)+'</strong><span>Space '+(index+1)+' / 80 · '+esc(s.park||['Magic Kingdom','EPCOT','Hollywood Studios','Animal Kingdom'][r.side])+price+(owner===undefined?'': ' · Owned by '+esc(players[owner].name))+'</span><div class="space-browser"><button class="secondary" data-space-step="-1" aria-label="Previous board space">←</button><button class="secondary" data-space-step="1" aria-label="Next board space">→</button></div>';drawRequest();}
 function updateCameraButtons(){host.querySelectorAll('[data-camera="free"],[data-camera="board"],[data-camera="follow"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.camera===mode)));}
 function freeCamera(){mode='free';autoFollow=false;updateCameraButtons();}
