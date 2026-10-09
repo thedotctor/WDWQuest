@@ -226,20 +226,28 @@ class BoardGameTests(unittest.TestCase):
             for(let i=1;i<=2;i++){
                 const die=diceReviewScene.getObjectByName('Game die '+i);
                 if(!die){issues.push('Missing die '+i);continue;}
-                const cube=die.children.find(o=>o.isMesh);cube.geometry.computeBoundingBox();
-                const extent=cube.geometry.boundingBox;
-                for(let value=1;value<=6;value++){
-                    const face=die.getObjectByName('Die '+i+' face '+value);
-                    if(!face||face.children.length!==value){issues.push('Incorrect pip count '+value);continue;}
-                    const axis=['x','y','z'][face.userData.pipAxis],sign=face.userData.pipSign;
-                    const surface=sign>0?extent.max[axis]:-extent.min[axis];
-                    face.children.forEach(pip=>{
-                        pip.updateMatrix();const positions=pip.geometry.attributes.position;
-                        let inner=Infinity;
-                        for(let j=0;j<positions.count;j++)inner=Math.min(inner,sign*new diceReviewThree.Vector3().fromBufferAttribute(positions,j).applyMatrix4(pip.matrix)[axis]);
-                        if(inner<surface+.003)issues.push('Pip buried inside die '+i+' face '+value);
-                    });
-                }
+                const cube=die.children.find(o=>o.isMesh);
+                if(!Array.isArray(cube.material)||cube.material.length!==6){issues.push('Missing painted faces');continue;}
+                const groups=cube.geometry.groups;
+                if(groups.length!==6||new Set(groups.map(g=>g.materialIndex)).size!==6)issues.push('Face material mapping incomplete');
+                cube.material.forEach(mat=>{
+                    const image=mat.map&&mat.map.image;
+                    if(!image){issues.push('Missing face texture');return;}
+                    const w=image.width,h=image.height,data=image.getContext('2d').getImageData(0,0,w,h).data,visited=new Uint8Array(w*h);
+                    const dark=index=>data[index*4]<80&&data[index*4+1]<80&&data[index*4+2]<80;
+                    let dots=0;
+                    for(let index=0;index<w*h;index++){
+                        if(visited[index]||!dark(index))continue;dots++;const stack=[index];visited[index]=1;
+                        while(stack.length){const pixel=stack.pop(),x=pixel%w,y=Math.floor(pixel/w);
+                            for(const next of [x>0?pixel-1:-1,x<w-1?pixel+1:-1,y>0?pixel-w:-1,y<h-1?pixel+w:-1]){
+                                if(next>=0&&!visited[next]&&dark(next)){visited[next]=1;stack.push(next);}
+                            }
+                        }
+                    }
+                    if(dots!==mat.userData.dieValue)issues.push('Wrong painted dot count '+mat.userData.dieValue+': '+dots);
+                });
+                const values=cube.material.map(mat=>mat.userData.dieValue);
+                if(new Set(values).size!==6||values[0]+values[1]!==7||values[2]+values[3]!==7||values[4]+values[5]!==7)issues.push('Incorrect opposite faces');
             }
             return issues;
         }""")

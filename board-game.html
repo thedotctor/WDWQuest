@@ -2942,10 +2942,10 @@ const objectTriangles=new WeakMap();
 function affineDraw(image,uv,p,texture){const iw=image.width||image.naturalWidth,ih=image.height||image.naturalHeight;if(!iw||!ih)return;const q=uv.map(v=>[(v[0]*texture.repeat.x+texture.offset.x)*iw,(1-v[1]*texture.repeat.y-texture.offset.y)*ih]);const den=q[0][0]*(q[1][1]-q[2][1])+q[1][0]*(q[2][1]-q[0][1])+q[2][0]*(q[0][1]-q[1][1]);if(Math.abs(den)<.0001)return;
 const solve=axis=>[(p[0][axis]*(q[1][1]-q[2][1])+p[1][axis]*(q[2][1]-q[0][1])+p[2][axis]*(q[0][1]-q[1][1]))/den,(p[0][axis]*(q[2][0]-q[1][0])+p[1][axis]*(q[0][0]-q[2][0])+p[2][axis]*(q[1][0]-q[0][0]))/den,(p[0][axis]*(q[1][0]*q[2][1]-q[2][0]*q[1][1])+p[1][axis]*(q[2][0]*q[0][1]-q[0][0]*q[2][1])+p[2][axis]*(q[0][0]*q[1][1]-q[1][0]*q[0][1]))/den];const x=solve(0),y=solve(1);ctx.save();ctx.clip();ctx.transform(x[0],y[0],x[1],y[1],x[2],y[2]);ctx.drawImage(image,0,0);ctx.restore();}
 function triangles(mesh){let a=objectTriangles.get(mesh.geometry);if(a)return a;const g=mesh.geometry,pos=g.attributes.position,idx=g.index,norm=g.attributes.normal,uv=g.attributes.uv;a=[];
-for(let j=0;j<(idx?idx.count:pos.count);j+=3){const ids=[0,1,2].map(k=>idx?idx.getX(j+k):j+k);a.push({points:ids.map(i=>new THREE.Vector3().fromBufferAttribute(pos,i)),normals:norm?ids.map(i=>new THREE.Vector3().fromBufferAttribute(norm,i)):null,uv:uv?ids.map(i=>[uv.getX(i),uv.getY(i)]):null});}objectTriangles.set(mesh.geometry,a);return a;}
+for(let j=0;j<(idx?idx.count:pos.count);j+=3){const ids=[0,1,2].map(k=>idx?idx.getX(j+k):j+k);const materialIndex=(g.groups.find(group=>j>=group.start&&j<group.start+group.count)||{}).materialIndex||0;a.push({materialIndex,points:ids.map(i=>new THREE.Vector3().fromBufferAttribute(pos,i)),normals:norm?ids.map(i=>new THREE.Vector3().fromBufferAttribute(norm,i)):null,uv:uv?ids.map(i=>[uv.getX(i),uv.getY(i)]):null});}objectTriangles.set(mesh.geometry,a);return a;}
 function render(scene,camera){ctx.setTransform(pixelRatio,0,0,pixelRatio,0,0);ctx.clearRect(0,0,width,height);const glow=ctx.createRadialGradient(width/2,height*.67,0,width/2,height*.67,width*.45);glow.addColorStop(0,'#00000024');glow.addColorStop(1,'#00000000');ctx.fillStyle=glow;ctx.fillRect(0,0,width,height);scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);const faces=[];
-scene.traverseVisible(obj=>{if(!obj.isMesh)return;const mat=Array.isArray(obj.material)?obj.material[0]:obj.material;if(!mat||mat.isShadowMaterial)return;normalMatrix.getNormalMatrix(obj.matrixWorld);
-for(const tri of triangles(obj)){const world=tri.points.map(v=>v.clone().applyMatrix4(obj.matrixWorld));position.copy(world[0]).add(world[1]).add(world[2]).multiplyScalar(1/3);camDir.copy(camera.position).sub(position).normalize();n.copy(tri.normals?tri.normals[0]:new THREE.Vector3().subVectors(world[1],world[0]).cross(new THREE.Vector3().subVectors(world[2],world[0])));if(tri.normals)n.add(tri.normals[1]).add(tri.normals[2]).multiplyScalar(1/3).applyMatrix3(normalMatrix);n.normalize();if(n.dot(camDir)<0&&mat.side!==THREE.DoubleSide)continue;
+scene.traverseVisible(obj=>{if(!obj.isMesh)return;normalMatrix.getNormalMatrix(obj.matrixWorld);
+for(const tri of triangles(obj)){const mat=Array.isArray(obj.material)?obj.material[tri.materialIndex]:obj.material;if(!mat||mat.isShadowMaterial)continue;const world=tri.points.map(v=>v.clone().applyMatrix4(obj.matrixWorld));position.copy(world[0]).add(world[1]).add(world[2]).multiplyScalar(1/3);camDir.copy(camera.position).sub(position).normalize();n.copy(tri.normals?tri.normals[0]:new THREE.Vector3().subVectors(world[1],world[0]).cross(new THREE.Vector3().subVectors(world[2],world[0])));if(tri.normals)n.add(tri.normals[1]).add(tri.normals[2]).multiplyScalar(1/3).applyMatrix3(normalMatrix);n.normalize();if(n.dot(camDir)<0&&mat.side!==THREE.DoubleSide)continue;
 const points=world.map(v=>{const p=v.clone().project(camera);return [(p.x+1)*width/2,(1-p.y)*height/2,p.z]});if(points.some(p=>p[2]>1||p[2]<-1))continue;const depth=points.reduce((s,p)=>s+p[2],0)/3;const params=obj.geometry.parameters||{},ground=params.width>8&&params.depth>8;const layer=ground?obj.position.y+(params.height||0):-1;const c=mat.color||new THREE.Color('#e9edf6');const diffuse=.57+Math.max(0,n.dot(light))*.46;const half=light.clone().add(camDir).normalize();const shine=Math.pow(Math.max(0,n.dot(half)),28)*.55;const rgb=[c.r,c.g,c.b].map(a=>Math.min(255,Math.round(Math.pow(a,1/2.2)*255*diffuse+shine*255)));faces.push({points,depth,ground,layer,color:'rgb('+rgb.join(',')+')',map:mat.map,uv:tri.uv,opacity:mat.opacity===undefined?1:mat.opacity});}
 });faces.sort((a,b)=>a.ground!==b.ground?(a.ground?-1:1):a.ground&&a.layer!==b.layer?a.layer-b.layer:b.depth-a.depth);for(const f of faces){ctx.beginPath();f.points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.globalAlpha=f.opacity;if(f.map&&f.uv&&f.map.image){affineDraw(f.map.image,f.uv,f.points,f.map)}else{ctx.fillStyle=f.color;ctx.fill();ctx.strokeStyle=f.color;ctx.lineWidth=.25;ctx.stroke();}}ctx.globalAlpha=1;
 }
@@ -4846,17 +4846,15 @@ for(let vertex=0;vertex<diePositions.count;vertex++){
  const point=new THREE.Vector3().fromBufferAttribute(diePositions,vertex),inner=point.clone().clampScalar(-.37,.37),normal=point.clone().sub(inner).normalize();
  point.copy(inner).addScaledVector(normal,.08);diePositions.setXYZ(vertex,point.x,point.y,point.z);dieNormals.setXYZ(vertex,normal.x,normal.y,normal.z);
 }
+// Paint pips onto the actual cube surfaces; no separate dots can intersect or vanish.
+const dieMaterials=[3,4,1,6,2,5].map(value=>{
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff4dd';ctx.fillRect(0,0,256,256);ctx.fillStyle='#101b2b';
+ pipLayout[value].forEach(([a,b])=>{ctx.beginPath();ctx.arc(128+a*58,128+b*58,21,0,Math.PI*2);ctx.fill();});
+ const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.generateMipmaps=false;texture.minFilter=THREE.LinearFilter;
+ const mat=new THREE.MeshStandardMaterial({map:texture,color:'#ffffff',roughness:.55,metalness:0});mat.userData.dieValue=value;return mat;
+});
 for(let i=0;i<2;i++){
- const g=new THREE.Group();g.name='Game die '+(i+1);world.add(g);mesh(g,dieGeometry,material('#fff4dd',.02,.40),0,0,0);g.scale.setScalar(1.15);
- for(const [axis,sign,value] of [[1,1,1],[1,-1,6],[2,1,2],[2,-1,5],[0,1,3],[0,-1,4]]){
-  const face=new THREE.Group();face.name='Die '+(i+1)+' face '+value;face.userData.dieValue=value;face.userData.pipAxis=axis;face.userData.pipSign=sign;g.add(face);
-  for(const [a,b] of pipLayout[value]){
-   const xyz=axis===1?[a*.205,sign*.462,b*.205]:axis===2?[a*.205,b*.205,sign*.462]:[sign*.462,a*.205,b*.205];
-   const pip=mesh(face,new THREE.CylinderGeometry(.071,.071,.008,16),material('#172237',0,.72),...xyz,false);
-   if(axis===0)pip.rotation.z=Math.PI/2;else if(axis===2)pip.rotation.x=Math.PI/2;
-  }
- }
- dice.push(g);
+ const g=new THREE.Group();g.name='Game die '+(i+1);world.add(g);const cube=mesh(g,dieGeometry,dieMaterials,0,0,0);cube.name='Die '+(i+1)+' painted faces';g.scale.setScalar(1.15);dice.push(g);
 }
 const rotations={1:[0,0,0],2:[-Math.PI/2,0,0],3:[0,0,Math.PI/2],4:[0,0,-Math.PI/2],5:[Math.PI/2,0,0],6:[Math.PI,0,0]};
 let diceValues=[1,1],diceStart=0,raf=0,last=0,width=0,height=0,selected=players[currentPlayer].pos,angle=.24,targetAngle=.24,mode='free',zoom=1,distance=44,targetDistance=44,look=new THREE.Vector3(),target=new THREE.Vector3(),drag=null,flat=false,showSpaceNames=false,dragMode='pan',wasMoving=false,autoFollow=false,followIndex=currentPlayer;
