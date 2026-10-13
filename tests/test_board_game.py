@@ -214,6 +214,99 @@ class BoardGameTests(unittest.TestCase):
         self.page.locator('[data-camera="board"]').click()
         self.page.wait_for_function("Math.abs(cameraSample.x) < .1 && Math.abs(cameraSample.z) < .1")
 
+    def start_five_player_game(self):
+        for _ in range(4):
+            self.page.locator('#addPlayer').click()
+        for i,name in enumerate(['Avery','Blake','Casey','Drew','Emery']):
+            self.page.get_by_label(f'Player {i+1}',exact=True).fill(name)
+        self.page.locator('#startGame').click()
+        for token in ['castle','monorail','epcot','tree','rocket']:
+            self.page.locator(f'[data-token-id="{token}"]').click()
+        self.page.locator('#tokenStart').click()
+        for pin in ['mk-castle','ep-figment','hs-movie','ak-tree','food-popcorn']:
+            self.page.locator(f'[data-starting-pin-id="{pin}"]').click()
+        self.page.locator('#startingPinStart').click()
+        expect(self.page.locator('#board3dHost')).to_be_visible(timeout=30000)
+        self.assertEqual(self.page.evaluate('players.length'),5)
+
+    def test_snack_photo_callbacks_ignore_closed_and_replaced_popups(self):
+        self.start_game()
+        result=self.page.evaluate("""() => {
+            const issues=[];
+            askSnackBreak(12);
+            const oldPhoto=document.getElementById('snackPhoto'),oldError=oldPhoto.onerror,oldLoad=oldPhoto.onload;
+            closeModal();
+            try{oldError();oldError();oldLoad();}catch(error){issues.push(error.message);}
+            if(modalRoot.children.length)issues.push('Closed popup was restored');
+            askSnackBreak(31);
+            const newPhoto=document.getElementById('snackPhoto');
+            try{oldError();oldLoad();}catch(error){issues.push(error.message);}
+            if(document.getElementById('snackPhoto')!==newPhoto)issues.push('Old photo replaced the next question');
+            // Failure for the current photo still shows the normal load-error state.
+            try{newPhoto.onerror();newPhoto.onerror();}catch(error){issues.push(error.message);}
+            if(!document.querySelector('#snackPicture .snack-load-error'))issues.push('Current photo error is missing');
+            closeModal();return issues;
+        }""")
+        self.assertEqual(result,[])
+
+    def test_five_player_card_payments_cannot_create_debt(self):
+        # Focused balances reproduce late-game cases from the complete playthrough.
+        self.start_five_player_game()
+        cases=self.page.evaluate("""() => {
+            const check=(cash,card)=>{players.forEach((p,i)=>p.cash=cash[i]);const before=players.reduce((sum,p)=>sum+p.cash,0);const message=applyMagicInstantEffect(card,0);return {cash:players.map(p=>p.cash),before,after:players.reduce((sum,p)=>sum+p.cash,0),message};};
+            return {
+                expense:check([10,10,10,10,10],{effect:'cash',amount:-100}),
+                maintenance:check([5,10,10,10,10],{effect:'maintenance'}),
+                collect:check([10,10,10,10,10],{effect:'collectPlayers'}),
+                share:check([10,10,10,10,10],{effect:'payPlayers'}),
+                gift:check([10,10,10,10,10],{effect:'richestGift'}),
+                fullShare:check([100,10,10,10,10],{effect:'payPlayers'})
+            };
+        }""")
+        self.assertEqual(cases['expense']['cash'],[0,10,10,10,10])
+        self.assertIn('$10',cases['expense']['message'])
+        self.assertEqual(cases['maintenance']['cash'][0],0)
+        self.assertEqual(cases['collect']['cash'],[50,0,0,0,0])
+        self.assertIn('$40',cases['collect']['message'])
+        self.assertEqual(cases['share']['cash'][0],0)
+        self.assertLessEqual(max(cases['share']['cash'][1:])-min(cases['share']['cash'][1:]),1)
+        self.assertEqual(cases['gift']['cash'],[20,0,10,10,10])
+        self.assertEqual(cases['fullShare']['cash'],[0,35,35,35,35])
+        for key in ['collect','share','gift','fullShare']:
+            self.assertEqual(cases[key]['before'],cases[key]['after'],key)
+        for case in cases.values():
+            self.assertTrue(all(cash>=0 for cash in case['cash']))
+        self.assertFalse(self.page.evaluate('players[0].eliminated'))
+
+    def test_elimination_returns_pins_without_resetting_power_uses(self):
+        self.start_five_player_game()
+        self.page.evaluate("""() => {
+            players[0].cash=20;players[0].pos=3;players[0].props=[7];players[0].pins=['mk-castle','food-icecream','resort-contemporary'];
+            players[1].props=[3];owners={3:1,7:0};pinPowerUses['resort-contemporary']='used';
+            window.ownerCashBefore=players[1].cash;showRentPayment(3);
+        }""")
+        self.page.locator('#rentBroke').click()
+        self.page.wait_for_function('currentPlayer===1&&!turnLocked',timeout=15000)
+        result=self.page.evaluate("""() => ({
+            loser:players[0],ownerCash:players[1].cash,previous:ownerCashBefore,owners,
+            available:unownedPins().map(pin=>pin.id),used:pinPowerUses['resort-contemporary']
+        })""")
+        self.assertTrue(result['loser']['eliminated'])
+        self.assertEqual(result['loser']['cash'],0)
+        self.assertEqual(result['loser']['props'],[])
+        self.assertEqual(result['loser']['pins'],[])
+        self.assertEqual(result['loser']['startingPin'],'mk-castle')
+        self.assertNotIn('7',result['owners'])
+        self.assertEqual(result['ownerCash'],result['previous']+20)
+        for pin in ['mk-castle','food-icecream','resort-contemporary']:
+            self.assertIn(pin,result['available'])
+        self.assertEqual(result['used'],'used')
+        # The returned pin can be bought by another player, with its use history intact.
+        self.page.evaluate('() => {window.returnedPinPurchase=offerDoublesPinPurchase(1)}')
+        self.page.locator('[data-buy-pin="resort-contemporary"]').click()
+        self.assertTrue(self.page.evaluate("players[1].pins.includes('resort-contemporary')"))
+        self.assertFalse(self.page.evaluate("powerReady(players[1],'resort-contemporary')"))
+
     def test_dice_have_visible_pips_on_all_six_faces(self):
         self.page.evaluate("""async () => {
             const THREE=await import('./assets/vendor/three.module.js');window.diceReviewThree=THREE;

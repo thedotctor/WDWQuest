@@ -31,3 +31,18 @@ need to be published there first.
 The root `.nojekyll` keeps GitHub Pages from running Jekyll on this static site.
 The board preloads its local Three.js module while the setup screen is loading.
 Versioned board links bypass a cached page but do not bypass the Pages deployment queue.
+
+To run a complete, accelerated five-player game through the Castle Finale:
+
+```sh
+python3 tests/play_five_player_game.py --seed 174513 --output /tmp/wdwquest-five-player
+```
+
+The runner makes normal button choices and uses seeded random dice and decks.
+It reads quiz answers from the question data, skips presentation waits, and uses
+reduced motion and the classic view to finish a long game quickly. It never grants
+cash, moves pawns directly, assigns ownership/badges, or bypasses the win rules.
+The first finale answer is deliberately wrong; winning then requires the real
+80-space retry lap. It records turns, card/trade events, balances, and errors in
+`report.json`. The normal regression suite also covers five-player card payments,
+returned pins after elimination, and cooldowns preserved when those pins are bought.
