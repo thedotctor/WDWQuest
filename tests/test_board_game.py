@@ -229,6 +229,129 @@ class BoardGameTests(unittest.TestCase):
         expect(self.page.locator('#board3dHost')).to_be_visible(timeout=30000)
         self.assertEqual(self.page.evaluate('players.length'),5)
 
+    def test_eight_property_goal_is_universal_and_keeps_other_requirements(self):
+        expect(self.page.locator('#gameMode')).to_have_count(0)
+        self.start_game()
+        self.page.evaluate("""() => {
+            const indices=SPACES.map((s,i)=>s.type==='property'&&s.park==='Magic Kingdom'&&!s.show?i:-1).filter(i=>i>=0).slice(0,8);
+            players[0].badges=BADGES.slice();players[0].pins=PIN_DESIGNS.filter(pin=>pin.park==='Magic Kingdom').map(pin=>pin.id);
+            owners={};indices.slice(0,7).forEach(i=>owners[i]=0);players[0].props=indices.slice(0,7);window.eighthProperty=indices[7];renderAll();
+        }""")
+        self.assertFalse(self.page.evaluate('finaleProgress(0).ready'))
+        self.page.evaluate('owners[eighthProperty]=0;players[0].props.push(eighthProperty);renderAll()')
+        self.assertTrue(self.page.evaluate('finaleProgress(0).ready'))
+        self.assertEqual(self.page.evaluate('finaleProgress(0).qualifyingPark.propertiesTotal'),8)
+        expect(self.page.locator('#castleFinaleBtn')).to_be_enabled()
+        self.page.evaluate('players[0].pins.pop();renderAll()')
+        expect(self.page.locator('#castleFinaleBtn')).to_be_disabled()
+        self.page.evaluate("players[0].pins.push('mk-mouse');players[0].badges.pop();renderAll()")
+        self.assertFalse(self.page.evaluate('finaleProgress(0).ready'))
+        self.page.evaluate('players[0].badges=BADGES.slice();players[0].finaleLapRemaining=1;renderAll()')
+        self.assertFalse(self.page.evaluate('finaleProgress(0).ready'))
+        self.page.evaluate("""() => {
+            owners={};SPACES.forEach((space,index)=>{if(space.type==='property'&&(space.park==='Magic Kingdom'||space.park==='EPCOT'&&index<=33))owners[index]=0;});
+            players[0].props=ownedPropertyIndices(0);players[0].pins=PIN_DESIGNS.filter(pin=>pin.park==='Magic Kingdom').slice(0,3).concat(PIN_DESIGNS.filter(pin=>pin.park==='EPCOT').slice(0,4)).map(pin=>pin.id);
+        }""")
+        self.assertEqual(self.page.evaluate('finaleProgress(0).bestPark.park'),'EPCOT')
+
+    def test_pixie_dust_targets_missing_badges_and_keeps_park_trivia(self):
+        self.start_game()
+        result=self.page.evaluate("""() => {
+            players[0].badges=BADGES.filter(b=>!['Disney History','Resorts & Dining'].includes(b));
+            const categories=[];for(let i=0;i<12;i++){askQuestion(null,{mode:'special',space:6});categories.push(document.querySelector('.modal .badge').textContent);}
+            players[0].badges=BADGES.filter(b=>b!=='Disney History');askQuestion(null,{mode:'special',space:6});
+            const onlyMissing=document.querySelector('.modal .badge').textContent;
+            askQuestion('Disney History',{mode:'property',space:3});const purchase=document.querySelector('.modal .badge').textContent;
+            askQuestion('Disney History',{mode:'badge',space:22});const parkTrivia=document.querySelector('.modal .badge').textContent;
+            players[0].badges=BADGES.slice();askQuestion(null,{mode:'special',space:6});const afterComplete=document.querySelector('.modal .badge').textContent;
+            return {categories,onlyMissing,purchase,parkTrivia,afterComplete};
+        }""")
+        self.assertTrue(all(category in ['Disney History','Resorts & Dining'] for category in result['categories']))
+        self.assertEqual(result['onlyMissing'],'Disney History')
+        self.assertEqual(result['purchase'],'Magic Kingdom')
+        self.assertEqual(result['parkTrivia'],'EPCOT')
+        self.assertIn(result['afterComplete'],self.page.evaluate('BADGES'))
+
+    def prepare_cash_offer(self):
+        self.page.evaluate("""() => {
+            players[0].cash=500;players[0].props=[];players[1].cash=400;players[1].props=[3];owners={3:1};finishTurn('Ready for a park partner deal.');
+        }""")
+        expect(self.page.locator('#endTurnTrade')).to_be_disabled()
+        self.page.locator('#endTurnBuy').click()
+        self.page.locator('[data-property-partner="1"]').click()
+        self.page.locator('[data-cash-property="3"]').click()
+
+    def test_cash_property_offer_requires_acceptance_and_transfers_once(self):
+        self.start_five_player_game();self.prepare_cash_offer()
+        self.page.locator('#propertyCashAmount').fill('125')
+        self.page.locator('#propertyCashMakeOffer').click()
+        self.assertEqual(self.page.evaluate('owners[3]'),1)
+        self.assertEqual(self.page.evaluate('players.slice(0,2).map(p=>p.cash)'),[500,400])
+        self.page.evaluate("window.acceptCashButton=document.getElementById('propertyCashAccept')")
+        self.page.locator('#propertyCashAccept').click()
+        self.page.evaluate('acceptCashButton.click()')
+        self.assertEqual(self.page.evaluate('owners[3]'),0)
+        self.assertEqual(self.page.evaluate('players.slice(0,2).map(p=>p.cash)'),[375,525])
+        self.assertEqual(self.page.evaluate('players[0].props'),[3])
+        self.assertEqual(self.page.evaluate('players[1].props'),[])
+        self.assertFalse(self.page.evaluate('executePropertyCashOffer(propertyTradeTurn,3,125)'))
+        self.page.locator('#propertyTradeNext').click()
+        self.assertEqual(self.page.evaluate('currentPlayer'),1)
+        expect(self.page.locator('#rollBtn')).to_be_enabled()
+
+    def test_cash_offers_reject_invalid_amounts_and_stale_balances(self):
+        self.start_five_player_game();self.prepare_cash_offer()
+        for amount in ['0','-1','1.5','501','']:
+            self.page.locator('#propertyCashAmount').fill(amount)
+            expect(self.page.locator('#propertyCashMakeOffer')).to_be_disabled()
+        self.page.locator('#propertyCashAmount').fill('100')
+        self.page.locator('#propertyCashMakeOffer').click()
+        self.page.evaluate('players[0].cash=50')
+        self.page.locator('#propertyCashAccept').click()
+        self.assertEqual(self.page.evaluate('owners[3]'),1)
+        self.assertEqual(self.page.evaluate('players.slice(0,2).map(p=>p.cash)'),[50,400])
+        expect(self.page.get_by_role('heading',name='Offer Unavailable')).to_be_visible()
+        self.page.locator('#propertyTradeNext').click()
+        self.page.evaluate('currentPlayer=0;turnLocked=false')
+        self.prepare_cash_offer()
+        self.page.locator('#propertyCashAmount').fill('100')
+        self.page.locator('#propertyCashMakeOffer').click()
+        self.page.locator('#propertyCashDecline').click()
+        self.assertEqual(self.page.evaluate('owners[3]'),1)
+        self.assertEqual(self.page.evaluate('players.slice(0,2).map(p=>p.cash)'),[500,400])
+
+    def test_pin_trader_purchase_allows_park_copies_and_one_trade(self):
+        self.start_five_player_game()
+        self.page.evaluate("""() => {
+            players[0].cash=200;players[0].pos=5;players[0].pins=['mk-castle'];players[1].pins=['ep-figment','mk-teacup'];players[2].pins.push('resort-contemporary');startPinTradersVisit(5);window.originalPinVisit=pinTradeVisit;
+        }""")
+        self.page.locator('#pinTraderShop').click()
+        expect(self.page.locator('[data-trader-buy-pin="mk-castle"]')).to_have_count(0)
+        expect(self.page.locator('[data-trader-buy-pin="resort-contemporary"]')).to_have_count(0)
+        self.page.locator('[data-trader-buy-pin="mk-teacup"]').click()
+        self.assertEqual(self.page.evaluate('players[0].cash'),100)
+        self.assertTrue(self.page.evaluate("players[0].pins.includes('mk-teacup')&&players[1].pins.includes('mk-teacup')"))
+        self.assertFalse(self.page.evaluate("buyTraderPin(originalPinVisit,'mk-mouse')"))
+        self.assertEqual(self.page.evaluate('players[0].pinTradesThisTurn'),0)
+        self.page.locator('#pinShopContinue').click()
+        expect(self.page.locator('#pinTraderShop')).to_be_disabled()
+        self.page.locator('[data-pin-partner="1"]').click()
+        self.page.locator('[data-pin-give="mk-castle"]').click()
+        self.page.locator('[data-pin-take="ep-figment"]').click()
+        self.page.locator('#pinOffer').click();self.page.locator('#pinTradeAccept').click()
+        self.page.wait_for_function('players[0].pinTradesThisTurn===1')
+        self.assertEqual(self.page.evaluate('players[0].cash'),100)
+        self.assertEqual(self.page.evaluate('players[0].pins'),['ep-figment','mk-teacup'])
+        self.page.locator('#pinTradeClose').click()
+        self.assertFalse(self.page.evaluate("buyTraderPin(originalPinVisit,'mk-mouse')"))
+
+    def test_pin_trader_shop_blocks_unaffordable_purchases(self):
+        self.start_game()
+        self.page.evaluate('players[0].cash=99;players[0].pos=5;startPinTradersVisit(5);showPinTraderShop()')
+        expect(self.page.locator('[data-trader-buy-pin]:enabled')).to_have_count(0)
+        self.assertFalse(self.page.evaluate("buyTraderPin(pinTradeVisit,'mk-mouse')"))
+        self.assertEqual(self.page.evaluate('players[0].cash'),99)
+
     def test_park_hopper_bonus_credits_full_lap_and_resumes_landing(self):
         self.start_game()
         self.page.evaluate("""() => {

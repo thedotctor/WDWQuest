@@ -50,3 +50,8 @@ returned pins after elimination, and cooldowns preserved when those pins are bou
 The $300 Park Hopper Bonus is covered by lap, backtracking, Security, and popup
 continuation checks. See [park-hopper-audit.md](park-hopper-audit.md) for the
 complete five-player balance run.
+
+All games now use an eight-property park goal, with all six badges and five
+matching pins. Pixie Dust targets missing badges; end-of-turn cash property
+offers and a $100 Pin Traders shop add ways to finish a collection. See
+[balance-features-audit.md](balance-features-audit.md) for the latest full run.

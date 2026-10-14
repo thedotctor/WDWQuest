@@ -1,7 +1,7 @@
 (async()=>{
  const pause=()=>new Promise(r=>setTimeout(r,0));
  const preferred=['Magic Kingdom','EPCOT','Hollywood Studios','Animal Kingdom',null];
- window.fullGameReport={turns:0,actions:0,events:{},issues:[],visited:{},finaleAttempts:0,initial:JSON.parse(JSON.stringify(players)),timeline:[]};
+ window.fullGameReport={turns:0,actions:0,events:{},issues:[],visited:{},finaleAttempts:0,finalePlayer:null,finaleAttemptsByPlayer:{},initial:JSON.parse(JSON.stringify(players)),timeline:[]};
  const report=fullGameReport;let lastActor=currentPlayer,lastSignature='',idle=0,planned=null,questionCount=0;
  const count=key=>report.events[key]=(report.events[key]||0)+1;
  const originalPick=pickQuestion;pickQuestion=function(...args){const q=originalPick(...args);window.testQuestion=q;return q;};
@@ -33,14 +33,23 @@
    if(!goal){const give2=mine.find(index=>SPACES[index].park===preferred[partner]),take2=theirs.find(index=>SPACES[index].park!==preferred[partner]);if(give2!==undefined&&take2!==undefined)return {partner,give:give2,take:take2};}
   }return null;
  };
+ const cashPlan=()=>{
+  const actor=currentPlayer,goal=preferred[actor],p=players[actor];if(!goal||ownedPropertyIndices(actor).filter(i=>SPACES[i].park===goal).length>=requiredParkProperties(10))return null;
+  for(let partner=0;partner<players.length;partner++){
+   if(partner===actor||players[partner].eliminated)continue;
+   const take=ownedPropertyIndices(partner).find(i=>SPACES[i].park===goal);if(take===undefined)continue;
+   const price=SPACES[take].cost;if(p.cash>=price+150)return {kind:'cash',partner,take,price};
+  }return null;
+ };
  for(let steps=0;steps<45000&&!gameOver&&report.turns<6000;steps++){
+  if(report.finalePlayer!==null&&players[report.finalePlayer].eliminated)report.finalePlayer=null;
   const active=players.filter(p=>!p.eliminated);if(active.length===1&&preferred[currentPlayer]===null)preferred[currentPlayer]=finaleProgress(currentPlayer).bestPark.park;
   check();const enabled=Array.from(modalRoot.querySelectorAll('button')).filter(b=>!b.disabled);const by=id=>document.getElementById(id);
   let selected=null;
   if(enabled.length){
    if(by('qAnswers')&&!by('qContinue')&&!by('propertyContinue')&&!by('winClose')){
     questionCount++;const options=enabled.filter(b=>b.classList.contains('answer'));const final=document.querySelector('.modal .badge')?.textContent==='FINAL CHALLENGE';
-    const wrong=final&&report.finaleAttempts===1 || !final&&questionCount<100&&questionCount%9===0;
+    const wrong=final&&report.finaleAttemptsByPlayer[currentPlayer]===1 || !final&&questionCount<100&&questionCount%9===0;
     selected=options.find(b=>wrong?b.textContent!==testQuestion.a:b.textContent===testQuestion.a);count(wrong?'wrong-answer':'correct-answer');
    }else if(by('snackAnswers')&&!by('snackContinue')){selected=enabled.find(b=>b.textContent===testSnack.name);count('snack-answer');}
    else if(by('propertyTryBuy'))selected=by('propertyTryBuy');
@@ -48,12 +57,16 @@
    else if(by('doublesPinYes')){const p=players[currentPlayer],want=unownedPins().some(pin=>pinNeeded(pin.id));selected=p.cash>230&&want?by('doublesPinYes'):by('doublesPinNo');}
    else if(enabled.some(b=>b.dataset.buyPin)){selected=enabled.find(b=>b.dataset.buyPin&&pinNeeded(b.dataset.buyPin))||by('doublesPinSkip');}
    else if(by('transportRoll'))selected=by('transportRoll');
-   else if(by('endTurnTrade')){planned=tradePlan();selected=planned&&!by('endTurnTrade').disabled?by('endTurnTrade'):by('endTurnDone');}
+   else if(by('endTurnTrade')){planned=tradePlan();if(planned&&!by('endTurnTrade').disabled)selected=by('endTurnTrade');else{planned=cashPlan();selected=planned&&!by('endTurnBuy').disabled?by('endTurnBuy'):by('endTurnDone');}}
    else if(enabled.some(b=>b.dataset.propertyPartner!==undefined)){selected=planned?enabled.find(b=>Number(b.dataset.propertyPartner)===planned.partner):by('propertyTradeSkip');}
    else if(by('propertyMakeOffer')){
     if(!planned)selected=by('propertyTradeSkip');
     else{const give=by('propertyMakeOffer');if(!give.disabled)selected=give;else{const mine=modalRoot.querySelector('[data-property-give="'+planned.give+'"]');selected=mine?.getAttribute('aria-pressed')==='true'?modalRoot.querySelector('[data-property-take="'+planned.take+'"]'):mine;}}
-   }else if(by('propertyAccept'))selected=by('propertyAccept');
+   }else if(by('propertyCashMakeOffer')){const property=modalRoot.querySelector('[data-cash-property="'+planned.take+'"]');if(property.getAttribute('aria-pressed')!=='true')selected=property;else{const input=by('propertyCashAmount');input.value=planned.price;input.dispatchEvent(new Event('input',{bubbles:true}));selected=by('propertyCashMakeOffer');}}
+   else if(by('propertyCashAccept'))selected=by('propertyCashAccept');
+   else if(by('propertyAccept'))selected=by('propertyAccept');
+   else if(by('pinTraderShop')&&!by('pinTraderShop').disabled&&players[currentPlayer].cash>=250&&purchasableTraderPins(currentPlayer).some(pin=>pinNeeded(pin.id)))selected=by('pinTraderShop');
+   else if(enabled.some(b=>b.dataset.traderBuyPin))selected=enabled.find(b=>b.dataset.traderBuyPin&&pinNeeded(b.dataset.traderBuyPin))||by('pinShopBack');
    else if(enabled.some(b=>b.dataset.pinPartner!==undefined)){
     const actor=currentPlayer,p=players[actor];const partner=players.findIndex((other,i)=>i!==actor&&!other.eliminated&&other.pins.some(id=>pinNeeded(id))&&p.pins.some(id=>!pinNeeded(id,i)));
     selected=modalRoot.querySelector('[data-pin-partner="'+partner+'"]')||modalRoot.querySelector('[data-pin-partner="-1"]');
@@ -64,11 +77,11 @@
     if(!chosenGive)selected=gives[0]||by('pinTradeClose');else if(!chosenTake)selected=takes[0]||by('pinTradeClose');else selected=by('pinOffer');
    }else if(by('pinTradeAccept'))selected=by('pinTradeAccept');
    else if(enabled.some(b=>b.dataset.pinAbility!==undefined))selected=enabled[0];
-   else{const priority=['parkHopperContinue','winClose','qContinue','propertyContinue','snackContinue','autographContinue','pinRewardContinue','propertyTradeNext','pinTradeClose','propertyEndTurn','magicDrawBtn','magicApplyBtn','endTurnDone','pinChoiceSkip'];selected=priority.map(by).find(e=>e&&!e.disabled)||enabled[0];}
+   else{const priority=['pinShopContinue','pinShopBack','parkHopperContinue','winClose','qContinue','propertyContinue','snackContinue','autographContinue','pinRewardContinue','propertyTradeNext','pinTradeClose','propertyEndTurn','magicDrawBtn','magicApplyBtn','endTurnDone','pinChoiceSkip'];selected=priority.map(by).find(e=>e&&!e.disabled)||enabled[0];}
    click(selected);
   }else if(!turnLocked){
    const actor=currentPlayer;report.visited[players[actor].pos]=(report.visited[players[actor].pos]||0)+1;
-   if(finaleProgress(actor).ready){report.finaleAttempts++;click(by('castleFinaleBtn'));}
+   if(finaleProgress(actor).ready&&(report.finalePlayer===null||report.finalePlayer===actor)){if(report.finalePlayer===null)report.finalePlayer=actor;report.finaleAttempts++;report.finaleAttemptsByPlayer[actor]=(report.finaleAttemptsByPlayer[actor]||0)+1;click(by('castleFinaleBtn'));}
    else click(by('rollBtn'));
   }
   await pause();
