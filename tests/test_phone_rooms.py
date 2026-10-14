@@ -123,7 +123,7 @@ class PhoneRoomTests(unittest.TestCase):
     def test_wrong_player_and_stale_commands_cannot_roll(self):
         self.start()
         result=self.b.evaluate("""async code=>{
-          const c=await import('./assets/firebase/client.js');const {db,uid}=await c.connect();
+          const c=await import('./assets/firebase/client.js?v=179');const {db,uid}=await c.connect();
           const state=(await c.get(c.ref(db,`rooms/${code}/state`))).val();
           const match=state.prompt.match(/data-room-action=\"(c[0-9]+)\"/);
           try{await c.set(c.ref(db,`rooms/${code}/commands/${uid}`),{id:crypto.randomUUID(),action:match[1],revision:state.revision,sentAt:c.serverTimestamp()});return 'sent';}catch(e){return 'denied';}
@@ -132,7 +132,7 @@ class PhoneRoomTests(unittest.TestCase):
         self.host.wait_for_timeout(300)
         self.assertEqual(self.host.evaluate('players[0].pos'),0)
         self.a.evaluate("""async code=>{
-          const c=await import('./assets/firebase/client.js');const {db,uid}=await c.connect();
+          const c=await import('./assets/firebase/client.js?v=179');const {db,uid}=await c.connect();
           const state=(await c.get(c.ref(db,`rooms/${code}/state`))).val();
           const match=state.prompt.match(/data-room-action=\"(c[0-9]+)\"/);
           try{await c.set(c.ref(db,`rooms/${code}/commands/${uid}`),{id:crypto.randomUUID(),action:match[1],revision:state.revision-1,sentAt:c.serverTimestamp()});}catch(e){}
@@ -149,18 +149,19 @@ class PhoneRoomTests(unittest.TestCase):
 
     def test_remote_prompt_sanitization_removes_executable_roots_and_attributes(self):
         result=self.host.evaluate("""async()=>{
-          const {safePrompt}=await import('./assets/firebase/client.js');
+          const {safePrompt}=await import('./assets/firebase/client.js?v=179');
           const template=document.createElement('template');
           template.innerHTML='<script>window.badPrompt=true</script><iframe srcdoc=\"bad\"></iframe><button onclick=\"window.badPrompt=true\">Safe</button><input type=file><img src=\"javascript:bad\" onerror=\"window.badPrompt=true\">';
+          const link=document.createElement('a');link.href='javascript:window.badPrompt=true';link.setAttribute('onclick','window.badPrompt=true');template.content.append(link);
           const wrapper=document.createElement('div');for(const node of template.content.children) wrapper.append(safePrompt(node));
           document.body.append(wrapper);
-          return {executed:!!window.badPrompt,scripts:wrapper.querySelectorAll('script,iframe,input[type=file]').length,unsafe:wrapper.querySelectorAll('[onclick],[onerror],img[src]').length,text:wrapper.textContent};
+          return {executed:!!window.badPrompt,scripts:wrapper.querySelectorAll('script,iframe,input[type=file]').length,unsafe:wrapper.querySelectorAll('[onclick],[onerror],img[src],a[href]').length,text:wrapper.textContent};
         }""")
         self.assertFalse(result['executed']);self.assertEqual(result['scripts'],0);self.assertEqual(result['unsafe'],0);self.assertIn('Safe',result['text'])
 
     def test_host_presence_pauses_and_restores_phone_choices(self):
         self.start()
-        change="""async([code,online])=>{const c=await import('./assets/firebase/client.js');const {db,uid}=await c.connect();await c.set(c.ref(db,`rooms/${code}/presence/${uid}`),{online,at:c.serverTimestamp()});}"""
+        change="""async([code,online])=>{const c=await import('./assets/firebase/client.js?v=179');const {db,uid}=await c.connect();await c.set(c.ref(db,`rooms/${code}/presence/${uid}`),{online,at:c.serverTimestamp()});}"""
         self.host.evaluate(change,[self.code,False])
         expect(self.a.get_by_role('button',name='Roll Dice',exact=True)).to_be_disabled()
         expect(self.a.locator('#controllerConnection')).to_contain_text('shared screen to reconnect')
@@ -190,6 +191,71 @@ class PhoneRoomTests(unittest.TestCase):
         # Emery's Popcorn power pin earns $50 on a correct badge question.
         self.assertEqual(self.host.evaluate('players.map(p=>p.cash)'),[1000,1000,1000,1000,1050])
         for player in self.host.evaluate('players'):self.assertIn('Magic Kingdom',player['badges'])
+
+    def test_fullscreen_board_and_escape_restore_host_view(self):
+        self.start()
+        self.host.get_by_role('button',name='Fullscreen Board',exact=True).click()
+        self.host.wait_for_function("document.fullscreenElement===document.querySelector('.board3d-stage')")
+        expect(self.host.locator('#modalRoot')).to_be_hidden()
+        expect(self.host.locator('.turn-panel')).to_be_hidden()
+        expect(self.host.locator('.room-host-bar')).to_be_hidden()
+        expect(self.host.locator('.board3d-toolbar')).to_be_hidden()
+        expect(self.a.get_by_role('button',name='Roll Dice',exact=True)).to_be_enabled()
+        bounds=self.host.locator('.board3d-stage canvas').bounding_box()
+        viewport=self.host.evaluate('({width:innerWidth,height:innerHeight})')
+        self.assertEqual(bounds['x'],0);self.assertEqual(bounds['y'],0)
+        self.assertAlmostEqual(bounds['width'],viewport['width'],delta=1)
+        self.assertAlmostEqual(bounds['height'],viewport['height'],delta=1)
+        if os.environ.get('TEST_ROOM_SCREENSHOTS'):
+            self.host.screenshot(path='/tmp/wdw-fullscreen-native.png')
+        self.host.keyboard.press('Escape')
+        self.host.wait_for_function("!document.documentElement.classList.contains('board-screen-active') && !document.fullscreenElement")
+        expect(self.host.locator('.room-host-bar')).to_be_visible()
+        expect(self.host.locator('.turn-panel')).to_be_visible()
+
+    def test_board_screen_fallback_keeps_questions_and_snack_photos_on_phones(self):
+        self.start()
+        # Exercise iPad-style fullscreen fallback; classic view must not leave a blank stage.
+        self.host.set_viewport_size({'width':1024,'height':768})
+        self.host.locator('[data-camera="flat"]').click()
+        self.host.evaluate("HTMLElement.prototype.requestFullscreen=undefined;HTMLElement.prototype.webkitRequestFullscreen=undefined")
+        self.host.get_by_role('button',name='Fullscreen Board',exact=True).click()
+        self.host.wait_for_function("document.documentElement.classList.contains('board-screen-active')")
+        self.assertFalse(self.host.evaluate("document.querySelector('.game-layout').classList.contains('classic-board')"))
+        expect(self.host.locator('.board3d-stage canvas')).to_be_visible()
+        if os.environ.get('TEST_ROOM_SCREENSHOTS'):
+            self.host.screenshot(path='/tmp/wdw-fullscreen-ipad.png')
+        self.host.evaluate('wait=()=>Promise.resolve();Math.random=()=>0;window.roomQuestion=null;const pick=pickQuestion;pickQuestion=function(...args){const q=pick(...args);window.roomQuestion=q;return q}')
+        self.a.get_by_role('button',name='Roll Dice',exact=True).click()
+        self.a.get_by_role('button',name='No / Continue Moving',exact=True).click()
+        self.host.wait_for_function('document.querySelectorAll("#qAnswers button").length===4')
+        expect(self.host.locator('#qAnswers')).to_be_hidden()
+        answer=self.host.evaluate('window.roomQuestion.a')
+        self.a.get_by_role('button',name=answer,exact=True).click()
+        self.host.wait_for_function("players[0].badges.includes('Magic Kingdom')")
+        for _ in range(6):
+            if self.host.evaluate('currentPlayer===1'):break
+            choices=self.a.locator('[data-room-action]:enabled');choices.first.wait_for(state='visible');choices.first.click();self.a.wait_for_timeout(250)
+        self.host.wait_for_function('currentPlayer===1')
+        photo='<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900"><rect width="1200" height="900" fill="#dcb"/></svg>'
+        for context in self.contexts:
+            context.route('https://commons.wikimedia.org/**',lambda route:route.fulfill(body=photo,content_type='image/svg+xml'))
+        self.host.evaluate("""()=>{
+          const index=SPACES.findIndex(s=>s.name==='Snack Break');players[1].pos=index;
+          snackDeck=[SNACK_BREAKS.findIndex(s=>s.mask)];lastSnackName='';turnLocked=true;renderAll();askSnackBreak(index);
+        }""")
+        expect(self.b.locator('.snack-picture img')).to_be_visible()
+        self.b.wait_for_function("document.querySelector('.phone-snack-mask')?.getBoundingClientRect().width>0")
+        expect(self.b.get_by_role('link',name='CC BY 2.0',exact=True)).to_have_attribute('href','https://creativecommons.org/licenses/by/2.0/')
+        self.assertEqual(self.host.locator('#snackPicture').is_visible(),False)
+        # Rotation/layout changes retain the label mask on the controller image.
+        self.b.set_viewport_size({'width':667,'height':375})
+        self.b.wait_for_function("document.querySelector('.phone-snack-mask').getBoundingClientRect().width>150")
+        self.host.get_by_role('button',name='Exit fullscreen',exact=True).click()
+        expect(self.host.locator('#snackPicture')).to_be_visible()
+        self.host.wait_for_function("document.querySelector('#snackNameMask').getBoundingClientRect().width>0")
+        expect(self.host.locator('.turn-panel')).to_be_visible()
+        self.assertTrue(self.b.locator('.snack-picture img').is_visible())
 
 
 if __name__=='__main__':unittest.main()

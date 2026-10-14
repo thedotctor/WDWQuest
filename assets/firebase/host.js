@@ -1,6 +1,6 @@
 import {configured, connect, roomCode, joinURL, presence, message, el, safePrompt,
   ROOM_LIFETIME, ref, set, update, remove, onValue, onChildAdded, onChildChanged,
-  runTransaction, serverTimestamp} from './client.js';
+  runTransaction, serverTimestamp} from './client.js?v=179';
 
 let session = null, timer = null;
 let revision = 0, lastContent = '', lastBody = null, actionCounter = 0, actionNodes = new Map();
@@ -18,7 +18,7 @@ function installEntry() {
   button.id = 'hostPhones';
   button.addEventListener('click', hostRoom);
   const join = el('a', 'Join a Room', 'room-link');
-  join.href = 'board-controller.html';
+  join.href = 'board-controller.html?v=179';
   row.append(button, join);
   lobby.append(row);
 }
@@ -161,7 +161,7 @@ async function startRoomGame() {
   // cannot reserve a duplicate token/pin or change seats while the game starts.
   try {
     await update(ref(session.db, `rooms/${session.code}/meta`), {phase: 'playing'});
-    const {get} = await import('./client.js');
+    const {get} = await import('./client.js?v=179');
     const final = (await get(ref(session.db, `rooms/${session.code}/members`))).val() || {};
     const valid = session.members.length === Object.keys(final).length && session.members.every(m => {
       const f = final[m.uid]; return f && f.name.trim() === m.name && f.token === m.token && f.startingPin === m.startingPin;
@@ -171,6 +171,7 @@ async function startRoomGame() {
       status('A player choice changed. Check the party and start again.'); drawLobby(); return;
     }
     session.phase = 'playing';
+    document.body.classList.add('phone-room-playing');
     players = session.members.map(m => ({name:m.name, token:m.token, startingPin:m.startingPin, cash:1000, pos:0, parkHopperSteps:0, parkHopperLaps:0, badges:[], props:[], autographs:[]}));
     showStartingPinSetup(0);
     document.getElementById('startingPinStart').click();
@@ -222,7 +223,10 @@ function promptHTML() {
     actionNodes.set(key, original);
   });
   if (source.querySelector('#snackPhoto')) {
-    clone.querySelector('.snack-picture')?.replaceWith(el('p', 'Look at the snack picture on the shared screen.', 'muted'));
+    const photo = source.querySelector('#snackPhoto');
+    const snack = SNACK_BREAKS.find(s => s.file === photo.dataset.snackFile);
+    if (snack?.mask) clone.querySelector('#snackPhoto')?.setAttribute('data-room-snack-mask', JSON.stringify(snack.mask));
+    clone.querySelector('.snack-name-mask')?.remove();
   }
   return safePrompt(clone).outerHTML;
 }
@@ -291,6 +295,7 @@ async function disposeRoom() {
   try {await remove(ref(s.db, `rooms/${s.code}`));} catch (e) {status(message(e)); return false;}
   s.stops.forEach(stop => stop()); session = null;
   clearTimeout(timer); timer = null; hostBar.hidden = true;
+  document.body.classList.remove('phone-room-playing');
   document.querySelector('.session-tag').textContent = 'LOCAL MULTIPLAYER';
   return true;
 }
@@ -298,6 +303,7 @@ window.addEventListener('beforeunload', event => {
   if (session?.phase === 'playing') {event.preventDefault(); event.returnValue = '';}
 });
 document.addEventListener('click', event => {
+  if (event.target.closest('[data-exit-board-screen]')) return;
   if (session?.phase === 'playing' && !session.online && (app.contains(event.target) || modalRoot.contains(event.target))) {
     event.preventDefault(); event.stopImmediatePropagation(); status('Reconnect before continuing the game.');
   }

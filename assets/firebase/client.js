@@ -41,6 +41,7 @@ export function roomCode() {
 }
 export function joinURL(code) {
   const url = new URL('../../board-controller.html', import.meta.url);
+  url.searchParams.set('v', '179');
   url.searchParams.set('room', code);
   return url.href;
 }
@@ -56,8 +57,8 @@ export function el(tag, text, className) {
   return node;
 }
 // Shared sanitization: a host prompt can carry text/controls, never executable HTML.
-const tags = new Set(['DIV','SECTION','SPAN','H2','H3','H4','P','STRONG','SMALL','EM','BR','BUTTON','LABEL','INPUT','IMG','UL','LI']);
-const attrs = new Set(['class','type','disabled','aria-pressed','aria-label','for','min','max','step','value','alt','data-room-action','data-room-field']);
+const tags = new Set(['DIV','SECTION','SPAN','H2','H3','H4','P','STRONG','SMALL','EM','BR','BUTTON','LABEL','INPUT','IMG','UL','LI','A']);
+const attrs = new Set(['class','type','disabled','aria-pressed','aria-label','for','min','max','step','value','alt','data-room-action','data-room-field','data-room-snack-mask']);
 export function safePrompt(node) {
   const clone = document.createElement('div');
   clone.append(node.cloneNode(true));
@@ -68,15 +69,17 @@ export function safePrompt(node) {
       continue;
     }
     for (const attr of [...child.attributes]) {
-      if (child.tagName === 'IMG' && attr.name === 'src') {
+      if (child.tagName === 'IMG' && attr.name === 'src' || child.tagName === 'A' && attr.name === 'href') {
         try {
           const url = new URL(attr.value, location.href);
-          if (url.origin === location.origin || (url.protocol === 'https:' && ['upload.wikimedia.org','commons.wikimedia.org'].includes(url.hostname))) continue;
+          const hosts = child.tagName === 'A' ? ['commons.wikimedia.org','creativecommons.org'] : ['upload.wikimedia.org','commons.wikimedia.org'];
+          if (url.origin === location.origin || (url.protocol === 'https:' && hosts.includes(url.hostname))) continue;
         } catch (_) {}
       }
       if (!attrs.has(attr.name)) child.removeAttribute(attr.name);
     }
     if (child.tagName === 'INPUT' && child.type !== 'number') child.remove();
+    if (child.tagName === 'A') {child.rel = 'noopener noreferrer'; child.target = '_blank';}
   }
   return clone;
 }

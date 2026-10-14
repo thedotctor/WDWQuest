@@ -42,3 +42,22 @@ Firebase console. Headless tests used reduced motion and the software renderer.
 
 The SDK is bundled locally. Updates send changed state fields only; the 3D scene,
 animation frames, answer keys, and full trivia bank are not transmitted to phones.
+
+## Board fullscreen follow-up
+
+Phone games now offer **Fullscreen Board** on the host. The stage fills the
+viewport; site navigation, player panels, toolbars, and host prompts are hidden.
+Phone controls remain connected to the original engine. Exit fullscreen/Escape
+restores the view; classic mode returns to 3D before entering. Native fullscreen
+is used when available, with a viewport fallback for other browsers. A small exit
+button stays visible. Snack photos, attribution links, and responsive label masks
+are sent to the active phone so host popups are not needed.
+
+The expanded nine-test room suite passed with the simulated local transport.
+Both new fullscreen tests also passed with the real Firebase SDK and official
+emulators. They checked native entry/Escape, a 1024×768 fallback, continuing a
+phone-controlled turn with hidden host prompts, snack photos/masks on the phone,
+phone rotation, and restoring the host's snack mask after leaving fullscreen.
+The existing five authorization checks passed; rules are unchanged. The expanded
+sanitizer check also rejected executable links. Screenshots of both board views
+were inspected internally. This does not establish physical iPad performance.

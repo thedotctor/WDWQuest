@@ -1,5 +1,5 @@
 import {configured, connect, presence, message, el, safePrompt, CODE_PATTERN,
-  ref, get, set, update, remove, onValue, serverTimestamp} from './client.js';
+  ref, get, set, update, remove, onValue, serverTimestamp} from './client.js?v=179';
 
 const app = document.getElementById('controllerApp');
 const connection = document.getElementById('controllerConnection');
@@ -11,7 +11,7 @@ function button(text, action, className = 'primary') {
   const node = el('button', text, className); node.type = 'button'; node.addEventListener('click', action); return node;
 }
 function joinForm(prefill = new URLSearchParams(location.search).get('room') || '') {
-  app.replaceChildren();
+  clearView();
   const card = el('section', undefined, 'controller-card');
   const form = el('form');
   const codeLabel = el('label', 'Room code'); codeLabel.htmlFor = 'joinCode';
@@ -85,7 +85,7 @@ function refreshConnection() {
 }
 function render() {
   if (!session || !state) return;
-  error(''); app.replaceChildren();
+  error(''); clearView();
   if (state.phase === 'lobby') {renderLobby(); refreshConnection(); return;}
   const index = state.seats?.[session.uid];
   const player = state.players?.[index];
@@ -100,6 +100,7 @@ function render() {
   if (active) {
     const template = document.createElement('template'); template.innerHTML = state.prompt || '<p>Watch the shared screen…</p>';
     for (const node of [...template.content.children]) card.append(safePrompt(node));
+    decorateSnackPictures(card);
     card.querySelectorAll('[data-room-action]').forEach(node => {
       node.dataset.originalDisabled = String(node.disabled);
       node.addEventListener('click', () => send(node.dataset.roomAction));
@@ -125,6 +126,39 @@ function render() {
   for (const name of player.properties || []) collection.append(el('p', name));
   app.append(collection);
   refreshConnection();
+}
+function decorateSnackPictures(card) {
+  card.querySelectorAll('.snack-picture img').forEach(photo => {
+    const frame = photo.parentElement;
+    let mask = null;
+    try {
+      const bounds = JSON.parse(photo.dataset.roomSnackMask || 'null');
+      if (bounds && ['left','top','width','height'].every(k => Number.isFinite(bounds[k]) && bounds[k] >= 0 && bounds[k] <= 100) && bounds.left + bounds.width <= 100 && bounds.top + bounds.height <= 100) {
+        mask = el('div', undefined, 'phone-snack-mask'); mask.setAttribute('aria-hidden','true'); frame.append(mask);
+        const position = () => {
+          if (!photo.isConnected || !photo.naturalWidth || !photo.naturalHeight) return;
+          const scale = Math.max(frame.clientWidth / photo.naturalWidth, frame.clientHeight / photo.naturalHeight);
+          const width = photo.naturalWidth * scale, height = photo.naturalHeight * scale;
+          mask.style.left = ((frame.clientWidth - width)/2 + bounds.left * width/100) + 'px';
+          mask.style.top = ((frame.clientHeight - height)/2 + bounds.top * height/100) + 'px';
+          mask.style.width = bounds.width * width/100 + 'px'; mask.style.height = bounds.height * height/100 + 'px';
+        };
+        photo.addEventListener('load', position);
+        const observer = new ResizeObserver(position); observer.observe(frame);
+        // A replaced prompt releases its resize observer rather than retaining images.
+        photo._releaseSnackObserver = () => observer.disconnect();
+        position();
+      }
+    } catch (_) {}
+    photo.addEventListener('error', () => {
+      if (!photo.isConnected) return;
+      photo._releaseSnackObserver?.(); frame.replaceChildren(el('p', 'The snack picture could not load.', 'muted'));
+    });
+  });
+}
+function clearView() {
+  app.querySelectorAll('.snack-picture img').forEach(photo => photo._releaseSnackObserver?.());
+  app.replaceChildren();
 }
 function renderLobby() {
   const member = session.member, others = (state.members || []).filter(m => m.uid !== session.uid);

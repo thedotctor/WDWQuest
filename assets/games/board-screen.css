@@ -1,0 +1,12 @@
+[data-board-screen]{display:none}
+body.phone-room-playing [data-board-screen]{display:inline-block}
+.board-screen-active,.board-screen-active body{height:100%;overflow:hidden!important;overscroll-behavior:none}
+.board-screen-active body{padding:0!important}
+.board-screen-active .shell,.board-screen-active .shell:has(.with-3d){max-width:none;padding:0;margin:0}
+.board-screen-active .top,.board-screen-active .room-host-bar,.board-screen-active .with-3d>.turn-panel,.board-screen-active .with-3d>.board3d-game-controls,.board-screen-active .with-3d>.board-wrap,.board-screen-active .with-3d>.board-key,.board-screen-active .with-3d>.log,.board-screen-active .with-3d>.board-photo-credit,.board-screen-active .board3d-toolbar,.board-screen-active .board3d-info,.board-screen-active .scene-hint,.board-screen-active #modalRoot{display:none!important}
+.board-screen-active .with-3d{display:block;margin:0}
+.board-screen-active .board3d-host{border:0;border-radius:0;margin:0;box-shadow:none}
+.board-screen-active .board3d-stage{display:block!important;position:fixed;inset:0;width:100vw;height:100vh;height:var(--board-screen-height,100dvh);margin:0;border-radius:0;z-index:1000;box-sizing:border-box}
+.board-screen-active .board3d-stage canvas{display:block;width:100%;height:100%!important;touch-action:none}
+.board-screen-exit{position:absolute;top:calc(12px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));z-index:2;min-height:44px;padding:10px 14px;border:1px solid #52627c;border-radius:10px;background:#0b1729bb;color:#f4f2ee;font:600 12px system-ui,sans-serif;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.board-screen-exit:focus-visible{outline:3px solid #f1cb7b;outline-offset:3px}

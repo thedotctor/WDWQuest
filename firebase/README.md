@@ -48,6 +48,10 @@ larger public launch. Stay on Spark to avoid enabling usage-based billing.
 5. The current player's phone shows the game's normal choices and questions.
    Trade acceptance moves to the other player's phone. Everyone has their own
    money and collection view. To change a cash offer, use **Update Amount**.
+6. On the host, choose **Fullscreen Board** above the 3D board to show only the
+   animated board. Questions, choices, and Snack Break pictures appear on phones.
+   Use **Exit fullscreen** or Escape to restore the host controls. Devices without
+   native fullscreen use the available browser viewport instead.
 
 Keep the host page open, in the foreground, and the device awake. Screen wake
 lock is requested when supported. Phone refreshes reconnect the same anonymous

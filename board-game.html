@@ -138,7 +138,8 @@ button,input{font:inherit}button{cursor:pointer;min-height:44px}.shell{max-width
 <link rel="modulepreload" href="assets/vendor/three.module.js">
 <link rel="stylesheet" href="assets/games/board-game.css">
 <link rel="icon" type="image/svg+xml" href="assets/games/board-castle.svg">
-<link rel="stylesheet" href="assets/firebase/room.css">
+<link rel="stylesheet" href="assets/firebase/room.css?v=179">
+<link rel="stylesheet" href="assets/games/board-screen.css">
 </head>
 <body>
 <div class="shell">
@@ -3094,7 +3095,7 @@ function modelShape(s){if(/friendship boat/i.test(s.name))return 'friendship';if
 async function mount(){const board=document.getElementById('board');if(!board||document.getElementById('board3dHost'))return;
 let THREE;try{THREE=await loadThree();}catch(e){console.warn('3D view unavailable; the original board remains playable.',e);return;}
 if(!board.isConnected||document.getElementById('board3dHost'))return;
-const host=document.createElement('section');host.id='board3dHost';host.className='board3d-host';host.innerHTML='<div class="board3d-toolbar"><strong><span class="scene-kicker">THE FOUR PARK ADVENTURE</span>Explore the magic</strong><div><button data-camera="free" aria-pressed="true">Free roam</button><button data-camera="board" aria-pressed="false">Overview</button><button data-camera="follow" aria-pressed="false">Follow pawn</button><button data-drag-mode="pan" aria-pressed="true">Pan</button><button data-drag-mode="orbit" aria-pressed="false">Orbit</button><button data-camera="left" aria-label="Rotate left">↶</button><button data-camera="right" aria-label="Rotate right">↷</button><button data-camera="flat" aria-pressed="false">Classic View</button><button data-ride-motion aria-pressed="true">Live park</button><button data-light-toggle aria-pressed="true">Night lights</button><button data-space-labels aria-pressed="false">Space names</button></div><label>Zoom <input id="board3dZoom" type="range" min="70" max="320" value="100"></label></div><div class="board3d-stage"><canvas tabindex="0" aria-label="3D board. Drag to pan, Shift-drag or choose Orbit to rotate, scroll or pinch to zoom. Arrow keys or WASD move the view; plus and minus zoom. The camera follows moving pawns."></canvas><div class="scene-hint" aria-hidden="true"><span>Drag to pan · Shift-drag to orbit</span><span>Scroll or pinch to zoom</span></div></div><div id="board3dInfo" class="board3d-info" aria-live="polite"></div>';
+const host=document.createElement('section');host.id='board3dHost';host.className='board3d-host';host.innerHTML='<div class="board3d-toolbar"><strong><span class="scene-kicker">THE FOUR PARK ADVENTURE</span>Explore the magic</strong><div><button data-camera="free" aria-pressed="true">Free roam</button><button data-camera="board" aria-pressed="false">Overview</button><button data-camera="follow" aria-pressed="false">Follow pawn</button><button data-drag-mode="pan" aria-pressed="true">Pan</button><button data-drag-mode="orbit" aria-pressed="false">Orbit</button><button data-camera="left" aria-label="Rotate left">↶</button><button data-camera="right" aria-label="Rotate right">↷</button><button type="button" data-board-screen>Fullscreen Board</button><button data-camera="flat" aria-pressed="false">Classic View</button><button data-ride-motion aria-pressed="true">Live park</button><button data-light-toggle aria-pressed="true">Night lights</button><button data-space-labels aria-pressed="false">Space names</button></div><label>Zoom <input id="board3dZoom" type="range" min="70" max="320" value="100"></label></div><div class="board3d-stage"><canvas tabindex="0" aria-label="3D board. Drag to pan, Shift-drag or choose Orbit to rotate, scroll or pinch to zoom. Arrow keys or WASD move the view; plus and minus zoom. The camera follows moving pawns."></canvas><div class="scene-hint" aria-hidden="true"><span>Drag to pan · Shift-drag to orbit</span><span>Scroll or pinch to zoom</span></div></div><div id="board3dInfo" class="board3d-info" aria-live="polite"></div>';
 const canvas=host.querySelector('canvas');let renderer;
 try{renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'high-performance'});}catch(e){renderer=softwareRenderer(THREE,canvas);}
 const layout=board.closest('.game-layout'),wrap=board.parentElement;wrap.before(host);layout.classList.add('with-3d');board.classList.add('board3d-source');
@@ -5108,7 +5109,8 @@ const oldDice=animateDice;animateDice=async function(values){
 })();
 
 </script>
+<script type="module" src="assets/games/board-screen.js"></script>
 <script src="assets/firebase/config.js"></script>
-<script type="module" src="assets/firebase/host.js"></script>
+<script type="module" src="assets/firebase/host.js?v=179"></script>
 </body>
 </html>
