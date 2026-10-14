@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>WDWQuest — Connect phone play</title>
+  <link rel="stylesheet" href="../assets/firebase/room.css">
+  <style>textarea{box-sizing:border-box;width:100%;min-height:220px;margin:16px 0;background:#0b1729;color:#dce4ee;border:1px solid #34445a;border-radius:10px;padding:12px;font:12px/1.5 monospace}.setup-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}a{color:#f1cb7b}.controller-card li{margin:12px 0}</style>
+</head>
+<body class="controller-page">
+  <main class="controller-shell">
+    <header><a class="controller-brand" href="../board-game.html?v=178">✦ WDW<span>Quest</span></a><small>PHONE PLAY SETUP</small></header>
+    <section class="controller-card">
+      <h1>Connect your phone room.</h1>
+      <p>Your Web app configuration is connected. Finish these steps in your Firebase project:</p>
+      <ol>
+        <li>Under <strong>Authentication → Sign-in method</strong>, enable <strong>Anonymous</strong> if it is not already enabled.</li>
+        <li>Click <strong>Copy Database Rules</strong> below.</li>
+        <li>Open <strong>Build → Realtime Database → Rules</strong>. Replace the entire rules editor with the copied text, then click <strong>Publish</strong>.</li>
+      </ol>
+      <p class="muted">These rules let the shared-screen host run the game and let each phone submit only its own allowed choices. Keep your project on the free Spark plan. Firebase Hosting is not needed.</p>
+      <div class="setup-actions"><button class="primary" id="copyRules" disabled>Copy Database Rules</button><a href="https://console.firebase.google.com/project/wdwquest/database/wdwquest-default-rtdb/rules" target="_blank" rel="noopener">Open Firebase Rules ↗</a></div>
+      <p id="copyStatus" role="status" class="muted">Loading rules…</p>
+      <details><summary>View the rules</summary><textarea id="rulesText" readonly aria-label="Firebase database rules"></textarea></details>
+    </section>
+    <section class="controller-card">
+      <h2>Then start your adventure.</h2>
+      <p>On the computer or iPad, open the board and choose <strong>Host with Phones</strong>. Each phone opens the controller and enters the room code.</p>
+      <div class="setup-actions"><a href="../board-game.html?v=178">Open the board →</a><a href="../board-controller.html?v=178">Open phone controller →</a></div>
+      <p class="muted">Keep the shared-screen tab open and the device awake. Phones can refresh and reconnect using the same browser.</p>
+    </section>
+  </main>
+  <script>
+    const copyButton=document.getElementById('copyRules'),field=document.getElementById('rulesText'),status=document.getElementById('copyStatus');
+    fetch('database.rules.json').then(response=>{if(!response.ok)throw Error('load');return response.text();}).then(text=>{
+      JSON.parse(text);field.value=text;copyButton.disabled=false;status.textContent='Ready to copy.';
+    }).catch(()=>{status.textContent='Could not load the rules. Refresh this page and try again.';});
+    copyButton.addEventListener('click',async()=>{
+      try{await navigator.clipboard.writeText(field.value);status.textContent='Copied! Paste into the Firebase Rules editor, then click Publish.';}
+      catch(_){document.querySelector('details').open=true;field.focus();field.select();status.textContent='Select and copy the rules shown below, then paste them into Firebase.';}
+    });
+  </script>
+</body>
+</html>

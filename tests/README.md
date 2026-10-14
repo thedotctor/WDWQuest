@@ -55,3 +55,11 @@ All games now use an eight-property park goal, with all six badges and five
 matching pins. Pixie Dust targets missing badges; end-of-turn cash property
 offers and a $100 Pin Traders shop add ways to finish a collection. See
 [balance-features-audit.md](balance-features-audit.md) for the latest full run.
+
+Firebase phone-room setup and emulator instructions are in
+[../firebase/README.md](../firebase/README.md). The new `test_phone_rooms.py` suite
+checks a five-phone round, seller consent for cash trades, room closure, refresh,
+host presence, stale choices, and prompt sanitization. Its default transport is
+simulated; set `TEST_FIREBASE_EMULATOR=1` for the actual bundled Firebase SDK and
+official Authentication/Realtime Database emulators. Database authorization has
+its own official-emulator suite in `firebase/rules.test.cjs`.

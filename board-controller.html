@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080e1a">
+  <title>WDWQuest — Phone Controller</title>
+  <link rel="icon" href="assets/games/board-castle.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/firebase/room.css">
+</head>
+<body class="controller-page">
+  <main class="controller-shell">
+    <header><a class="controller-brand" href="board-controller.html">✦ WDW<span>Quest</span></a><small>YOUR PARK DAY CONTROLLER</small></header>
+    <div id="controllerConnection" class="connection-status" role="status">Join the board on your shared screen.</div>
+    <div id="controllerApp"></div>
+    <p id="controllerError" class="room-error" role="alert"></p>
+    <footer><a href="board-game.html">Play on one device</a></footer>
+  </main>
+  <script src="assets/firebase/config.js"></script>
+  <script type="module" src="assets/firebase/controller.js"></script>
+</body>
+</html>
