@@ -229,6 +229,67 @@ class BoardGameTests(unittest.TestCase):
         expect(self.page.locator('#board3dHost')).to_be_visible(timeout=30000)
         self.assertEqual(self.page.evaluate('players.length'),5)
 
+    def test_park_hopper_bonus_credits_full_lap_and_resumes_landing(self):
+        self.start_game()
+        self.page.evaluate("""() => {
+            players[0].pos=79;players[0].parkHopperSteps=79;players[0].parkHopperLaps=0;players[0].cash=50;
+            turnLocked=true;renderAll();window.lapJourney=movePlayerSpaces(2).then(()=>resolveSpace(players[0].pos,false));
+        }""")
+        popup=self.page.locator('.park-hopper-modal')
+        expect(popup).to_be_visible()
+        expect(popup.locator('h2')).to_have_text("Four Parks, One Day! Here's A MAGIC for your next trip.")
+        self.assertEqual(self.page.evaluate('players[0].cash'),350)
+        self.assertEqual(self.page.evaluate('players[0].pos'),1)
+        expect(self.page.locator('#rollBtn')).to_be_disabled()
+        self.assertEqual(self.page.evaluate('currentPlayer'),0)
+        self.page.locator('#parkHopperContinue').click()
+        expect(self.page.locator('#propertyTryBuy')).to_be_visible(timeout=10000)
+        self.assertEqual(self.page.evaluate('players[0].parkHopperLaps'),1)
+        self.assertEqual(self.page.evaluate('players[0].cash'),350)
+
+    def test_park_hopper_bonus_cannot_be_farmed_by_backtracking(self):
+        self.start_game()
+        self.page.evaluate("""async () => {
+            const p=players[0];p.pos=0;p.parkHopperSteps=80;p.parkHopperLaps=1;turnLocked=true;
+            window.cashBeforeBacktrack=p.cash;
+            await movePlayerSpaces(-1);await movePlayerSpaces(1);
+        }""")
+        self.assertEqual(self.page.evaluate('players[0].cash'),self.page.evaluate('cashBeforeBacktrack'))
+        expect(self.page.locator('.park-hopper-modal')).to_have_count(0)
+        self.assertEqual(self.page.evaluate('players[0].parkHopperSteps'),80)
+        self.page.evaluate("""() => {
+            players[0].pos=79;players[0].parkHopperSteps=159;
+            window.secondLap=movePlayerSpaces(1);
+        }""")
+        expect(self.page.locator('.park-hopper-modal')).to_be_visible()
+        self.assertEqual(self.page.evaluate('players[0].cash'),self.page.evaluate('cashBeforeBacktrack')+300)
+        self.page.locator('#parkHopperContinue').click()
+        self.page.evaluate('() => window.secondLap')
+        self.assertEqual(self.page.evaluate('players[0].parkHopperLaps'),2)
+
+    def test_park_hopper_bonus_tracks_each_player_and_ignores_security(self):
+        self.start_five_player_game()
+        self.page.evaluate("""() => {
+            players.forEach(p=>{p.pos=79;p.parkHopperSteps=79;p.parkHopperLaps=0;});
+            turnLocked=true;window.playerOneLap=movePlayerSpaces(1,'bonus travel');
+        }""")
+        expect(self.page.locator('.park-hopper-modal')).to_be_visible()
+        self.assertEqual(self.page.evaluate('players.map(p=>p.cash)'),[1300,1000,1000,1000,1000])
+        self.page.locator('#parkHopperContinue').click()
+        self.page.evaluate("""() => {
+            currentPlayer=1;window.playerTwoLap=movePlayerSpaces(1,'Magic & Mischief');
+        }""")
+        expect(self.page.locator('.park-hopper-modal')).to_be_visible()
+        self.assertEqual(self.page.evaluate('players.map(p=>p.cash)'),[1300,1300,1000,1000,1000])
+        self.page.locator('#parkHopperContinue').click()
+        self.page.evaluate("""() => {
+            currentPlayer=2;applyMagicCard(MAGIC_CARDS.find(card=>card.effect==='security'));
+        }""")
+        self.page.wait_for_function('players[2].inSecurity',timeout=15000)
+        self.assertEqual(self.page.evaluate('players[2].parkHopperSteps'),79)
+        self.assertEqual(self.page.evaluate('players[2].cash'),1000)
+        expect(self.page.locator('.park-hopper-modal')).to_have_count(0)
+
     def test_snack_photo_callbacks_ignore_closed_and_replaced_popups(self):
         self.start_game()
         result=self.page.evaluate("""() => {

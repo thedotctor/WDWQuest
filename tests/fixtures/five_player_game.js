@@ -64,7 +64,7 @@
     if(!chosenGive)selected=gives[0]||by('pinTradeClose');else if(!chosenTake)selected=takes[0]||by('pinTradeClose');else selected=by('pinOffer');
    }else if(by('pinTradeAccept'))selected=by('pinTradeAccept');
    else if(enabled.some(b=>b.dataset.pinAbility!==undefined))selected=enabled[0];
-   else{const priority=['winClose','qContinue','propertyContinue','snackContinue','autographContinue','pinRewardContinue','propertyTradeNext','pinTradeClose','propertyEndTurn','magicDrawBtn','magicApplyBtn','endTurnDone','pinChoiceSkip'];selected=priority.map(by).find(e=>e&&!e.disabled)||enabled[0];}
+   else{const priority=['parkHopperContinue','winClose','qContinue','propertyContinue','snackContinue','autographContinue','pinRewardContinue','propertyTradeNext','pinTradeClose','propertyEndTurn','magicDrawBtn','magicApplyBtn','endTurnDone','pinChoiceSkip'];selected=priority.map(by).find(e=>e&&!e.disabled)||enabled[0];}
    click(selected);
   }else if(!turnLocked){
    const actor=currentPlayer;report.visited[players[actor].pos]=(report.visited[players[actor].pos]||0)+1;

@@ -46,3 +46,7 @@ The first finale answer is deliberately wrong; winning then requires the real
 80-space retry lap. It records turns, card/trade events, balances, and errors in
 `report.json`. The normal regression suite also covers five-player card payments,
 returned pins after elimination, and cooldowns preserved when those pins are bought.
+
+The $300 Park Hopper Bonus is covered by lap, backtracking, Security, and popup
+continuation checks. See [park-hopper-audit.md](park-hopper-audit.md) for the
+complete five-player balance run.
